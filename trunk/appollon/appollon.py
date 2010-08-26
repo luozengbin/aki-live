@@ -9,6 +9,8 @@ from google.appengine.ext.webapp import template
 
 import gdata.service
 import gdata.photos.service
+import gdata.media
+import gdata.geo
 import gdata.alt.appengine
 
 class MainPage(webapp.RequestHandler):
@@ -34,11 +36,12 @@ class MainPage(webapp.RequestHandler):
         photos=None
         client = gdata.photos.service.PhotosService()
         gdata.alt.appengine.run_on_appengine(client)
+        
         albums = client.GetUserFeed(user=user)
         for album in albums.entry:
-            photos = client.GetFeed('/data/feed/api/user/%s/albumid/%s?kind=photo' % (user, album.gphoto_id.text))
+            photos = client.GetFeed('/data/feed/base/user/%s/albumid/%s?kind=photo' % (user, album.gphoto_id.text))
             for photo in photos.entry:
-                photolist.append(photo.media.thumbnail[2].url)
+                photolist.append(photo.media.content[0].url)
 
         template_values={
                 'user':user,
