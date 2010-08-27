@@ -64,12 +64,7 @@ public class Kirin implements EntryPoint {
 	}
 
 	public void loadKirinData() {
-
-		// Create a tab panel
-		DecoratedTabPanel tabPanel = new DecoratedTabPanel();
-		tabPanel.setWidth("400px");
-		tabPanel.setAnimationEnabled(true);
-
+		
 		KirinServiceAsync kirinService = GWT.create(KirinService.class);
 		
 		kirinService.loadData(loginInfo, new AsyncCallback<String>() {
@@ -78,27 +73,32 @@ public class Kirin implements EntryPoint {
 					}
 					public void onSuccess(String result) {
 						kirinData = result;
+						
+						// Create a tab panel
+						DecoratedTabPanel tabPanel = new DecoratedTabPanel();
+						tabPanel.setWidth("400px");
+						tabPanel.setAnimationEnabled(true);
+						
+						// Add a home tab
+						String[] tabTitles = { "Hello", "GWT Logo", "More Info" };
+						HTML homeText = new HTML(kirinData);
+						tabPanel.add(homeText, tabTitles[0]);
+
+						// Add a tab with an image
+						VerticalPanel vPanel = new VerticalPanel();
+						vPanel.add(new HTML("image logo"));
+						tabPanel.add(vPanel, tabTitles[1]);
+
+						// Add a tab
+						HTML moreInfo = new HTML("Tabs are highly customizable using CSS.");
+						tabPanel.add(moreInfo, tabTitles[2]);
+
+						// Return the content
+						tabPanel.selectTab(0);
+						// tabPanel.ensureDebugId("cwTabPanel");
+
+						RootPanel.get("kirin_tabs").add(tabPanel);
 					}
 				});
-		
-		// Add a home tab
-		String[] tabTitles = { "Hello", "GWT Logo", "More Info" };
-		HTML homeText = new HTML(kirinData);
-		tabPanel.add(homeText, tabTitles[0]);
-
-		// Add a tab with an image
-		VerticalPanel vPanel = new VerticalPanel();
-		vPanel.add(new HTML("image logo"));
-		tabPanel.add(vPanel, tabTitles[1]);
-
-		// Add a tab
-		HTML moreInfo = new HTML("Tabs are highly customizable using CSS.");
-		tabPanel.add(moreInfo, tabTitles[2]);
-
-		// Return the content
-		tabPanel.selectTab(0);
-		// tabPanel.ensureDebugId("cwTabPanel");
-
-		RootPanel.get("kirin_tabs").add(tabPanel);
 	}
 }
