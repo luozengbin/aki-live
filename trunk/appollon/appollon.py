@@ -31,26 +31,32 @@ class MainPage(webapp.RequestHandler):
             url = users.create_logout_url(self.request.uri)
             url_linktext = 'Logout'
             
+            
+        #get album data
+        albumlist=[]
+        
+            
         #get photo data
-        photolist=[]
-        photos=None
+        #photolist=[]
+        #photos=None
         client = gdata.photos.service.PhotosService()
         gdata.alt.appengine.run_on_appengine(client)
         
         albums = client.GetUserFeed(user=user)
         for album in albums.entry:
-            photos = client.GetFeed('/data/feed/base/user/%s/albumid/%s?kind=photo' % (user, album.gphoto_id.text))
-            for photo in photos.entry:
-                photolist.append(photo.media.content[0].url)
+            albumlist.append(album)
+            #photos = client.GetFeed('/data/feed/base/user/%s/albumid/%s?kind=photo' % (user, album.gphoto_id.text))
+            #for photo in photos.entry:
+            #    photolist.append(photo.media.content[0].url)
 
         template_values={
                 'user':user,
-                'photolist': photolist,
+                'albumlist': albumlist,
                 'url': url,
                 'url_linktext': url_linktext,
         }
 
-        path = os.path.join(os.path.dirname(__file__), 'photo.html')
+        path = os.path.join(os.path.dirname(__file__), 'album.html')
         self.response.out.write(template.render(path, template_values))
 
 application = webapp.WSGIApplication([('/', MainPage)],debug=True)
