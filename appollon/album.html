@@ -1,0 +1,23 @@
+<html>
+<head>
+<title>album list</title>
+</head>
+<body>
+
+{{ user }}
+&nbsp;
+<a href='{{ url }}'>{{ url_linktext }}</a>
+&nbsp;
+
+<hr>
+
+<h1>album list</h1>
+
+<ol>
+{% for item in albumlist %}
+	<li><a href="{{ album.gphoto_id.text }}">{{ item.title.text }}({{ album.numphotos.text }})</a><img src={{ item }} />
+{% endfor %}
+</ol>
+
+</body>
+</html>
