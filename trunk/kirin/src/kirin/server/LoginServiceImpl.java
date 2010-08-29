@@ -8,9 +8,8 @@ import com.google.appengine.api.users.UserService;
 import com.google.appengine.api.users.UserServiceFactory;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
-
 public class LoginServiceImpl extends RemoteServiceServlet implements LoginService {
-	
+
 	private static final long serialVersionUID = 3375263133638612517L;
 
 	public LoginInfo login(String requestUri) {

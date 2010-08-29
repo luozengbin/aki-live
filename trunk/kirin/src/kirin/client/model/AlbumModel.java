@@ -8,6 +8,8 @@ public class AlbumModel implements Serializable {
 
 	private static final long serialVersionUID = -3506351850303610698L;
 
+	private String albumid;
+	
 	private String name;
 
 	private String update;
@@ -36,5 +38,13 @@ public class AlbumModel implements Serializable {
 
 	public List<PhotoModel> getPhotos() {
 		return photos;
+	}
+
+	public void setAlbumid(String albumid) {
+		this.albumid = albumid;
+	}
+
+	public String getAlbumid() {
+		return albumid;
 	}
 }
