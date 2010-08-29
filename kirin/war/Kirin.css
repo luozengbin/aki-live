@@ -34,9 +34,9 @@ h1 {
 }
 
 .leftCursor{
-	
+	cursor: url(image/left_cursor.cur), auto;
 }
 
 .rightCursor{
-	
+	cursor: url(image/right_cursor.cur), auto;
 }

@@ -25,35 +25,49 @@ public class KirinServiceImpl extends RemoteServiceServlet implements KirinServi
 	private static final Log log = LogFactory.getLog(KirinServiceImpl.class);
 
 	@Override
-	public List<AlbumModel> loadData(LoginInfo loginInfo) {
-		
+	public List<AlbumModel> loadAlbum(LoginInfo loginInfo) {
+
 		List<AlbumModel> result = new ArrayList<AlbumModel>();
-		
+
 		try {
+
 			PicasawebService service = new PicasawebService("Kirin-App");
+			service.setAuthSubToken(this.getThreadLocalRequest().getSession().getAttribute("sessionToken").toString());
 
 			URL feedUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + loginInfo.getNickname() + "?kind=album");
 
 			UserFeed userFeed = service.getFeed(feedUrl, UserFeed.class);
-			
-			AlbumFeed albumFeed = null;
-			
 			AlbumModel albumModel = null;
-			PhotoModel photoModel = null; 
-			
+
 			for (AlbumEntry albumEntry : userFeed.getAlbumEntries()) {
 				albumModel = new AlbumModel();
+				albumModel.setAlbumid(albumEntry.getGphotoId());
 				albumModel.setName(albumEntry.getTitle().getPlainText());
 				albumModel.setUpdate(albumEntry.getUpdated().toString());
-				albumFeed = albumEntry.getFeed("photo");
-				for (PhotoEntry photoEntry : albumFeed.getPhotoEntries()) {
-					photoModel = new PhotoModel();
-					photoModel.setTitle(photoEntry.getTitle().getPlainText());
-					photoModel.setThumbURL((photoEntry.getMediaThumbnails().get(2).getUrl()));
-					photoModel.setURL(photoEntry.getMediaGroup().getContents().get(0).getUrl());
-					albumModel.getPhotos().add(photoModel);
-				}
 				result.add(albumModel);
+			}
+		} catch (Exception e) {
+			log.error(e);
+			throw new RuntimeException(e);
+		}
+		return result;
+	}
+
+	@Override
+	public List<PhotoModel> loadPhoto(LoginInfo loginInfo, String albumid) {
+		List<PhotoModel> result = new ArrayList<PhotoModel>();
+		try {
+			PicasawebService service = new PicasawebService("Kirin-App");
+			service.setAuthSubToken(this.getThreadLocalRequest().getSession().getAttribute("sessionToken").toString());
+			URL feedUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + loginInfo.getNickname() + "/albumid/" + albumid);
+			AlbumFeed albumFeed = service.getFeed(feedUrl, AlbumFeed.class);
+			PhotoModel photoModel = null;
+			for (PhotoEntry photoEntry : albumFeed.getPhotoEntries()) {
+				photoModel = new PhotoModel();
+				photoModel.setTitle(photoEntry.getTitle().getPlainText());
+				photoModel.setThumbURL((photoEntry.getMediaThumbnails().get(2).getUrl()));
+				photoModel.setURL(photoEntry.getMediaGroup().getContents().get(0).getUrl());
+				result.add(photoModel);
 			}
 		} catch (Exception e) {
 			log.error(e);

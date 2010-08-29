@@ -11,6 +11,7 @@ public class LoginInfo implements Serializable {
 	private String logoutUrl;
 	private String emailAddress;
 	private String nickname;
+	private String tocken;
 
 	public boolean isLoggedIn() {
 		return loggedIn;
@@ -50,5 +51,13 @@ public class LoginInfo implements Serializable {
 
 	public void setNickname(String nickname) {
 		this.nickname = nickname;
+	}
+
+	public void setTocken(String tocken) {
+		this.tocken = tocken;
+	}
+
+	public String getTocken() {
+		return tocken;
 	}
 }

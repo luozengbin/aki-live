@@ -7,19 +7,29 @@
   
   <!-- Servlets -->
   <servlet>
+    <servlet-name>authService</servlet-name>
+    <servlet-class>kirin.server.AuthService</servlet-class>
+  </servlet>
+  
+  <servlet>
     <servlet-name>loginService</servlet-name>
     <servlet-class>kirin.server.LoginServiceImpl</servlet-class>
   </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>loginService</servlet-name>
-    <url-pattern>/kirin/login</url-pattern>
-  </servlet-mapping>
   
   <servlet>
     <servlet-name>kirinService</servlet-name>
     <servlet-class>kirin.server.KirinServiceImpl</servlet-class>
   </servlet>
+
+  <servlet-mapping>
+    <servlet-name>authService</servlet-name>
+    <url-pattern>/auth</url-pattern>
+  </servlet-mapping>
+  
+  <servlet-mapping>
+    <servlet-name>loginService</servlet-name>
+    <url-pattern>/kirin/login</url-pattern>
+  </servlet-mapping>
   
   <servlet-mapping>
     <servlet-name>kirinService</servlet-name>
@@ -28,7 +38,7 @@
   
   <!-- Default page to serve -->
   <welcome-file-list>
-    <welcome-file>Kirin.html</welcome-file>
+    <welcome-file>index.html</welcome-file>
   </welcome-file-list>
-
+  
 </web-app>
