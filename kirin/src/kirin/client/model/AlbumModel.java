@@ -47,4 +47,10 @@ public class AlbumModel implements Serializable {
 	public String getAlbumid() {
 		return albumid;
 	}
+
+	@Override
+	public String toString() {
+		return "AlbumModel [albumid=" + albumid + ", name=" + name + ", update=" + update + "]";
+	}
+	
 }

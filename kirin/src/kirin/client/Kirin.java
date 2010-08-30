@@ -3,6 +3,7 @@ package kirin.client;
 import java.util.List;
 
 import kirin.client.model.AlbumModel;
+import kirin.client.model.ContactModel;
 import kirin.client.model.LoginInfo;
 import kirin.client.model.PhotoModel;
 
@@ -16,6 +17,8 @@ import com.google.gwt.event.dom.client.MouseDownEvent;
 import com.google.gwt.event.dom.client.MouseDownHandler;
 import com.google.gwt.event.dom.client.MouseMoveEvent;
 import com.google.gwt.event.dom.client.MouseMoveHandler;
+import com.google.gwt.event.logical.shared.SelectionEvent;
+import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.user.client.Element;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -40,9 +43,7 @@ public class Kirin implements EntryPoint {
 
 	private HorizontalPanel loginInfoPanel = new HorizontalPanel();
 
-	private List<AlbumModel> albumList = null;
-
-	private AlbumModel currentAlbum = null;
+	private List<ContactModel> contactList = null;
 
 	private KirinServiceAsync kirinService = GWT.create(KirinService.class);
 
@@ -86,13 +87,17 @@ public class Kirin implements EntryPoint {
 	}
 
 	private void loadKirinData() {
-		kirinService.loadAlbum(loginInfo, new AsyncCallback<List<AlbumModel>>() {
-			public void onFailure(Throwable error) {
+
+		kirinService.loadContact(loginInfo, new AsyncCallback<List<ContactModel>>() {
+
+			@Override
+			public void onFailure(Throwable caught) {
 				// TODO render error div
 			}
 
-			public void onSuccess(List<AlbumModel> result) {
-				albumList = result;
+			@Override
+			public void onSuccess(List<ContactModel> result) {
+				contactList = result;
 				initTabs();
 			}
 		});
@@ -104,51 +109,58 @@ public class Kirin implements EntryPoint {
 		final DecoratedTabPanel tabPanel = new DecoratedTabPanel();
 		tabPanel.setAnimationEnabled(true);
 
-		final FlexTable o_layout = new FlexTable();
-		o_layout.setCellSpacing(6);
-		FlexCellFormatter o_cellFormatter = o_layout.getFlexCellFormatter();
-		// o_layout.setHTML(0, 0, "更新日付：" + album.getUpdate());
-		o_cellFormatter.setColSpan(0, 0, 5);
+		for (final ContactModel contactModel : contactList) {
 
-		tabPanel.add(o_layout, loginInfo.getNickname());
+			final FlexTable o_layout = new FlexTable();
+			o_layout.setCellSpacing(6);
+			FlexCellFormatter o_cellFormatter = o_layout.getFlexCellFormatter();
+			o_cellFormatter.setColSpan(0, 0, 5);
 
-		final ListBox dropBox = new ListBox(false);
+			tabPanel.add(o_layout, contactModel.getNikeName());
 
-		for (AlbumModel album : albumList) {
-			dropBox.addItem(album.getName());
+			final ListBox dropBox = new ListBox(false);
+
+			for (AlbumModel album : contactModel.getAlbumList()) {
+				dropBox.addItem(album.getName());
+			}
+
+			o_layout.setWidget(0, 0, dropBox);
+
+			dropBox.addChangeHandler(new ChangeHandler() {
+
+				@Override
+				public void onChange(ChangeEvent event) {
+					initPhotoLayout(contactModel, dropBox.getSelectedIndex(), o_layout);
+				}
+			});
+
+			tabPanel.addSelectionHandler(new SelectionHandler<Integer>() {
+				@Override
+				public void onSelection(SelectionEvent<Integer> event) {
+					FlexTable currentPhotoTable = (FlexTable) tabPanel.getWidget(event.getSelectedItem());
+					ListBox currentDropBox = (ListBox) currentPhotoTable.getWidget(0, 0);
+					currentDropBox.setSelectedIndex(0);
+				}
+			});
+
+			initPhotoLayout(contactModel, 0, o_layout);
 		}
 
-		o_layout.setWidget(0, 0, dropBox);
-
-		dropBox.addChangeHandler(new ChangeHandler() {
-
-			@Override
-			public void onChange(ChangeEvent event) {
-				initPhotoLayout(dropBox.getSelectedIndex(), o_layout);
-			}
-		});
-
 		tabPanel.selectTab(0);
-
-		dropBox.setItemSelected(0, true);
-		
-		initPhotoLayout(0, o_layout);
-
-		dropBox.setSelectedIndex(0);
 
 		RootPanel.get("kirin_tabs").add(tabPanel);
 	}
 
-	private void initPhotoLayout(int selectedIdx, final FlexTable o_layout) {
+	private void initPhotoLayout(ContactModel contactModel, int selectedIdx, final FlexTable o_layout) {
 		for (int i = 1; i < o_layout.getRowCount(); i++) {
 			o_layout.removeRow(i);
 		}
 
-		currentAlbum = albumList.get(selectedIdx);
+		AlbumModel currentAlbum = contactModel.getAlbumList().get(selectedIdx);
 
 		if (currentAlbum.getPhotos() == null || currentAlbum.getPhotos().size() == 0) {
 
-			kirinService.loadPhoto(loginInfo, currentAlbum.getAlbumid(), new AsyncCallback<List<PhotoModel>>() {
+			kirinService.loadPhoto(contactModel.getNikeName(), currentAlbum.getAlbumid(), new AsyncCallback<List<PhotoModel>>() {
 				@Override
 				public void onSuccess(List<PhotoModel> result) {
 
