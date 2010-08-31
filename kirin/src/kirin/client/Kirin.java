@@ -114,7 +114,7 @@ public class Kirin implements EntryPoint {
 			final FlexTable o_layout = new FlexTable();
 			o_layout.setCellSpacing(6);
 			FlexCellFormatter o_cellFormatter = o_layout.getFlexCellFormatter();
-			o_cellFormatter.setColSpan(0, 0, 5);
+			o_cellFormatter.setColSpan(0, 0, 2);
 
 			tabPanel.add(o_layout, contactModel.getNikeName());
 
@@ -142,7 +142,6 @@ public class Kirin implements EntryPoint {
 					currentDropBox.setSelectedIndex(0);
 				}
 			});
-
 			initPhotoLayout(contactModel, 0, o_layout);
 		}
 
@@ -152,9 +151,15 @@ public class Kirin implements EntryPoint {
 	}
 
 	private void initPhotoLayout(ContactModel contactModel, int selectedIdx, final FlexTable o_layout) {
+
 		for (int i = 1; i < o_layout.getRowCount(); i++) {
 			o_layout.removeRow(i);
 		}
+
+		final FlexTable m_layout = new FlexTable();
+		o_layout.setCellSpacing(6);
+		FlexCellFormatter o_cellFormatter = o_layout.getFlexCellFormatter();
+		o_cellFormatter.setColSpan(0, 0, 6);
 
 		AlbumModel currentAlbum = contactModel.getAlbumList().get(selectedIdx);
 
@@ -164,60 +169,23 @@ public class Kirin implements EntryPoint {
 				@Override
 				public void onSuccess(List<PhotoModel> result) {
 
-					int i = 1, j = 0;
-					for (PhotoModel photoModel : result) {
+					int i = 0, j = 0;
+
+					// share popup windows
+					final PopupPanel imagePopup = new PopupPanel(true);
+					imagePopup.setAnimationEnabled(true);
+
+					for (int k = 0; k < result.size(); k++) {
+
+						PhotoModel photoModel = result.get(k);
+
 						FlexTable i_layout = new FlexTable();
 						i_layout.setCellSpacing(6);
 						FlexCellFormatter i_cellFormatter = i_layout.getFlexCellFormatter();
 						i_layout.setHTML(0, 0, photoModel.getTitle());
 
-						// Create a popup to show the full size image
-						final Image fullImage = new Image(photoModel.getURL());
-						final PopupPanel imagePopup = new PopupPanel(true);
-						imagePopup.setAnimationEnabled(true);
-						imagePopup.setWidget(fullImage);
-
-						final Element fullImageElement = fullImage.getElement();
-
-						fullImage.addClickHandler(new ClickHandler() {
-							public void onClick(ClickEvent event) {
-								imagePopup.hide();
-							}
-						});
-
-						fullImage.addMouseDownHandler(new MouseDownHandler() {
-							@Override
-							public void onMouseDown(MouseDownEvent event) {
-								int x_pos = event.getRelativeX(fullImageElement);
-								int imageWidth = fullImageElement.getClientWidth();
-								if (x_pos <= (imageWidth / 3)) {
-									// TODO change to next image
-								} else if (x_pos >= (imageWidth / 3) * 2) {
-									// TODO change to pre image
-								}
-							}
-						});
-
-						fullImage.addMouseMoveHandler(new MouseMoveHandler() {
-							public void onMouseMove(MouseMoveEvent event) {
-								int x_pos = event.getRelativeX(fullImageElement);
-								int imageWidth = fullImageElement.getClientWidth();
-								if (x_pos > (imageWidth / 2)) {
-									fullImageElement.getStyle().setCursor(com.google.gwt.dom.client.Style.Cursor.MOVE);
-								} else {
-									fullImageElement.getStyle().setCursor(com.google.gwt.dom.client.Style.Cursor.E_RESIZE);
-								}
-							}
-						});
-
+						// add small image to flexTable
 						Image thumbImage = new Image(photoModel.getThumbURL());
-
-						thumbImage.addClickHandler(new ClickHandler() {
-							public void onClick(ClickEvent event) {
-								imagePopup.center();
-							}
-						});
-
 						i_cellFormatter.setColSpan(0, 0, 1);
 						i_cellFormatter.setHorizontalAlignment(0, 0, HasHorizontalAlignment.ALIGN_CENTER);
 						i_layout.setWidget(1, 0, thumbImage);
@@ -229,8 +197,50 @@ public class Kirin implements EntryPoint {
 							j = 0;
 							i++;
 						}
-						o_layout.setWidget(i, j++, decPanel);
+						m_layout.setWidget(i, j++, decPanel);
+
+						// add full image popup windows for small image
+						imagePopup.setHeight(photoModel.getHeight() + "px");
+						imagePopup.setWidth(photoModel.getWidth() + "px");
+						final String fullImageURL = photoModel.getURL();
+
+						final Image fullImage = new Image();
+
+						thumbImage.addClickHandler(new ClickHandler() {
+							public void onClick(ClickEvent event) {
+
+								imagePopup.clear();
+
+								fullImage.setUrl(fullImageURL);
+
+								imagePopup.setWidget(fullImage);
+
+								// show full image
+								imagePopup.center();
+							}
+						});
+
+						// add event handling
+						// fullImage.addClickHandler(new ClickHandler() {
+						// public void onClick(ClickEvent event) {
+						// // hide full image
+						// imagePopup.hide(true);
+						// }
+						// });
+
+						ImageMouseDownHandler mouseDownHandler = new ImageMouseDownHandler();
+						mouseDownHandler.setPhotoModelList(result);
+						mouseDownHandler.setImagePopup(imagePopup);
+						mouseDownHandler.setCurrIdx(k);
+						mouseDownHandler.setFullImage(fullImage);
+						fullImage.addMouseDownHandler(mouseDownHandler);
+
+						ImageMouseMoveHandler mouseMoveHandler = new ImageMouseMoveHandler();
+						mouseMoveHandler.setFullImage(fullImage);
+						fullImage.addMouseMoveHandler(mouseMoveHandler);
 					}
+
+					o_layout.setWidget(1, 0, m_layout);
 				}
 
 				@Override
@@ -238,6 +248,124 @@ public class Kirin implements EntryPoint {
 					// TODO render error div
 				}
 			});
+		}
+	}
+
+	class ImageMouseDownHandler implements MouseDownHandler {
+
+		private Image fullImage;
+
+		private PopupPanel imagePopup;
+
+		private List<PhotoModel> photoModelList;
+
+		private int currIdx;
+
+		@Override
+		public void onMouseDown(MouseDownEvent event) {
+
+			Element fullImageElement = fullImage.getElement();
+			int x_pos = event.getRelativeX(fullImageElement);
+			int imageWidth = fullImageElement.getClientWidth();
+
+			if (x_pos > (imageWidth / 2)) {
+
+				PhotoModel nextPhotoModel = currIdx < (photoModelList.size() - 1) ? photoModelList.get(currIdx + 1) : null;
+
+				if (nextPhotoModel != null) {
+					loadNewImage(nextPhotoModel, currIdx + 1);
+				}
+
+			} else {
+				PhotoModel prePhotoModel = currIdx > 0 ? photoModelList.get(currIdx - 1) : null;
+
+				if (prePhotoModel != null) {
+					loadNewImage(prePhotoModel, currIdx - 1);
+				}
+			}
+		}
+
+		private void loadNewImage(final PhotoModel photoModel, final int nextIdx) {
+
+			imagePopup.clear();
+			imagePopup.setHeight(photoModel.getHeight() + "px");
+			imagePopup.setWidth(photoModel.getWidth() + "px");
+			Image fullImage = new Image(photoModel.getURL());
+			imagePopup.setWidget(fullImage);
+
+			if (currIdx > 0) {
+				ImageMouseDownHandler mouseDownHandler = new ImageMouseDownHandler();
+				mouseDownHandler.setPhotoModelList(photoModelList);
+				mouseDownHandler.setImagePopup(imagePopup);
+				mouseDownHandler.setCurrIdx(nextIdx);
+				mouseDownHandler.setFullImage(fullImage);
+				fullImage.addMouseDownHandler(mouseDownHandler);
+
+				ImageMouseMoveHandler mouseMoveHandler = new ImageMouseMoveHandler();
+				mouseMoveHandler.setFullImage(fullImage);
+				fullImage.addMouseMoveHandler(mouseMoveHandler);
+			}
+
+			getImagePopup().center();
+		}
+
+		public void setFullImage(Image fullImage) {
+			this.fullImage = fullImage;
+		}
+
+		public Image getFullImage() {
+			return fullImage;
+		}
+
+		public void setImagePopup(PopupPanel imagePopup) {
+			this.imagePopup = imagePopup;
+		}
+
+		public PopupPanel getImagePopup() {
+			return imagePopup;
+		}
+
+		public void setPhotoModelList(List<PhotoModel> photoModelList) {
+			this.photoModelList = photoModelList;
+		}
+
+		public List<PhotoModel> getPhotoModelList() {
+			return photoModelList;
+		}
+
+		public void setCurrIdx(int currIdx) {
+			this.currIdx = currIdx;
+		}
+
+		public int getCurrIdx() {
+			return currIdx;
+		}
+
+	}
+
+	class ImageMouseMoveHandler implements MouseMoveHandler {
+
+		private Image fullImage;
+
+		public void onMouseMove(MouseMoveEvent event) {
+			Element fullImageElement = getFullImage().getElement();
+			int x_pos = event.getRelativeX(fullImageElement);
+			int imageWidth = fullImageElement.getClientWidth();
+			if (x_pos > (imageWidth / 2)) {
+				fullImageElement.removeClassName("leftCursor");
+				fullImageElement.addClassName("rightCursor");
+			} else {
+				fullImageElement.removeClassName("rightCursor");
+				fullImageElement.addClassName("leftCursor");
+			}
+		}
+
+		public void setFullImage(Image fullImage) {
+			this.fullImage = fullImage;
+		}
+
+		public Image getFullImage() {
+			return fullImage;
 		}
 	}
 }

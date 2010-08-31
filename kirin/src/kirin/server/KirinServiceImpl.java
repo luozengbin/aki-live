@@ -45,9 +45,11 @@ public class KirinServiceImpl extends RemoteServiceServlet implements KirinServi
 
 			// get firends
 			ContactsService service = new ContactsService("Kirin-App");
-			service.setAuthSubToken(this.getThreadLocalRequest().getSession().getAttribute("sessionToken").toString());
+			if(this.getThreadLocalRequest().getSession().getAttribute("sessionToken") != null){
+				service.setAuthSubToken(this.getThreadLocalRequest().getSession().getAttribute("sessionToken").toString());
+			}
 
-			URL feedUrl = new URL("http://www.google.com/m8/feeds/contacts/default/full");
+			URL feedUrl = new URL("https://www.google.com/m8/feeds/contacts/default/full");
 			ContactQuery contactQuery = new ContactQuery(feedUrl);
 			contactQuery.setMaxResults(1000);
 			ContactFeed resultFeed = service.getFeed(contactQuery, ContactFeed.class);
@@ -92,7 +94,7 @@ public class KirinServiceImpl extends RemoteServiceServlet implements KirinServi
 			PicasawebService service = new PicasawebService("Kirin-App");
 			service.setAuthSubToken(this.getThreadLocalRequest().getSession().getAttribute("sessionToken").toString());
 
-			URL feedUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + userId + "?kind=album");
+			URL feedUrl = new URL("https://picasaweb.google.com/data/feed/api/user/" + userId + "?kind=album");
 
 			UserFeed userFeed = service.getFeed(feedUrl, UserFeed.class);
 			AlbumModel albumModel = null;
@@ -116,13 +118,15 @@ public class KirinServiceImpl extends RemoteServiceServlet implements KirinServi
 		try {
 			PicasawebService service = new PicasawebService("Kirin-App");
 			service.setAuthSubToken(this.getThreadLocalRequest().getSession().getAttribute("sessionToken").toString());
-			URL feedUrl = new URL("http://picasaweb.google.com/data/feed/api/user/" + userId + "/albumid/" + albumid);
+			URL feedUrl = new URL("https://picasaweb.google.com/data/feed/api/user/" + userId + "/albumid/" + albumid);
 			AlbumFeed albumFeed = service.getFeed(feedUrl, AlbumFeed.class);
 			PhotoModel photoModel = null;
 			for (PhotoEntry photoEntry : albumFeed.getPhotoEntries()) {
 				photoModel = new PhotoModel();
 				photoModel.setTitle(photoEntry.getTitle().getPlainText());
 				photoModel.setThumbURL((photoEntry.getMediaThumbnails().get(2).getUrl()));
+				photoModel.setHeight(photoEntry.getMediaGroup().getContents().get(0).getHeight());
+				photoModel.setWidth(photoEntry.getMediaGroup().getContents().get(0).getWidth());
 				photoModel.setURL(photoEntry.getMediaGroup().getContents().get(0).getUrl());
 				result.add(photoModel);
 			}
