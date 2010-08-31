@@ -36,7 +36,7 @@ public class AuthService extends javax.servlet.http.HttpServlet {
 				}
 
 				if (!isReply) {
-					String loginUrl = AuthSubUtil.getRequestUrl(resuest.getRequestURL().toString(), "http://picasaweb.google.com/data/ http://www.google.com/m8/feeds/", false, true);
+					String loginUrl = AuthSubUtil.getRequestUrl(resuest.getRequestURL().toString(), "https://picasaweb.google.com/data/ https://www.google.com/m8/feeds/", false, true);
 					response.sendRedirect(loginUrl);
 				}
 
