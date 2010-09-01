@@ -12,6 +12,7 @@ public class LoginInfo implements Serializable {
 	private String emailAddress;
 	private String nickname;
 	private String tocken;
+	private boolean registed;
 
 	public boolean isLoggedIn() {
 		return loggedIn;
@@ -60,4 +61,12 @@ public class LoginInfo implements Serializable {
 	public String getTocken() {
 		return tocken;
 	}
+
+  public void setRegisted(boolean registed) {
+    this.registed = registed;
+  }
+
+  public boolean isRegisted() {
+    return registed;
+  }
 }
