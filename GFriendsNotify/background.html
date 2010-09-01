@@ -19,13 +19,16 @@ var update = function(count) {
 };
 
 var check = function() {
+
+  //console.log("before:" + lastCheckout);
+  
   var xhr = new XMLHttpRequest();
   var uri = getBadgeTextURI + lastCheckout;
-  xhr.open('GET', uri, true);
+  xhr.open('POST', uri, true);
   xhr.onload = function(){
     var result = eval("("+ xhr.responseText +")");
-    console.log(result.size);
-    console.log(result.newLastCheckout);
+    //console.log("size:" + result.size);
+    //console.log("newLastCheckout:" + result.newLastCheckout);
     count = result.size;
     newLastCheckout = result.newLastCheckout;
     if (count >= 0) {
@@ -68,11 +71,16 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   showTargetPage();
   count = 0;
   lastCheckout = newLastCheckout;
+  localStorage.gfriends_lastCheckout = lastCheckout;
   chrome.browserAction.setBadgeBackgroundColor({color : COLOR_S});
   update(count.toString());
+  //console.log("after click:" + lastCheckout);
 });
 
 init = function(){
+  if(localStorage.gfriends_lastCheckout){
+    lastCheckout = localStorage.gfriends_lastCheckout;
+  }
   check();
 };
 
