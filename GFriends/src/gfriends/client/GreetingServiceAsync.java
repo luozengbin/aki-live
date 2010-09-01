@@ -10,4 +10,6 @@ public interface GreetingServiceAsync {
 
 	void pushMessage(String content, AsyncCallback<List<GreetingItem>> callback);
 
+  void loadGreeting(AsyncCallback<List<GreetingItem>> callback);
+
 }

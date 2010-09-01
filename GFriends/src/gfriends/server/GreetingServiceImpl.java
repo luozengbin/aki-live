@@ -17,56 +17,71 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 public class GreetingServiceImpl extends RemoteServiceServlet implements GreetingService {
 
-	private static final long serialVersionUID = -4809886475604728588L;
+  private static final long serialVersionUID = -4809886475604728588L;
 
-	@Override
-	public List<GreetingItem> pushMessage(String content) {
+  @Override
+  public List<GreetingItem> pushMessage(String content) {
 
-		List<GreetingItem> result = new ArrayList<GreetingItem>();
+    PersistenceManager pm = null;
 
-		UserService userService = UserServiceFactory.getUserService();
-		User user = userService.getCurrentUser();
+    if (content != null && content.trim().length() > 0) {
 
-		Date date = new Date();
-		Greeting greeting = new Greeting(user, content, date);
+      // store
 
-		// store 
-		PersistenceManager pm = null;
-		try {
-			pm = PMF.get().getPersistenceManager();
-			pm.makePersistent(greeting);
-		} finally {
-			pm.close();
-			pm = null;
-		}
-		
-		// select
-		try {
+      UserService userService = UserServiceFactory.getUserService();
+      User user = userService.getCurrentUser();
 
-			pm = PMF.get().getPersistenceManager();
+      Date date = new Date();
+      Greeting greeting = new Greeting(user, content, date);
 
-			String query = "select from " + Greeting.class.getName() + " order by date desc range 0,20";
+      try {
+        pm = PMF.get().getPersistenceManager();
+        pm.makePersistent(greeting);
+      } finally {
+        if (pm != null) {
+          pm.close();
+          pm = null;
+        }
+      }
+    }
 
-			pm = PMF.get().getPersistenceManager();
-			@SuppressWarnings("unchecked")
-			List<Greeting> greetings = (List<Greeting>) pm.newQuery(query).execute();
+    return loadGreeting();
+  }
 
-			GreetingItem greetingItem = null;
-			for (Greeting currentGreeting : greetings) {
-				greetingItem = new GreetingItem();
-				if (currentGreeting.getAuthor() != null) {
-					greetingItem.setNickName(currentGreeting.getAuthor().getNickname());
-				}
-				greetingItem.setContent(currentGreeting.getContent());
-				greetingItem.setDataTime(currentGreeting.getDate().toString());
-				greetingItem.setTimestamp(currentGreeting.getDate().getTime());
-				result.add(greetingItem);
-			}
+  public List<GreetingItem> loadGreeting() {
 
-		} finally {
-			pm.close();
-		}
+    PersistenceManager pm = null;
+    List<GreetingItem> result = new ArrayList<GreetingItem>();
 
-		return result;
-	}
+    // select
+    try {
+
+      pm = PMF.get().getPersistenceManager();
+
+      String query = "select from " + Greeting.class.getName() + " order by date desc range 0,20";
+
+      @SuppressWarnings("unchecked")
+      List<Greeting> greetings = (List<Greeting>) pm.newQuery(query).execute();
+
+      GreetingItem greetingItem = null;
+      for (Greeting currentGreeting : greetings) {
+        greetingItem = new GreetingItem();
+        if (currentGreeting.getAuthor() != null) {
+          greetingItem.setNickName(currentGreeting.getAuthor().getNickname());
+        }
+        greetingItem.setContent(currentGreeting.getContent());
+        greetingItem.setDataTime(currentGreeting.getDate().toString());
+        greetingItem.setTimestamp(currentGreeting.getDate().getTime());
+        result.add(greetingItem);
+      }
+
+    } finally {
+      if (pm != null) {
+        pm.close();
+        pm = null;
+      }
+    }
+
+    return result;
+  }
 }
