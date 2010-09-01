@@ -4,31 +4,51 @@
     "http://java.sun.com/dtd/web-app_2_3.dtd">
 
 <web-app>
-  
-  <!-- Servlets -->
-  <servlet>
-    <servlet-name>loginServlet</servlet-name>
-    <servlet-class>gfriends.server.LoginServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet>
-    <servlet-name>greetingServlet</servlet-name>
-    <servlet-class>gfriends.server.GreetingServiceImpl</servlet-class>
-  </servlet>
-  
-  <servlet-mapping>
-    <servlet-name>loginServlet</servlet-name>
-    <url-pattern>/gfriends/login</url-pattern>
-  </servlet-mapping>
-  
-  <servlet-mapping>
-    <servlet-name>greetingServlet</servlet-name>
-    <url-pattern>/gfriends/greeting</url-pattern>
-  </servlet-mapping>
-  
-  <!-- Default page to serve -->
-  <welcome-file-list>
-    <welcome-file>GFriends.html</welcome-file>
-  </welcome-file-list>
+
+	<!-- Servlets -->
+	<servlet>
+		<servlet-name>loginServlet</servlet-name>
+		<servlet-class>gfriends.server.LoginServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>greetingServlet</servlet-name>
+		<servlet-class>gfriends.server.GreetingServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>getBadgeTextService</servlet-name>
+		<servlet-class>gfriends.server.GetBadgeTextService</servlet-class>
+	</servlet>
+
+	<servlet>
+		<servlet-name>contactsService</servlet-name>
+		<servlet-class>gfriends.server.ContactsServiceImpl</servlet-class>
+	</servlet>
+
+	<servlet-mapping>
+		<servlet-name>loginServlet</servlet-name>
+		<url-pattern>/gfriends/login</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>greetingServlet</servlet-name>
+		<url-pattern>/gfriends/greeting</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>getBadgeTextService</servlet-name>
+		<url-pattern>/gfriends/getBadgeText</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>contactsService</servlet-name>
+		<url-pattern>/gfriends/contacts</url-pattern>
+	</servlet-mapping>
+
+	<!-- Default page to serve -->
+	<welcome-file-list>
+		<welcome-file>GFriends.html</welcome-file>
+	</welcome-file-list>
 
 </web-app>
