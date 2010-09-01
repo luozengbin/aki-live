@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<script type="text/javascript">
+const MAX_COUNT_SIZE = 9999;
+const INTERVAL_S = 1000 * 60; // 1 minute
+const INTERVAL_E = 1000 * 60 * 60; // 1 hour
+const COLOR_S = [050, 150, 050, 230];
+const COLOR_E = [200, 050, 050, 230];
+const targetURI = 'http://akirawebapps.appspot.com/';
+const getBadgeTextURI = 'http://akirawebapps.appspot.com/gfriends/getBadgeText?lastCheckout=';
+var lastCheckout = 0;
+var count = 0;
+var newLastCheckout = 0;
+
+var update = function(count) {
+  chrome.browserAction.setBadgeText({text : count});
+};
+
+var check = function() {
+  var xhr = new XMLHttpRequest();
+  var uri = getBadgeTextURI + lastCheckout;
+  xhr.open('GET', uri, true);
+  xhr.onload = function(){
+    var result = eval("("+ xhr.responseText +")");
+    console.log(result.size);
+    console.log(result.newLastCheckout);
+    count = result.size;
+    newLastCheckout = result.newLastCheckout;
+    if (count >= 0) {
+      chrome.browserAction.setBadgeBackgroundColor({color : COLOR_S});
+      update(count.toString());
+      setTimeout(check, INTERVAL_S);
+    } else {
+      error();
+    }
+  };
+  
+  xhr.onerror = function(){
+    error();
+  };
+  
+  xhr.send(null);
+};
+
+var error = function() {
+  chrome.browserAction.setBadgeBackgroundColor({color : COLOR_E});
+  update('!');
+  setTimeout(check, INTERVAL_E);
+};
+
+var showTargetPage = function() {
+  chrome.tabs.getAllInWindow(undefined, function(tabs) {
+    for (var i = 0, tab; tab = tabs[i]; i++) {
+      if (tab.url && targetURI == tab.url) {
+        chrome.tabs.update(tab.id, {url: targetURI,selected: true});
+        return;
+      }
+    }
+    chrome.tabs.create({url: targetURI});
+  });
+};
+
+chrome.browserAction.setBadgeText({text : '?'});
+chrome.browserAction.setBadgeBackgroundColor({color : COLOR_E});
+chrome.browserAction.onClicked.addListener(function(tab) {
+  showTargetPage();
+  count = 0;
+  lastCheckout = newLastCheckout;
+  chrome.browserAction.setBadgeBackgroundColor({color : COLOR_S});
+  update(count.toString());
+});
+
+init = function(){
+  check();
+};
+
+</script>
+</head>
+<body onload="init();">
+</body>
+</html>

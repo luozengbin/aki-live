@@ -1,0 +1,14 @@
+{
+    "name" : "GFriends Notify",
+    "version" : "1.1",
+    "description" : "Notify GFriends Entry.",
+    "background_page" : "background.html",
+    "permissions" : [
+        "tabs",
+        "http://akirawebapps.appspot.com/"
+    ],
+    "browser_action" : {
+        "default_title" : "GFriends Notify",
+        "default_icon" : "icon.png"
+    }
+}
