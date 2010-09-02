@@ -11,7 +11,9 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
+import com.google.gwt.i18n.client.DateTimeFormat;
 import com.google.gwt.resources.client.ImageResource;
+import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Anchor;
@@ -21,7 +23,6 @@ import com.google.gwt.user.client.ui.DecoratedStackPanel;
 import com.google.gwt.user.client.ui.DecoratorPanel;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.FlexTable.FlexCellFormatter;
-import com.google.gwt.user.client.ui.Grid;
 import com.google.gwt.user.client.ui.HTML;
 import com.google.gwt.user.client.ui.HasHorizontalAlignment;
 import com.google.gwt.user.client.ui.HasVerticalAlignment;
@@ -38,6 +39,8 @@ import com.google.gwt.user.client.ui.VerticalPanel;
 import com.google.gwt.user.client.ui.VerticalSplitPanel;
 
 public class GFriends implements EntryPoint {
+
+  private static final int REFRESH_INTERVAL = 1000 * 5; // ms
 
   private LoginInfo loginInfo = null;
 
@@ -80,6 +83,7 @@ public class GFriends implements EntryPoint {
                   public void onSuccess(Void result) {
                     Window.Location.reload();
                   }
+
                   @Override
                   public void onFailure(Throwable caught) {
                   }
@@ -218,15 +222,28 @@ public class GFriends implements EntryPoint {
     stackPanel.ensureDebugId("cwStackPanel");
 
     // -----------------------right panel-------------------------
+
+    final FlexTable topFlexTable = new FlexTable();
+    FlexCellFormatter cellFormatter = topFlexTable.getFlexCellFormatter();
+    topFlexTable.setCellSpacing(3);
+    topFlexTable.setCellPadding(3);
+    cellFormatter.setColSpan(0, 0, 2);
+
     final RichTextArea area = new RichTextArea();
     area.ensureDebugId("cwRichText-area");
     area.setSize("750px", "100px");
-    // Add the components to a panel
-    Grid t_grid = new Grid(2, 1);
-    t_grid.setStyleName("cw-RichText");
-    t_grid.setWidget(0, 0, area);
+    topFlexTable.setWidget(0, 0, area);
+
+    /*
+     * Image reloadImage = new Image("/images/refresh.png");
+     * reloadImage.setWidth("24px"); reloadImage.setHeight("24px");
+     * reloadImage.addStyleName("img_button"); topFlexTable.setWidget(1, 0,
+     * reloadImage);
+     */
+
     Button sendButton = new Button("SendMessage");
-    t_grid.setWidget(1, 0, sendButton);
+    cellFormatter.setHorizontalAlignment(1, 1, HasHorizontalAlignment.ALIGN_RIGHT);
+    topFlexTable.setWidget(1, 1, sendButton);
 
     final FlexTable flexTable = new FlexTable();
     flexTable.addStyleName("cw-FlexTable");
@@ -236,13 +253,12 @@ public class GFriends implements EntryPoint {
     VerticalSplitPanel vSplit = new VerticalSplitPanel();
     vSplit.ensureDebugId("cwVerticalSplitPanel");
     vSplit.setSize("100%", "100%");
-    vSplit.setSplitPosition("150px");
-    vSplit.setTopWidget(t_grid);
+    vSplit.setSplitPosition("155px");
+    vSplit.setTopWidget(topFlexTable);
     vSplit.setBottomWidget(flexTable);
 
     final MessageAsyncCallback messageAsyncCallback = new MessageAsyncCallback();
     messageAsyncCallback.setFlexTable(flexTable);
-
     greetingService.loadGreeting(messageAsyncCallback);
 
     sendButton.addClickHandler(new ClickHandler() {
@@ -252,9 +268,17 @@ public class GFriends implements EntryPoint {
           Window.alert("no message need to send!!!");
         } else {
           greetingService.pushMessage(area.getText(), messageAsyncCallback);
+          area.setText("");
         }
       }
     });
+
+    /*
+     * reloadImage.addClickHandler(new ClickHandler() {
+     * 
+     * @Override public void onClick(ClickEvent event) {
+     * greetingService.loadGreeting(messageAsyncCallback); } });
+     */
 
     // -------------------main split panel-----------------------
     HorizontalSplitPanel hSplit = new HorizontalSplitPanel();
@@ -264,16 +288,32 @@ public class GFriends implements EntryPoint {
     hSplit.setSplitPosition("20%");
     hSplit.setRightWidget(vSplit);
     hSplit.setLeftWidget(stackPanel);
+    
     // Wrap the split panel in a decorator panel
     DecoratorPanel decPanel = new DecoratorPanel();
     decPanel.setWidget(hSplit);
 
     RootPanel.get("gfriends_content").add(decPanel);
+
+    // -------------------auto reload---------------------------
+    final MessageAsyncCallback autoMessageAsyncCallback = new MessageAsyncCallback();
+    autoMessageAsyncCallback.setFlexTable(flexTable);
+    autoMessageAsyncCallback.setAutoRefresh(true);
+    Timer refreshTimer = new Timer() {
+      @Override
+      public void run() {
+        greetingService.loadGreeting(autoMessageAsyncCallback);
+      }
+    };
+    refreshTimer.schedule(1000 * 10);
+    refreshTimer.scheduleRepeating(REFRESH_INTERVAL);
   }
 
   class MessageAsyncCallback implements AsyncCallback<List<GreetingItem>> {
 
     private FlexTable flexTable;
+
+    private boolean autoRefresh = false;
 
     @Override
     public void onFailure(Throwable caught) {
@@ -282,34 +322,54 @@ public class GFriends implements EntryPoint {
 
     @Override
     public void onSuccess(List<GreetingItem> result) {
-      getFlexTable().clear(true);
+
+      this.flexTable.removeAllRows();
 
       GreetingItem greetingItem = null;
 
       if (result.size() == 0) {
-        getFlexTable().setHTML(0, 0, "<b><font color=\"red\">no messages!!!</font></b>");
+        this.flexTable.setHTML(0, 0, "<b><font color=\"red\">no messages!!!</font></b>");
 
       } else {
 
-        FlexCellFormatter cellFormatter = flexTable.getFlexCellFormatter();
+        if (result.size() > 0) {
 
-        for (int i = 0; i < result.size(); i++) {
-          greetingItem = result.get(i);
-
-          String style = null;
-          for (ContactItem contactItem : contactItemList) {
-            if (contactItem.getNickName().equals(greetingItem.getNickName())) {
-              style = contactItem.getStyle();
-              break;
+          long lastTimestamp = 0;
+          if (isLocalStorageSupported()) {
+            if (isAutoRefresh()) {
+              lastTimestamp = Long.valueOf(getAutoLastGreetingTime());
+            } else {
+              lastTimestamp = Long.valueOf(getLastGreetingTime());
+              setAutoLastGreetingTime(String.valueOf(lastTimestamp));
             }
-          }
-          if (style != null) {
-            cellFormatter.addStyleName(i, 0, style + "_bkcolor");
+            setLastGreetingTime(Long.toString(result.get(0).getTimestamp()));
           }
 
-          String innerHtml = "<p><b>" + (greetingItem.getNickName() == null ? "An anonymous person " : greetingItem.getNickName()) + " wrote: </b>("
-              + greetingItem.getDataTime() + ")</p>" + "<blockquote><pre>" + greetingItem.getContent() + "</pre></blockquote>";
-          getFlexTable().setHTML(i, 0, innerHtml);
+          FlexCellFormatter cellFormatter = flexTable.getFlexCellFormatter();
+          for (int i = 0; i < result.size(); i++) {
+            greetingItem = result.get(i);
+            ContactItem currentContact = null;
+            for (ContactItem contactItem : contactItemList) {
+              if (contactItem.getEmail().equals(greetingItem.getEmail())) {
+                currentContact = contactItem;
+                break;
+              }
+            }
+            if (currentContact != null) {
+              cellFormatter.addStyleName(i, 0, currentContact.getStyle() + "_bkcolor");
+            }
+
+            StringBuilder sb = new StringBuilder();
+
+            if (isLocalStorageSupported() && greetingItem.getTimestamp() > lastTimestamp) {
+              sb.append("<img src='/images/new_icon.jpg' width='33px' Height='19px'/><br/>");
+            }
+            sb.append("[" + DateTimeFormat.getMediumDateTimeFormat().format(greetingItem.getDataTime()) + "]&nbsp;&nbsp;&nbsp;")
+              .append("<b>").append((currentContact == null ? "An anonymous person " : currentContact.getNickName())).append(" wrote: </b>")
+              .append("<br/>").append("<blockquote><pre>")
+              .append(greetingItem.getContent()).append("</pre></blockquote>");
+            this.flexTable.setHTML(i, 0, sb.toString());
+          }
         }
       }
     }
@@ -322,6 +382,13 @@ public class GFriends implements EntryPoint {
       return flexTable;
     }
 
+    public void setAutoRefresh(boolean autoRefresh) {
+      this.autoRefresh = autoRefresh;
+    }
+
+    public boolean isAutoRefresh() {
+      return autoRefresh;
+    }
   }
 
   public interface Images extends Tree.Resources {
@@ -373,6 +440,7 @@ public class GFriends implements EntryPoint {
       // Open the contact info popup when the user clicks a contact
       contactLink.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
+
           // Set the info about the contact
           contactInfo.setHTML(contactName + "<br><i>" + contactEmail + "</i>");
 
@@ -401,4 +469,36 @@ public class GFriends implements EntryPoint {
     return hPanel.getElement().getString();
   }
 
+  // ------------------- native code ----------------------------//
+  public static native boolean isLocalStorageSupported() /*-{
+    if ($wnd.localStorage) {
+      return true;
+    }else{
+      return false;
+    }
+  }-*/;
+
+  public static native String getLastGreetingTime() /*-{
+    if($wnd.localStorage.lastGreetingTime){
+      return $wnd.localStorage.lastGreetingTime;
+    }else{
+      return "0";
+    }
+  }-*/;
+
+  public static native void setLastGreetingTime(String lastGreetingTime) /*-{
+    $wnd.localStorage.lastGreetingTime = lastGreetingTime;
+  }-*/;
+
+  public static native String getAutoLastGreetingTime() /*-{
+    if($wnd.localStorage.autoLastGreetingTime){
+      return $wnd.localStorage.autoLastGreetingTime;
+    }else{
+      return "0";
+    }
+  }-*/;
+
+  public static native void setAutoLastGreetingTime(String autoLastGreetingTime) /*-{
+    $wnd.localStorage.autoLastGreetingTime = autoLastGreetingTime;
+  }-*/;
 }

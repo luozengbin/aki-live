@@ -148,3 +148,7 @@ html>body .gwt-DecoratedStackPanel {
 .contact_8_bkcolor {
   background-color: #cc00ff;
 }
+
+.img_button {
+  cursor: pointer;
+}

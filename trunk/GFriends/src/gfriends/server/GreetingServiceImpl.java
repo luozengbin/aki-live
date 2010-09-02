@@ -68,9 +68,10 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
         greetingItem = new GreetingItem();
         if (currentGreeting.getAuthor() != null) {
           greetingItem.setNickName(currentGreeting.getAuthor().getNickname());
+          greetingItem.setEmail(currentGreeting.getAuthor().getEmail());
         }
         greetingItem.setContent(currentGreeting.getContent());
-        greetingItem.setDataTime(currentGreeting.getDate().toString());
+        greetingItem.setDataTime(currentGreeting.getDate());
         greetingItem.setTimestamp(currentGreeting.getDate().getTime());
         result.add(greetingItem);
       }
