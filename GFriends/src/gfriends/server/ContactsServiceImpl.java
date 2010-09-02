@@ -32,14 +32,15 @@ public class ContactsServiceImpl extends RemoteServiceServlet implements Contact
 
       ContactItem contactItem = null;
       for (Contact contact : contactList) {
-        contactItem = new ContactItem();
-        contactItem.setNickName(contact.getNickName());
-        contactItem.setEmail(contact.getEmail());
-        contactItem.setRegisterDate(contact.getRegisterDate());
-        contactItem.setStyle(contact.getStyle());
-        result.add(contactItem);
+        if(contact.isEnable()){
+          contactItem = new ContactItem();
+          contactItem.setNickName(contact.getNickName());
+          contactItem.setEmail(contact.getEmail());
+          contactItem.setRegisterDate(contact.getRegisterDate());
+          contactItem.setStyle(contact.getStyle());
+          result.add(contactItem);
+        }
       }
-
     } finally {
       if (pm != null) {
         pm.close();
