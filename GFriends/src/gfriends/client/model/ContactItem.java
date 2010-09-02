@@ -3,8 +3,8 @@ package gfriends.client.model;
 import java.util.Date;
 
 public class ContactItem implements java.io.Serializable {
-
-  private static final long serialVersionUID = 5934518607422959575L;
+  
+  private static final long serialVersionUID = -4914160841393066829L;
 
   private String nickName;
   
@@ -54,6 +54,5 @@ public class ContactItem implements java.io.Serializable {
 
   public String getEmail() {
     return email;
-  }
-
+  } 
 }
