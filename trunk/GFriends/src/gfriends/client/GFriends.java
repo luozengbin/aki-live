@@ -48,11 +48,13 @@ public class GFriends implements EntryPoint {
 
   private List<ContactItem> contactItemList = new ArrayList<ContactItem>();
 
-  LoginServiceAsync loginService = GWT.create(LoginService.class);
+  private LoginServiceAsync loginService = GWT.create(LoginService.class);
 
-  GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
+  private GreetingServiceAsync greetingService = GWT.create(GreetingService.class);
 
-  ContactsServiceAsync contactsService = GWT.create(ContactsService.class);
+  private ContactsServiceAsync contactsService = GWT.create(ContactsService.class);
+
+  private MessageAsyncCallback autoMessageAsyncCallback = null;
 
   @Override
   public void onModuleLoad() {
@@ -288,7 +290,7 @@ public class GFriends implements EntryPoint {
     hSplit.setSplitPosition("20%");
     hSplit.setRightWidget(vSplit);
     hSplit.setLeftWidget(stackPanel);
-    
+
     // Wrap the split panel in a decorator panel
     DecoratorPanel decPanel = new DecoratorPanel();
     decPanel.setWidget(hSplit);
@@ -296,7 +298,7 @@ public class GFriends implements EntryPoint {
     RootPanel.get("gfriends_content").add(decPanel);
 
     // -------------------auto reload---------------------------
-    final MessageAsyncCallback autoMessageAsyncCallback = new MessageAsyncCallback();
+    autoMessageAsyncCallback = new MessageAsyncCallback();
     autoMessageAsyncCallback.setFlexTable(flexTable);
     autoMessageAsyncCallback.setAutoRefresh(true);
     Timer refreshTimer = new Timer() {
@@ -346,8 +348,12 @@ public class GFriends implements EntryPoint {
           }
 
           FlexCellFormatter cellFormatter = flexTable.getFlexCellFormatter();
+
+          int skipCount = 0;
           for (int i = 0; i < result.size(); i++) {
+
             greetingItem = result.get(i);
+
             ContactItem currentContact = null;
             for (ContactItem contactItem : contactItemList) {
               if (contactItem.getEmail().equals(greetingItem.getEmail())) {
@@ -355,20 +361,22 @@ public class GFriends implements EntryPoint {
                 break;
               }
             }
-            if (currentContact != null) {
-              cellFormatter.addStyleName(i, 0, currentContact.getStyle() + "_bkcolor");
-            }
 
-            StringBuilder sb = new StringBuilder();
+            if (currentContact.isEnable()) {
+              cellFormatter.addStyleName(i - skipCount, 0, currentContact.getStyle() + "_bkcolor");
+              StringBuilder sb = new StringBuilder();
 
-            if (isLocalStorageSupported() && greetingItem.getTimestamp() > lastTimestamp) {
-              sb.append("<img src='/images/new_icon.jpg' width='33px' Height='19px'/><br/>");
+              if (isLocalStorageSupported() && greetingItem.getTimestamp() > lastTimestamp) {
+                sb.append("<img src='/images/new_icon.jpg' width='33px' Height='19px'/><br/>");
+              }
+              sb.append("[" + DateTimeFormat.getMediumDateTimeFormat().format(greetingItem.getDataTime()) + "]&nbsp;&nbsp;&nbsp;").append("<b>")
+                  .append(currentContact.getNickName()).append(" wrote: </b>").append("<br/>").append("<blockquote><pre>")
+                  .append(greetingItem.getContent()).append("</pre></blockquote>");
+              this.flexTable.setHTML(i - skipCount, 0, sb.toString());
+
+            } else {
+              skipCount++;
             }
-            sb.append("[" + DateTimeFormat.getMediumDateTimeFormat().format(greetingItem.getDataTime()) + "]&nbsp;&nbsp;&nbsp;")
-              .append("<b>").append((currentContact == null ? "An anonymous person " : currentContact.getNickName())).append(" wrote: </b>")
-              .append("<br/>").append("<blockquote><pre>")
-              .append(greetingItem.getContent()).append("</pre></blockquote>");
-            this.flexTable.setHTML(i, 0, sb.toString());
           }
         }
       }
@@ -405,9 +413,28 @@ public class GFriends implements EntryPoint {
   private VerticalPanel createFiltersItem() {
     VerticalPanel filtersPanel = new VerticalPanel();
     filtersPanel.setSpacing(4);
-    filtersPanel.add(new CheckBox("All"));
+
+    ClickHandler handler = new ClickHandler() {
+      @Override
+      public void onClick(ClickEvent event) {
+        CheckBox cb = (CheckBox) event.getSource();
+        for (ContactItem contactItem : contactItemList) {
+          if (contactItem.getEmail().equals(cb.getFormValue())) {
+            contactItem.setEnable(cb.getValue());
+            greetingService.loadGreeting(autoMessageAsyncCallback);
+            break;
+          }
+        }
+      }
+    };
+
     for (ContactItem contactItem : this.contactItemList) {
-      filtersPanel.add(new CheckBox(contactItem.getNickName()));
+      CheckBox cb = new CheckBox(contactItem.getNickName());
+      cb.setFormValue(contactItem.getEmail());
+      contactItem.setEnable(true);
+      cb.setValue(contactItem.isEnable());
+      cb.addClickHandler(handler);
+      filtersPanel.add(cb);
     }
     return filtersPanel;
   }
@@ -440,10 +467,8 @@ public class GFriends implements EntryPoint {
       // Open the contact info popup when the user clicks a contact
       contactLink.addClickHandler(new ClickHandler() {
         public void onClick(ClickEvent event) {
-
           // Set the info about the contact
           contactInfo.setHTML(contactName + "<br><i>" + contactEmail + "</i>");
-
           // Show the popup of contact info
           int left = contactLink.getAbsoluteLeft() + 14;
           int top = contactLink.getAbsoluteTop() + 14;
