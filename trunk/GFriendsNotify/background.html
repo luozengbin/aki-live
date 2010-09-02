@@ -29,9 +29,13 @@ var check = function() {
     var result = eval("("+ xhr.responseText +")");
     console.log("size:" + result.size);
     console.log("newLastCheckout:" + result.newLastCheckout);
+    var oldCount = count;
     count = result.size;
     newLastCheckout = result.newLastCheckout;
     if (count >= 0) {
+      if(count > oldCount){
+        showNotification(count - oldCount);
+      }
       chrome.browserAction.setBadgeBackgroundColor({color : COLOR_S});
       update(count.toString());
       setTimeout(check, INTERVAL_S);
@@ -77,6 +81,26 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   update(count.toString());
   console.log("after click:" + lastCheckout);
 });
+
+
+function showNotification(messageNum) {
+  // 許可をチェック
+  if (webkitNotifications.permissionLevel === webkitNotifications.PERMISSION_ALLOWED) {
+    var notification = webkitNotifications.createNotification('icon48.png', 'メッセージ通知', messageNum + "通が届きました。");
+    notification.ondisplay = function(){
+      // 表示されてから3秒後に自動で閉じる
+      setTimeout(function(){notification.cancel();},3000);
+    };
+    notification.show();
+  } else {
+    // ユーザに許可を得る
+    webkitNotifications.requestPermission(function() {
+      if (webkitNotifications.permissionLevel === webkitNotifications.PERMISSION_ALLOWED) {
+        showNotification(messageNum);
+      }
+    });
+  }
+}
 
 init = function(){
   if(localStorage.gfriends_lastCheckout){
