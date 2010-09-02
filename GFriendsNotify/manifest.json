@@ -5,6 +5,7 @@
     "background_page" : "background.html",
     "permissions" : [
         "tabs",
+        "notifications",
 	"unlimited_storage",
         "http://akirawebapps.appspot.com/"
     ],
