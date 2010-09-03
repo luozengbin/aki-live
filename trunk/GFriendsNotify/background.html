@@ -31,8 +31,8 @@ var check = function() {
     console.log("newLastCheckout:" + result.newLastCheckout);
     var oldCount = count;
     count = result.size;
-    newLastCheckout = result.newLastCheckout;
     if (count >= 0) {
+        showNotification(count - oldCount);
       if(count > oldCount){
         showNotification(count - oldCount);
       }
@@ -81,15 +81,18 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   update(count.toString());
   console.log("after click:" + lastCheckout);
 });
-
+chrome.extension.onRequest.addListener(function(res){
+  showTargetPage();
+});
 
 function showNotification(messageNum) {
   // 許可をチェック
   if (webkitNotifications.permissionLevel === webkitNotifications.PERMISSION_ALLOWED) {
-    var notification = webkitNotifications.createNotification('icon48.png', 'メッセージ通知', messageNum + "通が届きました。");
+    //var notification = webkitNotifications.createNotification('icon48.png', 'メッセージ通知', messageNum + "通が届きました。");
+    var notification = webkitNotifications.createHTMLNotification("messageHTML.html?message=" + messageNum);
     notification.ondisplay = function(){
       // 表示されてから3秒後に自動で閉じる
-      setTimeout(function(){notification.cancel();},3000);
+      setTimeout(function(){notification.cancel();},6000);
     };
     notification.show();
   } else {
