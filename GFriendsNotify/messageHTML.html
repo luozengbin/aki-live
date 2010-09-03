@@ -1,0 +1,31 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <script type="text/javascript">
+  function queryString(item){
+     var sValue=location.search.match(new RegExp("[\?\&]"+item+"=([^\&]*)(\&?)"));
+     var infoList = sValue.toString().split(",");
+     var messageNum = infoList[1];
+     document.getElementById("messageNum").innerHTML = messageNum + "通が届きました。";
+  }
+
+  </script>
+  </head>
+  <body onload="queryString('message')">
+    <div onclick="chrome.extension.sendRequest('click');" style="cursor: pointer;">
+       <table border="0" cellspacing="0" cellpadding="0">
+         <tr>
+           <td valign="top" Rowspan="3"><img alt="icon48" src="icon48.png"></td>
+           <td valign="top"><b><span style="font-size: 18px;">メッセージ通知</span></b></td>
+         </tr>
+         <tr>
+           <td valign="top" align="left"><span id ="messageNum" style="font-size: 12px"></span></td>
+         </tr>
+         <tr>
+           <td valign="bottom" align="right"><span style="font-size: 10px; color: green;">Design By App</span></td>
+         </tr>
+       </table>
+    </div>
+  </body>
+</html>
