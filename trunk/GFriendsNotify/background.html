@@ -13,6 +13,7 @@ const getBadgeTextURI = 'http://akirawebapps.appspot.com/gfriends/getBadgeText?l
 var lastCheckout = 0;
 var count = 0;
 var newLastCheckout = 0;
+var notification;
 
 var update = function(count) {
   chrome.browserAction.setBadgeText({text : count});
@@ -76,6 +77,7 @@ chrome.browserAction.onClicked.addListener(function(tab){
 });
 chrome.extension.onRequest.addListener(function(res){
   reloadTargetPage();
+  notification.cancel();
 });
 
 function reloadTargetPage() {
@@ -93,7 +95,7 @@ function showNotification(messageNum) {
   // 許可をチェック
   if (webkitNotifications.permissionLevel === webkitNotifications.PERMISSION_ALLOWED) {
     //var notification = webkitNotifications.createNotification('icon48.png', 'メッセージ通知', messageNum + "通が届きました。");
-    var notification = webkitNotifications.createHTMLNotification("messageHTML.html?message=" + messageNum);
+    notification = webkitNotifications.createHTMLNotification("messageHTML.html?message=" + messageNum);
     notification.ondisplay = function(){
       // 表示されてから3秒後に自動で閉じる
       setTimeout(function(){notification.cancel();},6000);
