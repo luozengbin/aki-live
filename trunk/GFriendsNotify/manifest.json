@@ -7,7 +7,7 @@
         "tabs",
         "notifications",
 	"unlimited_storage",
-        "http://akirawebapps.appspot.com/"
+        "https://akirawebapps.appspot.com/"
     ],
     "browser_action" : {
         "default_title" : "GFriends Notify",
