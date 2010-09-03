@@ -13,14 +13,14 @@
   </script>
   </head>
   <body onload="queryString('message')">
-    <div onclick="chrome.extension.sendRequest('click');" style="cursor: pointer;">
+    <div>
        <table border="0" cellspacing="0" cellpadding="0">
          <tr>
            <td valign="top" Rowspan="3"><img alt="icon48" src="icon48.png"></td>
            <td valign="top"><b><span style="font-size: 18px;">メッセージ通知</span></b></td>
          </tr>
          <tr>
-           <td valign="top" align="left"><span id ="messageNum" style="font-size: 12px"></span></td>
+           <td valign="top" align="left"><a href="javascript:chrome.extension.sendRequest('click');"><span id ="messageNum" style="font-size: 12px"></span></a></td>
          </tr>
          <tr>
            <td valign="bottom" align="right"><span style="font-size: 10px; color: green;">Design By App</span></td>

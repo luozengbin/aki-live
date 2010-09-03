@@ -71,7 +71,14 @@ var showTargetPage = function() {
 
 chrome.browserAction.setBadgeText({text : '?'});
 chrome.browserAction.setBadgeBackgroundColor({color : COLOR_E});
-chrome.browserAction.onClicked.addListener(function(tab) {
+chrome.browserAction.onClicked.addListener(function(tab){
+  reloadTargetPage();
+});
+chrome.extension.onRequest.addListener(function(res){
+  reloadTargetPage();
+});
+
+function reloadTargetPage() {
   showTargetPage();
   count = 0;
   lastCheckout = newLastCheckout;
@@ -80,10 +87,7 @@ chrome.browserAction.onClicked.addListener(function(tab) {
   chrome.browserAction.setBadgeBackgroundColor({color : COLOR_S});
   update(count.toString());
   console.log("after click:" + lastCheckout);
-});
-chrome.extension.onRequest.addListener(function(res){
-  showTargetPage();
-});
+};
 
 function showNotification(messageNum) {
   // 許可をチェック
