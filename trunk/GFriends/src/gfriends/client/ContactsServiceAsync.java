@@ -10,7 +10,7 @@ public interface ContactsServiceAsync {
 
   void loadContacts(AsyncCallback<List<ContactItem>> callback);
 
-  void register(String nickname, String email, AsyncCallback<Void> callback);
+  void register(String nickname, String email, AsyncCallback<Boolean> callback);
 
   void removeAllContact(AsyncCallback<Void> callback);
 

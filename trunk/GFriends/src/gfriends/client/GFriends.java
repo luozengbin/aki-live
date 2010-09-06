@@ -42,6 +42,8 @@ public class GFriends implements EntryPoint {
 
   private static final int REFRESH_INTERVAL = 1000 * 5; // ms
 
+  private static final int SCROLL_TITLE_INTERVAL = 300;
+
   private LoginInfo loginInfo = null;
 
   private HorizontalPanel loginInfoPanel = new HorizontalPanel();
@@ -55,6 +57,10 @@ public class GFriends implements EntryPoint {
   private ContactsServiceAsync contactsService = GWT.create(ContactsService.class);
 
   private MessageAsyncCallback autoMessageAsyncCallback = null;
+
+  private Timer scrollTitleTimmer = null;
+
+  private int newMsgNum = 0;
 
   @Override
   public void onModuleLoad() {
@@ -72,26 +78,11 @@ public class GFriends implements EntryPoint {
           } else {
             // render register_content
 
-            RootPanel.get("register_content").add(new HTML("<font clolr=\"red\">please content administrator of this site!</font><br/>"));
+            RootPanel.get("register_content").add(new HTML("<p><b>Please Fill Auto Register Form And Confirm The Response!</b></p>"));
 
             final TextBox nicknameTx = new TextBox();
             final TextBox emailTx = new TextBox();
-            Button registerBt = new Button("Register");
-            registerBt.addClickHandler(new ClickHandler() {
-              @Override
-              public void onClick(ClickEvent event) {
-                contactsService.register(nicknameTx.getValue(), emailTx.getValue(), new AsyncCallback<Void>() {
-                  @Override
-                  public void onSuccess(Void result) {
-                    Window.Location.reload();
-                  }
-
-                  @Override
-                  public void onFailure(Throwable caught) {
-                  }
-                });
-              }
-            });
+            final Button registerBt = new Button("Register");
 
             // Create a table to layout the form options
             FlexTable layout = new FlexTable();
@@ -115,10 +106,43 @@ public class GFriends implements EntryPoint {
             layout.setWidget(3, 0, registerBt);
 
             // Wrap the content in a DecoratorPanel
-            DecoratorPanel decPanel = new DecoratorPanel();
+            final DecoratorPanel decPanel = new DecoratorPanel();
             decPanel.setWidget(layout);
 
             RootPanel.get("register_content").add(decPanel);
+
+            final HTML hintMsg = new HTML();
+            RootPanel.get("register_content").add(hintMsg);
+
+            registerBt.addClickHandler(new ClickHandler() {
+              @Override
+              public void onClick(ClickEvent event) {
+
+                if (nicknameTx.getValue() != null && nicknameTx.getValue().trim().length() > 0 && emailTx.getValue() != null
+                    && emailTx.getValue().trim().length() > 0) {
+                  
+                  contactsService.register(nicknameTx.getValue(), emailTx.getValue(), new AsyncCallback<Boolean>() {
+                    @Override
+                    public void onSuccess(Boolean result) {
+                      // Window.Location.reload();
+                      if (result) {
+                        decPanel.setVisible(false);
+                        hintMsg.setHTML("<p><b><font color=\"blue\">Register Done, But It's NOT FINISHED!!! <br/> Until you get a confirm mail from this site.</font></b></p>");
+                      } else {
+                        decPanel.setVisible(true);
+                        hintMsg.setHTML("<p><b><font color=\"red\">The email is duplicated. check again please.</font></b></p>");
+                      }
+                    }
+
+                    @Override
+                    public void onFailure(Throwable caught) {
+                    }
+                  });
+                } else {
+                  hintMsg.setHTML("<p><font color=\"red\">Input with errors.</font></p>");
+                }
+              }
+            });
           }
         } else {
           loadLogin();
@@ -325,6 +349,7 @@ public class GFriends implements EntryPoint {
     @Override
     public void onSuccess(List<GreetingItem> result) {
 
+      newMsgNum = 0;
       this.flexTable.removeAllRows();
 
       GreetingItem greetingItem = null;
@@ -368,6 +393,7 @@ public class GFriends implements EntryPoint {
 
               if (isLocalStorageSupported() && greetingItem.getTimestamp() > lastTimestamp) {
                 sb.append("<img src='/images/new_icon.jpg' width='33px' Height='19px'/><br/>");
+                newMsgNum++;
               }
               sb.append("[" + DateTimeFormat.getMediumDateTimeFormat().format(greetingItem.getDataTime()) + "]&nbsp;&nbsp;&nbsp;").append("<b>")
                   .append(currentContact.getNickName()).append(" wrote: </b>").append("<br/>").append("<blockquote><pre>")
@@ -380,6 +406,28 @@ public class GFriends implements EntryPoint {
           }
         }
       }
+
+      // // update title
+      // if (newMsgNum > 0) {
+      //
+      // if (scrollTitleTimmer == null) {
+      // scrollTitleTimmer = new Timer() {
+      // @Override
+      // public void run() {
+      // String msg = String.valueOf(newMsgNum) + "通新メッセージが届きました！";
+      // scrolleTitle(msg, " " + msg);
+      // }
+      // };
+      // }
+      //
+      // scrollTitleTimmer.scheduleRepeating(SCROLL_TITLE_INTERVAL);
+      //
+      // } else {
+      // if (scrollTitleTimmer != null) {
+      // scrollTitleTimmer.cancel();
+      // }
+      // }
+
     }
 
     public void setFlexTable(FlexTable flexTable) {
@@ -497,17 +545,17 @@ public class GFriends implements EntryPoint {
   // ------------------- native code ----------------------------//
   public static native boolean isLocalStorageSupported() /*-{
     if ($wnd.localStorage) {
-      return true;
+    return true;
     }else{
-      return false;
+    return false;
     }
   }-*/;
 
   public static native String getLastGreetingTime() /*-{
     if($wnd.localStorage.lastGreetingTime){
-      return $wnd.localStorage.lastGreetingTime;
+    return $wnd.localStorage.lastGreetingTime;
     }else{
-      return "0";
+    return "0";
     }
   }-*/;
 
@@ -516,14 +564,20 @@ public class GFriends implements EntryPoint {
   }-*/;
 
   public static native String getAutoLastGreetingTime() /*-{
-    if($wnd.localStorage.autoLastGreetingTime){
-      return $wnd.localStorage.autoLastGreetingTime;
-    }else{
-      return "0";
-    }
-  }-*/;
+                                                        if($wnd.localStorage.autoLastGreetingTime){
+                                                        return $wnd.localStorage.autoLastGreetingTime;
+                                                        }else{
+                                                        return "0";
+                                                        }
+                                                        }-*/;
 
   public static native void setAutoLastGreetingTime(String autoLastGreetingTime) /*-{
-    $wnd.localStorage.autoLastGreetingTime = autoLastGreetingTime;
-  }-*/;
+                                                                                 $wnd.localStorage.autoLastGreetingTime = autoLastGreetingTime;
+                                                                                 }-*/;
+
+  public static native void scrolleTitle(String msg, String msgud) /*-{
+                                                                   if (msgud.length < msg.length) msgud += " - " + msg;
+                                                                   msgud = msgud.substring(1, msgud.length);
+                                                                   document.title = msgud.substring(0, msg.length);
+                                                                   }-*/;
 }
