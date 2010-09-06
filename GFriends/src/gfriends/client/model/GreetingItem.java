@@ -4,10 +4,10 @@ import java.io.Serializable;
 import java.util.Date;
 
 public class GreetingItem implements Serializable {
-	
-	private static final long serialVersionUID = 5272747091708346356L;
-	
-	private String email;
+  
+  private static final long serialVersionUID = 7503692890727680691L;
+
+  private String email;
 	
 	private String nickName;
 	
@@ -16,6 +16,8 @@ public class GreetingItem implements Serializable {
 	private Date dataTime;
 	
 	private long timestamp;
+	
+	private boolean encrypt;
 
 	public void setNickName(String nickName) {
 		this.nickName = nickName;
@@ -32,15 +34,7 @@ public class GreetingItem implements Serializable {
 	public String getContent() {
 		return content;
 	}
-
-//	public void setDataTime(String dataTime) {
-//		this.dataTime = dataTime;
-//	}
-//
-//	public String getDataTime() {
-//		return dataTime;
-//	}
-
+	
 	public void setTimestamp(long timestamp) {
 		this.timestamp = timestamp;
 	}
@@ -63,6 +57,14 @@ public class GreetingItem implements Serializable {
 
   public Date getDataTime() {
     return dataTime;
+  }
+
+  public void setEncrypt(boolean encrypt) {
+    this.encrypt = encrypt;
+  }
+
+  public boolean isEncrypt() {
+    return encrypt;
   }
 
 }
