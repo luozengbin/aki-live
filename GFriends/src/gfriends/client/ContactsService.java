@@ -10,6 +10,6 @@ import com.google.gwt.user.client.rpc.RemoteServiceRelativePath;
 @RemoteServiceRelativePath("contacts")
 public interface ContactsService extends RemoteService {
   public List<ContactItem> loadContacts();
-  public void register(String nickname, String email);
+  public boolean register(String nickname, String email);
   public void removeAllContact();
 }
