@@ -26,6 +26,11 @@
 		<servlet-class>gfriends.server.ContactsServiceImpl</servlet-class>
 	</servlet>
 
+	<servlet>
+		<servlet-name>encryptKeyService</servlet-name>
+		<servlet-class>gfriends.server.EncryptKeyServiceImpl</servlet-class>
+	</servlet>
+
 	<servlet-mapping>
 		<servlet-name>loginServlet</servlet-name>
 		<url-pattern>/gfriends/login</url-pattern>
@@ -44,6 +49,11 @@
 	<servlet-mapping>
 		<servlet-name>contactsService</servlet-name>
 		<url-pattern>/gfriends/contacts</url-pattern>
+	</servlet-mapping>
+
+	<servlet-mapping>
+		<servlet-name>encryptKeyService</servlet-name>
+		<url-pattern>/gfriends/encryptKey</url-pattern>
 	</servlet-mapping>
 
 	<!-- Default page to serve -->
