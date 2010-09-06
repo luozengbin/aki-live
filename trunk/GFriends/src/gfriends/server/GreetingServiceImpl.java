@@ -32,7 +32,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
       User user = userService.getCurrentUser();
 
       Date date = new Date();
-      Greeting greeting = new Greeting(user, content, date);
+      Greeting greeting = new Greeting(user, content, date, true);
 
       try {
         pm = PMF.get().getPersistenceManager();
@@ -73,6 +73,7 @@ public class GreetingServiceImpl extends RemoteServiceServlet implements Greetin
         greetingItem.setContent(currentGreeting.getContent());
         greetingItem.setDataTime(currentGreeting.getDate());
         greetingItem.setTimestamp(currentGreeting.getDate().getTime());
+        greetingItem.setEncrypt(currentGreeting.getEncrypt() == null ? false : currentGreeting.getEncrypt().booleanValue());
         result.add(greetingItem);
       }
 

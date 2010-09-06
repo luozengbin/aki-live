@@ -56,7 +56,11 @@ public class GFriends implements EntryPoint {
 
   private ContactsServiceAsync contactsService = GWT.create(ContactsService.class);
 
+  private EncryptKeyServiceAsync encryptKeyService = GWT.create(EncryptKeyService.class);
+
   private MessageAsyncCallback autoMessageAsyncCallback = null;
+
+  private String encryptKey = null;
 
   private Timer scrollTitleTimmer = null;
 
@@ -120,14 +124,15 @@ public class GFriends implements EntryPoint {
 
                 if (nicknameTx.getValue() != null && nicknameTx.getValue().trim().length() > 0 && emailTx.getValue() != null
                     && emailTx.getValue().trim().length() > 0) {
-                  
+
                   contactsService.register(nicknameTx.getValue(), emailTx.getValue(), new AsyncCallback<Boolean>() {
                     @Override
                     public void onSuccess(Boolean result) {
                       // Window.Location.reload();
                       if (result) {
                         decPanel.setVisible(false);
-                        hintMsg.setHTML("<p><b><font color=\"blue\">Register Done, But It's NOT FINISHED!!! <br/> Until you get a confirm mail from this site.</font></b></p>");
+                        hintMsg
+                            .setHTML("<p><b><font color=\"blue\">Register Done, But It's NOT FINISHED!!! <br/> Until you get a confirm mail from this site.</font></b></p>");
                       } else {
                         decPanel.setVisible(true);
                         hintMsg.setHTML("<p><b><font color=\"red\">The email is duplicated. check again please.</font></b></p>");
@@ -293,7 +298,7 @@ public class GFriends implements EntryPoint {
         if (area.getText() == null || area.getText().trim().length() == 0) {
           Window.alert("no message need to send!!!");
         } else {
-          greetingService.pushMessage(area.getText(), messageAsyncCallback);
+          greetingService.pushMessage(encrypt(encryptKey, area.getText()), messageAsyncCallback);
           area.setText("");
         }
       }
@@ -347,12 +352,10 @@ public class GFriends implements EntryPoint {
     }
 
     @Override
-    public void onSuccess(List<GreetingItem> result) {
+    public void onSuccess(final List<GreetingItem> result) {
 
       newMsgNum = 0;
       this.flexTable.removeAllRows();
-
-      GreetingItem greetingItem = null;
 
       if (result.size() == 0) {
         this.flexTable.setHTML(0, 0, "<b><font color=\"red\">no messages!!!</font></b>");
@@ -361,52 +364,29 @@ public class GFriends implements EntryPoint {
 
         if (result.size() > 0) {
 
-          long lastTimestamp = 0;
-          if (isLocalStorageSupported()) {
-            if (isAutoRefresh()) {
-              lastTimestamp = Long.valueOf(getAutoLastGreetingTime());
-            } else {
-              lastTimestamp = Long.valueOf(getLastGreetingTime());
-              setAutoLastGreetingTime(String.valueOf(lastTimestamp));
-            }
-            setLastGreetingTime(Long.toString(result.get(0).getTimestamp()));
+          if (encryptKey == null) {
+
+            encryptKeyService.getKey(new AsyncCallback<String>() {
+
+              @Override
+              public void onFailure(Throwable caught) {
+              }
+
+              @Override
+              public void onSuccess(String key) {
+                encryptKey = key;
+                updateFlexTable(result);
+              }
+            });
+
+          } else {
+            updateFlexTable(result);
           }
 
-          FlexCellFormatter cellFormatter = flexTable.getFlexCellFormatter();
-
-          int skipCount = 0;
-          for (int i = 0; i < result.size(); i++) {
-
-            greetingItem = result.get(i);
-
-            ContactItem currentContact = null;
-            for (ContactItem contactItem : contactItemList) {
-              if (contactItem.getEmail().equals(greetingItem.getEmail())) {
-                currentContact = contactItem;
-                break;
-              }
-            }
-
-            if (currentContact.isEnable()) {
-              cellFormatter.addStyleName(i - skipCount, 0, currentContact.getStyle() + "_bkcolor");
-              StringBuilder sb = new StringBuilder();
-
-              if (isLocalStorageSupported() && greetingItem.getTimestamp() > lastTimestamp) {
-                sb.append("<img src='/images/new_icon.jpg' width='33px' Height='19px'/><br/>");
-                newMsgNum++;
-              }
-              sb.append("[" + DateTimeFormat.getMediumDateTimeFormat().format(greetingItem.getDataTime()) + "]&nbsp;&nbsp;&nbsp;").append("<b>")
-                  .append(currentContact.getNickName()).append(" wrote: </b>").append("<br/>").append("<blockquote><pre>")
-                  .append(greetingItem.getContent()).append("</pre></blockquote>");
-              this.flexTable.setHTML(i - skipCount, 0, sb.toString());
-
-            } else {
-              skipCount++;
-            }
-          }
         }
       }
 
+      // TODO render scroll title
       // // update title
       // if (newMsgNum > 0) {
       //
@@ -427,6 +407,57 @@ public class GFriends implements EntryPoint {
       // scrollTitleTimmer.cancel();
       // }
       // }
+
+    }
+
+    private void updateFlexTable(List<GreetingItem> result) {
+
+      long lastTimestamp = 0;
+      if (isLocalStorageSupported()) {
+        if (isAutoRefresh()) {
+          lastTimestamp = Long.valueOf(getAutoLastGreetingTime());
+        } else {
+          lastTimestamp = Long.valueOf(getLastGreetingTime());
+          setAutoLastGreetingTime(String.valueOf(lastTimestamp));
+        }
+        setLastGreetingTime(Long.toString(result.get(0).getTimestamp()));
+      }
+
+      FlexCellFormatter cellFormatter = flexTable.getFlexCellFormatter();
+
+      int skipCount = 0;
+      GreetingItem greetingItem = null;
+      for (int i = 0; i < result.size(); i++) {
+
+        greetingItem = result.get(i);
+
+        ContactItem currentContact = null;
+        for (ContactItem contactItem : contactItemList) {
+          if (contactItem.getEmail().equals(greetingItem.getEmail())) {
+            currentContact = contactItem;
+            break;
+          }
+        }
+
+        if (currentContact.isEnable()) {
+          cellFormatter.addStyleName(i - skipCount, 0, currentContact.getStyle() + "_bkcolor");
+          StringBuilder sb = new StringBuilder();
+
+          if (isLocalStorageSupported() && greetingItem.getTimestamp() > lastTimestamp) {
+            sb.append("<img src='/images/new_icon.jpg' width='33px' Height='19px'/><br/>");
+            newMsgNum++;
+          }
+          sb.append("[" + DateTimeFormat.getMediumDateTimeFormat().format(greetingItem.getDataTime()) + "]&nbsp;&nbsp;&nbsp;").append("<b>")
+              .append(currentContact.getNickName()).append(" wrote: </b>").append("<br/>").append("<blockquote><pre>")
+              .append(greetingItem.isEncrypt() ? decrypt(encryptKey, greetingItem.getContent()) : greetingItem.getContent())
+              .append("</pre></blockquote>");
+
+          this.flexTable.setHTML(i - skipCount, 0, sb.toString());
+
+        } else {
+          skipCount++;
+        }
+      }
 
     }
 
@@ -564,20 +595,34 @@ public class GFriends implements EntryPoint {
   }-*/;
 
   public static native String getAutoLastGreetingTime() /*-{
-                                                        if($wnd.localStorage.autoLastGreetingTime){
-                                                        return $wnd.localStorage.autoLastGreetingTime;
-                                                        }else{
-                                                        return "0";
-                                                        }
-                                                        }-*/;
+    if($wnd.localStorage.autoLastGreetingTime){
+      return $wnd.localStorage.autoLastGreetingTime;
+    }else{
+      return "0";
+    }
+  }-*/;
 
   public static native void setAutoLastGreetingTime(String autoLastGreetingTime) /*-{
-                                                                                 $wnd.localStorage.autoLastGreetingTime = autoLastGreetingTime;
-                                                                                 }-*/;
+    $wnd.localStorage.autoLastGreetingTime = autoLastGreetingTime;
+  }-*/;
 
   public static native void scrolleTitle(String msg, String msgud) /*-{
-                                                                   if (msgud.length < msg.length) msgud += " - " + msg;
-                                                                   msgud = msgud.substring(1, msgud.length);
-                                                                   document.title = msgud.substring(0, msg.length);
-                                                                   }-*/;
+    if (msgud.length < msg.length) msgud += " - " + msg;
+    msgud = msgud.substring(1, msgud.length);
+    document.title = msgud.substring(0, msg.length);
+  }-*/;
+
+  public static native String encrypt(String key, String input) /*-{
+    var pass = $wnd.utf16to8(key);
+    var out = $wnd.des_cbc_encrypt(pass, $wnd.utf16to8(input));
+    out = $wnd.base64encode(out);
+    return out;
+  }-*/;
+
+  public static native String decrypt(String key, String input) /*-{
+    var pass = $wnd.utf16to8(key);
+    input = $wnd.base64decode(input);
+    var out = $wnd.des_cbc_decrypt(pass, input);
+    return $wnd.utf8to16(out);
+  }-*/;
 }
