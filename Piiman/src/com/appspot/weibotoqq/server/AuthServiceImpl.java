@@ -3,8 +3,11 @@ package com.appspot.weibotoqq.server;
 import java.util.logging.Logger;
 
 import com.appspot.weibotoqq.Constants;
-import com.appspot.weibotoqq.auth.QQAuth;
+import com.appspot.weibotoqq.api.QQWeiboApi;
 import com.appspot.weibotoqq.client.AuthService;
+import com.appspot.weibotoqq.dao.AuthTokenDao;
+import com.appspot.weibotoqq.dao.ConfigItemDao;
+import com.appspot.weibotoqq.model.AuthToken;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
@@ -15,32 +18,46 @@ public class AuthServiceImpl extends RemoteServiceServlet implements AuthService
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + AuthServiceImpl.class.getName());
 
+  private AuthTokenDao authTokenDao = new AuthTokenDao();
+
+  private ConfigItemDao configItemDao = new ConfigItemDao();
+
   public String requestToken() throws IllegalArgumentException {
     try {
 
-      QQAuth qqAuth = new QQAuth();
+      QQWeiboApi weiboApi = new QQWeiboApi();
 
-      return qqAuth.requestToken();
+      AuthToken authToken = weiboApi.requestToken();
+
+      this.authTokenDao.save(authToken);
+
+      return configItemDao.getValue("qq.authorize.url") + "?oauth_token=" + authToken.getToken();
 
     } catch (Exception e) {
-      
+
       e.printStackTrace();
-      
+
+      log.severe(e.getMessage());
+
       throw new IllegalArgumentException("予期しないエラーが起きました！", e);
     }
   }
-  
+
   public String exchangeToken(String oauth_token, String oauth_verifier) throws IllegalArgumentException {
     try {
 
-      QQAuth qqAuth = new QQAuth();
+      QQWeiboApi weiboApi = new QQWeiboApi();
 
-      return qqAuth.exchangeToken(oauth_token, oauth_verifier);
+      AuthToken authToken = this.authTokenDao.getByToken(oauth_token);
+
+      return weiboApi.exchangeToken(authToken, oauth_verifier).getUserName() + "さんから認可を得ました！";
 
     } catch (Exception e) {
-      
+
       e.printStackTrace();
-      
+
+      log.severe(e.getMessage());
+
       throw new IllegalArgumentException("予期しないエラーが起きました！", e);
     }
   }
