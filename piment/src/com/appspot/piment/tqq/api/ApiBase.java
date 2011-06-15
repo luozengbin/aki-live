@@ -1,0 +1,132 @@
+package com.appspot.piment.tqq.api;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.UUID;
+import java.util.logging.Logger;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
+
+import com.appspot.piment.Constants;
+import com.appspot.piment.dao.ConfigItemDao;
+import com.appspot.piment.model.AuthToken;
+
+public class ApiBase {
+
+  private static final Logger log = Logger.getLogger(Constants.FQCN + ApiBase.class.getName());
+
+  protected BaseParams baseParams = null;
+
+  protected AuthToken authToken = null;
+
+  protected Map<String, String> configMap = null;
+
+  public ApiBase() {
+    super();
+    this.init();
+  }
+
+  public ApiBase(AuthToken authToken) {
+    super();
+    this.init();
+    this.authToken = authToken;
+  }
+
+  private void init() {
+
+    ConfigItemDao configItemDao = new ConfigItemDao();
+
+    this.configMap = configItemDao.getValues();
+
+    this.baseParams = new BaseParams();
+
+    this.baseParams.setAuthConsumerKey(configMap.get("qq.oauth.consumer.key"));
+
+    this.baseParams.setAuthConsumerSecret(configMap.get("qq.oauth.consumer.secret"));
+
+    this.baseParams.setAuthSignatureMethod(configMap.get("qq.oauth.signature.method"));
+
+    this.baseParams.setAuthVersion(configMap.get("qq.oauth.version"));
+  }
+
+  public String getSignedURL(String httpMethod, String targetURL, Map<String, String> params) throws Exception {
+    String urlParams = getURLParams(params);
+    // 签名
+    String oauth_signature = signature(httpMethod, targetURL, urlParams.toString(), baseParams.getAuthConsumerSecret(), authToken != null ? authToken.getTokenSecret() : null);
+    log.info("oauth_signature = " + oauth_signature);
+    String signedURL = targetURL + "?" + urlParams.toString() + "&oauth_signature=" + URLEncoder.encode(oauth_signature, Constants.HTTP_ENCODEING);
+    return signedURL;
+  }
+
+  public String getSignedPayload(String httpMethod, String targetURL, Map<String, String> params) throws Exception {
+    
+    String urlParams = getURLParams(params);
+    // 签名
+    String oauth_signature = signature(httpMethod, targetURL, urlParams.toString(), baseParams.getAuthConsumerSecret(), authToken != null ? authToken.getTokenSecret() : null);
+    log.info("oauth_signature = " + oauth_signature);
+    String payload = urlParams.toString() + "&oauth_signature=" + URLEncoder.encode(oauth_signature, Constants.HTTP_ENCODEING);
+    return payload;
+  }
+  
+  public String getURLParams(Map<String, String> params) throws UnsupportedEncodingException {
+    StringBuilder urlParams = new StringBuilder();
+
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      urlParams.append(entry.getKey()).append("=").append(URLEncoder.encode(entry.getValue(), Constants.HTTP_ENCODEING)).append("&");
+      log.info(entry.getKey() + " = " + entry.getValue());
+    }
+    urlParams = urlParams.delete(urlParams.length() - 1, urlParams.length());
+    return urlParams.toString();
+  }
+
+  private String signature(String method, String url, String urlParams, String consumerSecret, String tokenSecret) throws Exception {
+
+    // 签名对象
+    String signatureData = method + "&" + URLEncoder.encode(url, Constants.HTTP_ENCODEING) + "&" + URLEncoder.encode(urlParams, Constants.HTTP_ENCODEING);
+
+    String signatureKey = URLEncoder.encode(consumerSecret, Constants.HTTP_ENCODEING) + "&" + (tokenSecret != null ? URLEncoder.encode(tokenSecret, Constants.HTTP_ENCODEING) : "");
+
+    log.info("signatureKey = " + signatureKey);
+    log.info("signatureData = " + signatureData);
+
+    // 通过HmacSHA1哈希函数签名
+    String hashAlgorithm = Constants.HMACSHA1_ALGORITHM;
+    String byteEncode = Constants.ENCODEING_US_ASCII;
+    Mac hashMac = Mac.getInstance(hashAlgorithm);
+    SecretKeySpec spec = new SecretKeySpec(signatureKey.getBytes(byteEncode), hashAlgorithm);
+    hashMac.init(spec);
+    byte[] hashByte = hashMac.doFinal((signatureData).getBytes(byteEncode));
+
+    // 签名值
+    return new String(Base64.encodeBase64(hashByte));
+  }
+
+  public String getOAuthNonce() {
+
+    // 单次值，随机生成的32位字符串，防止重放攻击（每次请求必须不同）
+    return UUID.randomUUID().toString().substring(0, 32);
+  }
+
+  public String getOAuthTimestamp() {
+    // 时间戳, 其值是距1970 00:00:00 GMT的秒数，必须是大于0的整数
+    return String.valueOf(System.currentTimeMillis()).substring(0, 10);
+  }
+  
+  public Map<String, String> getFixedParams(){
+    
+    Map<String, String> fixedParams = new LinkedHashMap<String, String>();
+    fixedParams.put("oauth_consumer_key", baseParams.getAuthConsumerKey());
+    fixedParams.put("oauth_nonce", getOAuthNonce());
+    fixedParams.put("oauth_signature_method", baseParams.getAuthSignatureMethod());
+    fixedParams.put("oauth_timestamp", getOAuthTimestamp());
+    fixedParams.put("oauth_token", authToken.getToken());
+    fixedParams.put("oauth_version", baseParams.getAuthVersion());
+    
+    return fixedParams;
+  }
+}
