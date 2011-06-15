@@ -1,0 +1,24 @@
+package com.appspot.piment;
+
+public interface Constants {
+
+  String FQCN = "piment.";
+
+  String TQQ = "tqq";
+
+  String SINA_WEIBO = "sina";
+
+  String HTTP_GET = "GET";
+
+  String HTTP_POST = "POST";
+
+  String HMACSHA1_ALGORITHM = "HmacSHA1";
+
+  String ENCODEING_US_ASCII = "US-ASCII";
+
+  // HTTP信息处理中使用的编码
+  String HTTP_ENCODEING = "utf-8";
+  
+  String LOOPBACK_IP = "127.0.0.1";
+
+}
