@@ -11,6 +11,10 @@
 		<servlet-name>tqqWeiboServlet</servlet-name>
 		<servlet-class>com.appspot.piment.rpc.TQQWeiboServiceImpl</servlet-class>
 	</servlet>
+	<servlet>
+		<servlet-name>job001</servlet-name>
+		<servlet-class>com.appspot.piment.jobs.Job001</servlet-class>
+	</servlet>
 	<servlet-mapping>
 		<servlet-name>authServlet</servlet-name>
 		<url-pattern>/piment/auth</url-pattern>
@@ -18,6 +22,10 @@
 	<servlet-mapping>
 		<servlet-name>tqqWeiboServlet</servlet-name>
 		<url-pattern>/piment/tqq/weibo</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>job001</servlet-name>
+		<url-pattern>/corns/job001</url-pattern>
 	</servlet-mapping>
 	<!-- Default page to serve -->
 	<welcome-file-list>
