@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<cronentries>
+	<cron>
+		<url>/corns/job001</url>
+		<description>cronttwit the run every 2 minutes</description>
+		<schedule>every 12 hours</schedule>
+		<timezone>Asia/Tokyo</timezone>
+	</cron>
+</cronentries>
