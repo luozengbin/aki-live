@@ -4,8 +4,8 @@
 <web-app>
 	<!-- Servlets -->
 	<servlet>
-		<servlet-name>authServlet</servlet-name>
-		<servlet-class>com.appspot.piment.rpc.AuthServiceImpl</servlet-class>
+		<servlet-name>tqqAuthServlet</servlet-name>
+		<servlet-class>com.appspot.piment.rpc.TQQAuthServiceImpl</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>tqqWeiboServlet</servlet-name>
@@ -16,8 +16,8 @@
 		<servlet-class>com.appspot.piment.jobs.Job001</servlet-class>
 	</servlet>
 	<servlet-mapping>
-		<servlet-name>authServlet</servlet-name>
-		<url-pattern>/piment/auth</url-pattern>
+		<servlet-name>tqqAuthServlet</servlet-name>
+		<url-pattern>/piment/tqq/auth</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>tqqWeiboServlet</servlet-name>
