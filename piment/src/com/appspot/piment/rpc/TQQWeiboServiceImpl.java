@@ -3,7 +3,7 @@ package com.appspot.piment.rpc;
 import com.appspot.piment.client.rpc.TQQWeiboService;
 import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.model.AuthToken;
-import com.appspot.piment.tqq.api.WeiboApi;
+import com.appspot.piment.api.tqq.WeiboApi;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 @SuppressWarnings("serial")

@@ -1,7 +1,7 @@
 package com.appspot.piment.client;
 
-import com.appspot.piment.client.rpc.AuthService;
-import com.appspot.piment.client.rpc.AuthServiceAsync;
+import com.appspot.piment.client.rpc.TQQAuthService;
+import com.appspot.piment.client.rpc.TQQAuthServiceAsync;
 import com.appspot.piment.client.rpc.TQQWeiboService;
 import com.appspot.piment.client.rpc.TQQWeiboServiceAsync;
 import com.appspot.piment.shared.StringUtils;
@@ -22,7 +22,7 @@ public class Piment implements EntryPoint {
   /**
    * Create a remote service proxy to talk to the server-side Auth service.
    */
-  private final AuthServiceAsync authService = GWT.create(AuthService.class);
+  private final TQQAuthServiceAsync qqAuthService = GWT.create(TQQAuthService.class);
 
   private final TQQWeiboServiceAsync qqWeiboService = GWT.create(TQQWeiboService.class);
 
@@ -41,7 +41,7 @@ public class Piment implements EntryPoint {
 
       public void onClick(ClickEvent event) {
 
-        authService.requestToken(new AsyncCallback<String>() {
+        qqAuthService.requestToken(new AsyncCallback<String>() {
 
           @Override
           public void onSuccess(String requestTokenUrl) {
@@ -120,7 +120,7 @@ public class Piment implements EntryPoint {
 
     if (StringUtils.isNotBlank(oauth_token) && StringUtils.isNotBlank(oauth_verifier)) {
 
-      authService.exchangeToken(oauth_token, oauth_verifier, new AsyncCallback<String>() {
+      qqAuthService.exchangeToken(oauth_token, oauth_verifier, new AsyncCallback<String>() {
 
         @Override
         public void onSuccess(String result) {
