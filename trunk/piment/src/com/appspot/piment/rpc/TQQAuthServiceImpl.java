@@ -3,20 +3,20 @@ package com.appspot.piment.rpc;
 import java.util.logging.Logger;
 
 import com.appspot.piment.Constants;
-import com.appspot.piment.client.rpc.AuthService;
+import com.appspot.piment.client.rpc.TQQAuthService;
 import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.dao.ConfigItemDao;
 import com.appspot.piment.model.AuthToken;
-import com.appspot.piment.tqq.api.OAuthApi;
+import com.appspot.piment.api.tqq.OAuthApi;
 import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 
 /**
  * The server side implementation of the RPC service.
  */
 @SuppressWarnings("serial")
-public class AuthServiceImpl extends RemoteServiceServlet implements AuthService {
+public class TQQAuthServiceImpl extends RemoteServiceServlet implements TQQAuthService {
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + AuthServiceImpl.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + TQQAuthServiceImpl.class.getName());
 
   private AuthTokenDao authTokenDao = new AuthTokenDao();
 

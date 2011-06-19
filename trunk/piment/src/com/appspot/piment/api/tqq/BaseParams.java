@@ -1,4 +1,4 @@
-package com.appspot.piment.tqq.api;
+package com.appspot.piment.api.tqq;
 
 public class BaseParams implements java.io.Serializable {
 

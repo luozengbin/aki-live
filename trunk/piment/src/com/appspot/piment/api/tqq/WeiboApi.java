@@ -1,4 +1,4 @@
-package com.appspot.piment.tqq.api;
+package com.appspot.piment.api.tqq;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
