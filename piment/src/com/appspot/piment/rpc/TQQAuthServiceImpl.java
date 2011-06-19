@@ -13,8 +13,9 @@ import com.google.gwt.user.server.rpc.RemoteServiceServlet;
 /**
  * The server side implementation of the RPC service.
  */
-@SuppressWarnings("serial")
 public class TQQAuthServiceImpl extends RemoteServiceServlet implements TQQAuthService {
+  
+  private static final long serialVersionUID = 1596146959816008191L;
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + TQQAuthServiceImpl.class.getName());
 
