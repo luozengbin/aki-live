@@ -12,8 +12,8 @@
 		<servlet-class>com.appspot.piment.rpc.TQQWeiboServiceImpl</servlet-class>
 	</servlet>
 	<servlet>
-		<servlet-name>job001</servlet-name>
-		<servlet-class>com.appspot.piment.jobs.Job001</servlet-class>
+		<servlet-name>job1001</servlet-name>
+		<servlet-class>com.appspot.piment.jobs.Job1001</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>sinaAuthServlet</servlet-name>
@@ -35,8 +35,8 @@
 	</servlet-mapping>
 
 	<servlet-mapping>
-		<servlet-name>job001</servlet-name>
-		<url-pattern>/corns/job001</url-pattern>
+		<servlet-name>job1001</servlet-name>
+		<url-pattern>/corns/job1001</url-pattern>
 	</servlet-mapping>
 	<!-- Default page to serve -->
 	<welcome-file-list>
