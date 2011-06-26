@@ -20,9 +20,6 @@ public class ConfigItemDao {
 
   public ConfigItemDao() {
     super();
-    
-    pm = PMF.get().getPersistenceManager();
-    
   }
 
   public String getValue(String key) {
