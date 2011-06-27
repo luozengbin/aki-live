@@ -24,6 +24,8 @@ public class ApiBase {
 	super();
 	this.init();
 	this.authToken = authToken;
+	this.weibo = new Weibo();
+	this.weibo.setOAuthAccessToken(this.authToken.getToken(), this.authToken.getTokenSecret());
   }
 
   private void init() {
