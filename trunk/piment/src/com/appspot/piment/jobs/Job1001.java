@@ -28,8 +28,6 @@ public class Job1001 extends HttpServlet {
 
 	log.info("-- job1001 start --");
 
-	(new InitDataDao()).initUserMap();
-
 	JobStatusDao jobStatusDao = new JobStatusDao();
 
 	JobStatus jobStatus = jobStatusDao.getJobStatus(Job1001.class.getName());
