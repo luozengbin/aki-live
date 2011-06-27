@@ -16,10 +16,13 @@ public class InitDataDao {
   public void initUserMap() {
     try {
       pm = PMF.get().getPersistenceManager();
-//      UserMap userMap = new UserMap("", "");
-//      userMap.setCreateTime(DateUtils.getSysDate());
-//      userMap.setCreator(InitDataDao.class.getName());
-//      pm.makePersistent(userMap);
+      UserMap userMap = new UserMap("", "");
+      userMap.setCreateTime(DateUtils.getSysDate());
+      userMap.setCreator(InitDataDao.class.getName());
+      userMap.setUpdateTime(DateUtils.getSysDate());
+      userMap.setUpdator(InitDataDao.class.getName());
+      
+      pm.makePersistent(userMap);
 
     } finally {
       if (pm != null) {
