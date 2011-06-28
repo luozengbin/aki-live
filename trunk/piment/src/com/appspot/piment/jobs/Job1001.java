@@ -11,7 +11,6 @@ import weibo4j.Status;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.dao.AuthTokenDao;
-import com.appspot.piment.dao.InitDataDao;
 import com.appspot.piment.dao.JobStatusDao;
 import com.appspot.piment.dao.UserMapDao;
 import com.appspot.piment.model.AuthToken;
@@ -28,30 +27,37 @@ public class Job1001 extends HttpServlet {
 
 	log.info("-- job1001 start --");
 
-	JobStatusDao jobStatusDao = new JobStatusDao();
+	try {
+	  
+	  JobStatusDao jobStatusDao = new JobStatusDao();
 
-	JobStatus jobStatus = jobStatusDao.getJobStatus(Job1001.class.getName());
+	  JobStatus jobStatus = jobStatusDao.getJobStatus(Job1001.class.getName());
 
-	log.info(jobStatus.toString());
+	  log.info(jobStatus.toString());
 
-	com.appspot.piment.api.sina.WeiboApi sinaWeiboApi = null;
-	AuthTokenDao authTokenDao = new AuthTokenDao();
+	  com.appspot.piment.api.sina.WeiboApi sinaWeiboApi = null;
+	  AuthTokenDao authTokenDao = new AuthTokenDao();
 
-	// ユーザ毎に同期化処理を行う
-	for (UserMap userMap : (new UserMapDao()).getAllUserMaps()) {
-	  // sinaのユーザIDを元にAccessTokenを取り出す
-	  AuthToken sinaAuthToken = authTokenDao.getByUserId(userMap.getSinaUserId());
+	  // ユーザ毎に同期化処理を行う
+	  for (UserMap userMap : (new UserMapDao()).getAllUserMaps()) {
+		// sinaのユーザIDを元にAccessTokenを取り出す
 
-	  // AccessTokenでAPIオブジェクトを初期化する
-	  sinaWeiboApi = new com.appspot.piment.api.sina.WeiboApi(sinaAuthToken);
+		AuthToken sinaAuthToken = authTokenDao.getByUserId(userMap.getSinaUserId());
 
-	  List<Status> userMessages = sinaWeiboApi.getUserTimeline(userMap);
-	  for (Status status : userMessages) {
-		System.out.println(status.getText());
+		// AccessTokenでAPIオブジェクトを初期化する
+		sinaWeiboApi = new com.appspot.piment.api.sina.WeiboApi(sinaAuthToken);
+
+		List<Status> userMessages = sinaWeiboApi.getUserTimeline(userMap);
+		for (Status status : userMessages) {
+		  log.info("--->" + status.getText());
+		}
 	  }
-	}
 
-	log.info("-- job1001 end --");
+	  log.info("-- job1001 end --");
+
+	} catch (Exception e) {
+	  throw new RuntimeException(e);
+	}
 
   }
 }

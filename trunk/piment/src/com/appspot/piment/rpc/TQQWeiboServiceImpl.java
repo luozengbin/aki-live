@@ -12,7 +12,7 @@ public class TQQWeiboServiceImpl extends RemoteServiceServlet implements TQQWeib
   @Override
   public void sendMessage(String msg) {
     AuthTokenDao authTokenDao = new AuthTokenDao();
-    AuthToken authToken = authTokenDao.getByToken("bfe2382e72eb4614890de3f7ae4a19f3");
+    AuthToken authToken = authTokenDao.getByToken("");//TODO ADD Token
     WeiboApi weiboApi = new WeiboApi(authToken);
     try {
       weiboApi.sendMessage(msg, getThreadLocalRequest().getRemoteAddr());
@@ -24,7 +24,7 @@ public class TQQWeiboServiceImpl extends RemoteServiceServlet implements TQQWeib
   @Override
   public String fetchMessage(String startTime) {
     AuthTokenDao authTokenDao = new AuthTokenDao();
-    AuthToken authToken = authTokenDao.getByToken("bfe2382e72eb4614890de3f7ae4a19f3");
+    AuthToken authToken = authTokenDao.getByToken("");//TODO ADD Token
     WeiboApi weiboApi = new WeiboApi(authToken);
     try {
       return weiboApi.fetchMessage(startTime);
