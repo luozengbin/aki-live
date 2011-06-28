@@ -25,8 +25,6 @@ public class UserMapDao {
 	  List<UserMap> userMapList = (List<UserMap>) pm.newQuery(UserMap.class).execute();
 
 	  for (UserMap userMap : userMapList) {
-
-		System.out.println(userMap.getSinaUserId());
 		result.add(userMap);
 	  }
 
