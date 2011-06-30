@@ -4,6 +4,8 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import net.arnx.jsonic.JSON;
+
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.shared.StringUtils;
@@ -14,52 +16,60 @@ public class WeiboApi extends ApiBase {
   private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
 
   public WeiboApi(AuthToken authToken) {
-    super(authToken);
+	super(authToken);
   }
 
-  public void sendMessage(String msg, String clientIp) throws Exception {
-
-    Map<String, String> params = new LinkedHashMap<String, String>();
-
-    params.put("clientip", StringUtils.isNotBlank(clientIp) ? clientIp : Constants.LOOPBACK_IP);
-    params.put("content", msg);
-    params.put("format", "json");
-    params.putAll(getFixedParams());
-
-    String url = configMap.get("qq.weibo.send.text.url");
-
-    String postPayload = getSignedPayload(Constants.HTTP_POST, url, params);
-
-    log.info("postPayload = " + postPayload);
-
-    String response = HttpClient.doPost(url, postPayload);
-
-    log.info("result --> \n" + response);
+  @Override
+  protected void subInit() {
 
   }
-  
-  
+
+  public Response sendMessage(String msg, String clientIp) throws Exception {
+
+	Map<String, String> params = new LinkedHashMap<String, String>();
+
+	params.put("clientip", StringUtils.isNotBlank(clientIp) ? clientIp : Constants.LOOPBACK_IP);
+	params.put("content", msg);
+	params.put("format", "json");
+	params.putAll(getFixedParams());
+
+	String url = configMap.get("qq.weibo.send.text.url");
+
+	String postPayload = getSignedPayload(Constants.HTTP_POST, url, params);
+
+	log.info("postPayload = " + postPayload);
+
+	String response = HttpClient.doPost(url, postPayload);
+
+	log.info("result --> \n" + response);
+
+	Response responseObj = JSON.decode(response, Response.class);
+
+	return responseObj;
+
+  }
+
   public String fetchMessage(String startTime) throws Exception {
-    
-    log.info("start fetchMessage --> startTime: "+ startTime);
-    
-    Map<String, String> params = new LinkedHashMap<String, String>();
 
-    params.put("format", "json");
-    params.put("lastid", "0");
-    params.putAll(getFixedParams());
-    params.put("pageflag", "0");
-    params.put("pagetime", "0");
-    params.put("reqnum", "20");
+	log.info("start fetchMessage --> startTime: " + startTime);
 
-    String url = configMap.get("qq.weibo.broadcast.timeline.url");
+	Map<String, String> params = new LinkedHashMap<String, String>();
 
-    String final_url = getSignedURL(Constants.HTTP_GET, url, params);
-    
-    log.info("final_url -->" + final_url);
-    
-    String response = HttpClient.doGet(final_url);
-    
-    return response;
+	params.put("format", "json");
+	params.put("lastid", "0");
+	params.putAll(getFixedParams());
+	params.put("pageflag", "0");
+	params.put("pagetime", "0");
+	params.put("reqnum", "20");
+
+	String url = configMap.get("qq.weibo.broadcast.timeline.url");
+
+	String final_url = getSignedURL(Constants.HTTP_GET, url, params);
+
+	log.info("final_url -->" + final_url);
+
+	String response = HttpClient.doGet(final_url);
+
+	return response;
   }
 }

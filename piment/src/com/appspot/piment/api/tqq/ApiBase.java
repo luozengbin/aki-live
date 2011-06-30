@@ -16,7 +16,7 @@ import com.appspot.piment.Constants;
 import com.appspot.piment.dao.ConfigItemDao;
 import com.appspot.piment.model.AuthToken;
 
-public class ApiBase {
+public abstract class ApiBase {
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + ApiBase.class.getName());
 
@@ -29,12 +29,14 @@ public class ApiBase {
   public ApiBase() {
     super();
     this.init();
+    this.subInit();
   }
 
   public ApiBase(AuthToken authToken) {
     super();
     this.init();
     this.authToken = authToken;
+    this.subInit();
   }
 
   private void init() {
@@ -53,6 +55,8 @@ public class ApiBase {
 
     this.baseParams.setAuthVersion(configMap.get("qq.oauth.version"));
   }
+  
+  protected abstract void subInit();
 
   public String getSignedURL(String httpMethod, String targetURL, Map<String, String> params) throws Exception {
     String urlParams = getURLParams(params);

@@ -18,15 +18,14 @@ public class OAuthApi extends ApiBase {
 
   public OAuthApi() {
 	super();
-	init();
   }
 
   public OAuthApi(AuthToken authToken) {
 	super(authToken);
-	init();
   }
 
-  private void init() {
+  @Override
+  protected void subInit() {
 	this.authCallbackUrl = configMap.get("sina.oauth.callback");
 	this.weibo = new Weibo();
   }
@@ -34,7 +33,6 @@ public class OAuthApi extends ApiBase {
   public AuthToken requestToken() throws Exception {
 
 	RequestToken requestToken;
-
 	requestToken = weibo.getOAuthRequestToken(this.authCallbackUrl);
 
 	log.info("Token:" + requestToken.getToken());

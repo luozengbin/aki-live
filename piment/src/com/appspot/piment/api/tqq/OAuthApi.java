@@ -23,18 +23,17 @@ public class OAuthApi extends ApiBase {
 
   public OAuthApi() {
     super();
-    init();
   }
 
   public OAuthApi(AuthToken authToken) {
     super(authToken);
-    init();
   }
-
-  private void init() {
-    this.requestTokenUrl = configMap.get("qq.request.token.url");
+  
+  @Override
+  protected void subInit() {
+	this.requestTokenUrl = configMap.get("qq.request.token.url");
     this.accessTokenUrl = configMap.get("qq.access.token.url");
-    this.authCallbackUrl = configMap.get("qq.oauth.callback");
+    this.authCallbackUrl = configMap.get("qq.oauth.callback");	
   }
 
   public AuthToken requestToken() throws Exception {
@@ -106,5 +105,4 @@ public class OAuthApi extends ApiBase {
     return authToken;
 
   }
-
 }

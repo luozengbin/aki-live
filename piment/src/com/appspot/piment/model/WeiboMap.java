@@ -16,7 +16,7 @@ public class WeiboMap {
   private Long id;
 
   @Persistent
-  private String userMapId;
+  private Long userMapId;
 
   @Persistent
   private String tqqWeiboId;
@@ -40,7 +40,7 @@ public class WeiboMap {
 	super();
   }
 
-  public WeiboMap(String userMap, String tqqWeiboId, String sinaWeiboId) {
+  public WeiboMap(Long userMapId, String tqqWeiboId, String sinaWeiboId) {
 	super();
 	this.userMapId = userMapId;
 	this.tqqWeiboId = tqqWeiboId;
@@ -55,11 +55,11 @@ public class WeiboMap {
 	this.id = id;
   }
 
-  public String getUserMapId() {
+  public Long getUserMapId() {
 	return userMapId;
   }
 
-  public void setUserMapId(String userMapId) {
+  public void setUserMapId(Long userMapId) {
 	this.userMapId = userMapId;
   }
 
