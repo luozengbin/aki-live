@@ -11,14 +11,17 @@
 		<servlet-name>tqqWeiboServlet</servlet-name>
 		<servlet-class>com.appspot.piment.rpc.TQQWeiboServiceImpl</servlet-class>
 	</servlet>
-	<servlet>
-		<servlet-name>job1001</servlet-name>
-		<servlet-class>com.appspot.piment.jobs.Job1001</servlet-class>
-	</servlet>
+	
 	<servlet>
 		<servlet-name>sinaAuthServlet</servlet-name>
 		<servlet-class>com.appspot.piment.rpc.SinaAuthServiceImpl</servlet-class>
 	</servlet>
+	
+	<servlet>
+		<servlet-name>job1001</servlet-name>
+		<servlet-class>com.appspot.piment.jobs.Job1001</servlet-class>
+	</servlet>
+
 
 	<servlet-mapping>
 		<servlet-name>tqqAuthServlet</servlet-name>
@@ -36,10 +39,22 @@
 
 	<servlet-mapping>
 		<servlet-name>job1001</servlet-name>
-		<url-pattern>/corns/job1001</url-pattern>
+		<url-pattern>/crons/job1001</url-pattern>
 	</servlet-mapping>
+	
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>piment.html</welcome-file>
 	</welcome-file-list>
+
+	<!-- Security and Authentication -->
+	<security-constraint>
+		<web-resource-collection>
+			<url-pattern>/crons/*</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>admin</role-name>
+		</auth-constraint>
+	</security-constraint>
+
 </web-app>
