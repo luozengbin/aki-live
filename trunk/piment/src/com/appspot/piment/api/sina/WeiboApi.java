@@ -15,7 +15,9 @@ import com.appspot.piment.model.WeiboMap;
 public class WeiboApi extends ApiBase {
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
-  
+
+  //private WeiboMapDao weiboMapDao = null;
+
   public WeiboApi() {
 	super();
   }
@@ -24,23 +26,41 @@ public class WeiboApi extends ApiBase {
 	super(authToken);
   }
 
-  public List<Status> getUserTimeline(UserMap userMap) {
+  @Override
+  protected void subInit() {
 	
+  }
+
+  /**
+   * sinaのUserTimelineインタフェースへ問い合わせて、ユーザ発表したメッセージを取得する
+   * 
+   * @param userMap
+   *          取得対象ユーザのID
+   * @return メッセージリスト
+   */
+  public List<Status> getUserTimeline(UserMap userMap) {
+
 	try {
-
-	  WeiboMapDao weiboMapDao = new WeiboMapDao();
-	  
-	  WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(userMap.getId());
-
+	  // sinaへの問い合わせパラメータを初期化する
 	  Paging paging = new Paging();
-	  paging.setPage(1);
-	  paging.setCount(20);
+	  // 取得ページ数
+	  paging.setPage(Integer.valueOf(this.configMap.get("sina.usertimeline.paging.page")));
+	  // 取得数
+	  paging.setCount(Integer.valueOf(this.configMap.get("sina.usertimeline.paging.count")));
+
+	  // 前回同期化された最後の履歴レコードを取り出す
+	  WeiboMapDao weiboMapDao = new WeiboMapDao();
+	  WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(userMap.getId());
 	  if (lastestCreateWeiboMap != null) {
+		// 最後処理されたメッセージのIDを「SinceId」条件として設定する
 		paging.setSinceId(Long.valueOf(lastestCreateWeiboMap.getSinaWeiboId()));
 	  }
-	  
+
+	  log.info("sinaからメッセージIDが \"" + paging.getSinceId() + "\"以降のユーザメッセージを取得する");
+
+	  // 問い合わせを行う
 	  return this.weibo.getUserTimeline(paging);
-	  
+
 	} catch (Exception e) {
 	  throw new RuntimeException(e);
 	}

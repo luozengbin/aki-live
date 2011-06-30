@@ -21,7 +21,6 @@ public class WeiboMapDao {
   }
 
   public WeiboMap getNewestItem(Long userMapId) {
-
 	try {
 	  pm = PMF.get().getPersistenceManager();
 	  Query query = pm.newQuery(QL_001);
@@ -39,7 +38,19 @@ public class WeiboMapDao {
 		pm = null;
 	  }
 	}
-
   }
 
+  public WeiboMap save(WeiboMap weiboMap) {
+	try {
+	  pm = PMF.get().getPersistenceManager();
+	  weiboMap = pm.makePersistent(weiboMap);
+	  return weiboMap;
+	} finally {
+	  if (pm != null) {
+		pm.close();
+		pm = null;
+	  }
+	}
+  }
+  
 }

@@ -2,6 +2,8 @@ package com.appspot.piment;
 
 public interface Constants {
 
+  String APP_NAME = "Piment";
+  
   String FQCN = "piment.";
 
   String TQQ = "tqq";
@@ -20,5 +22,7 @@ public interface Constants {
   String HTTP_ENCODEING = "utf-8";
   
   String LOOPBACK_IP = "127.0.0.1";
+  
+  String TQQ_SUCCEED = "0";
 
 }

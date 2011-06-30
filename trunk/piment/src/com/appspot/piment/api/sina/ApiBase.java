@@ -7,10 +7,10 @@ import weibo4j.Weibo;
 import com.appspot.piment.dao.ConfigItemDao;
 import com.appspot.piment.model.AuthToken;
 
-public class ApiBase {
+public abstract class ApiBase {
 
   protected Weibo weibo = null;
-  
+
   protected AuthToken authToken = null;
 
   protected Map<String, String> configMap = null;
@@ -18,6 +18,7 @@ public class ApiBase {
   public ApiBase() {
 	super();
 	this.init();
+	this.subInit();
   }
 
   public ApiBase(AuthToken authToken) {
@@ -26,6 +27,7 @@ public class ApiBase {
 	this.authToken = authToken;
 	this.weibo = new Weibo();
 	this.weibo.setOAuthAccessToken(this.authToken.getToken(), this.authToken.getTokenSecret());
+	this.subInit();
   }
 
   private void init() {
@@ -36,5 +38,7 @@ public class ApiBase {
 	System.setProperty("weibo4j.oauth.consumerKey", Weibo.CONSUMER_KEY);
 	System.setProperty("weibo4j.oauth.consumerSecret", Weibo.CONSUMER_SECRET);
   }
+
+  protected abstract void subInit();
 
 }
