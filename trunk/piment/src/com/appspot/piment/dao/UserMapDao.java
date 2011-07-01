@@ -15,7 +15,7 @@ public class UserMapDao {
 	super();
   }
 
-  public List<UserMap> getAllUserMaps() {
+  public List<UserMap> getAllEnableUserMaps() {
 
 	List<UserMap> result = new ArrayList<UserMap>();
 	try {
@@ -25,7 +25,10 @@ public class UserMapDao {
 	  List<UserMap> userMapList = (List<UserMap>) pm.newQuery(UserMap.class).execute();
 
 	  for (UserMap userMap : userMapList) {
-		result.add(userMap);
+		//制御フラグより
+		if(!userMap.isDisable()){
+		  result.add(userMap);
+		}
 	  }
 
 	  return result;

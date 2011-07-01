@@ -1,5 +1,6 @@
 package com.appspot.piment.api.tqq;
 
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -15,16 +16,16 @@ public class WeiboApi extends ApiBase {
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
 
+  protected String sendTextUrl = null;
+  protected String sendPicUrl = null;
+
   public WeiboApi(AuthToken authToken) {
 	super(authToken);
+	this.sendTextUrl = configMap.get("qq.weibo.send.text.url");
+	this.sendPicUrl = configMap.get("qq.weibo.send.pic.url");
   }
 
-  @Override
-  protected void subInit() {
-
-  }
-
-  public Response sendMessage(String msg, String clientIp) throws Exception {
+  public Response sendMessage(String msg, String pic, String clientIp) throws Exception {
 
 	Map<String, String> params = new LinkedHashMap<String, String>();
 
@@ -33,20 +34,26 @@ public class WeiboApi extends ApiBase {
 	params.put("format", "json");
 	params.putAll(getFixedParams());
 
-	String url = configMap.get("qq.weibo.send.text.url");
-
-	String postPayload = getSignedPayload(Constants.HTTP_POST, url, params);
-
-	log.info("postPayload = " + postPayload);
-
-	String response = HttpClient.doPost(url, postPayload);
-
+	String response = null;
+	if (StringUtils.isNotBlank(pic)) {
+	  
+	  params.put("oauth_signature", getSignature(Constants.HTTP_POST, this.sendPicUrl, params));
+	  
+	  Map<String, String> fileUrlMaps = new HashMap<String, String>();
+	  fileUrlMaps.put("pic", pic);
+	  
+	  response = HttpClient.doPostMultipart(this.sendPicUrl, params, fileUrlMaps);
+	  
+	} else {
+	  String postPayload = getSignedPayload(Constants.HTTP_POST, this.sendTextUrl, params);
+	  log.info("postPayload = " + postPayload);
+	  response = HttpClient.doPost(this.sendTextUrl, postPayload);
+	}
 	log.info("result --> \n" + response);
 
 	Response responseObj = JSON.decode(response, Response.class);
 
 	return responseObj;
-
   }
 
   public String fetchMessage(String startTime) throws Exception {

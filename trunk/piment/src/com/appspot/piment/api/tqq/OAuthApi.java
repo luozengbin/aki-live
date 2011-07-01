@@ -23,13 +23,15 @@ public class OAuthApi extends ApiBase {
 
   public OAuthApi() {
     super();
+    subInit();
   }
 
   public OAuthApi(AuthToken authToken) {
     super(authToken);
+    subInit();
   }
   
-  @Override
+  
   protected void subInit() {
 	this.requestTokenUrl = configMap.get("qq.request.token.url");
     this.accessTokenUrl = configMap.get("qq.access.token.url");
