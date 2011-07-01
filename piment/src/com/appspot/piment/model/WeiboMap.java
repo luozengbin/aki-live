@@ -19,10 +19,19 @@ public class WeiboMap {
   private Long userMapId;
 
   @Persistent
+  private WeiboSource source;
+
+  @Persistent
   private String tqqWeiboId;
 
   @Persistent
   private String sinaWeiboId;
+
+  @Persistent
+  private WeiboStatus status;
+
+  @Persistent
+  private int retryCount;
 
   @Persistent
   private Date createTime;
@@ -38,13 +47,6 @@ public class WeiboMap {
 
   public WeiboMap() {
 	super();
-  }
-
-  public WeiboMap(Long userMapId, String tqqWeiboId, String sinaWeiboId) {
-	super();
-	this.userMapId = userMapId;
-	this.tqqWeiboId = tqqWeiboId;
-	this.sinaWeiboId = sinaWeiboId;
   }
 
   public Long getId() {
@@ -63,6 +65,14 @@ public class WeiboMap {
 	this.userMapId = userMapId;
   }
 
+  public WeiboSource getSource() {
+	return source;
+  }
+
+  public void setSource(WeiboSource source) {
+	this.source = source;
+  }
+
   public String getTqqWeiboId() {
 	return tqqWeiboId;
   }
@@ -77,6 +87,22 @@ public class WeiboMap {
 
   public void setSinaWeiboId(String sinaWeiboId) {
 	this.sinaWeiboId = sinaWeiboId;
+  }
+
+  public WeiboStatus getStatus() {
+	return status;
+  }
+
+  public void setStatus(WeiboStatus status) {
+	this.status = status;
+  }
+
+  public int getRetryCount() {
+	return retryCount;
+  }
+
+  public void setRetryCount(int retryCount) {
+	this.retryCount = retryCount;
   }
 
   public Date getCreateTime() {
@@ -110,11 +136,11 @@ public class WeiboMap {
   public void setUpdator(String updator) {
 	this.updator = updator;
   }
-
+  
   @Override
   public String toString() {
-	return "WeiboMap [id=" + id + ", userMapId=" + userMapId + ", tqqWeiboId=" + tqqWeiboId + ", sinaWeiboId=" + sinaWeiboId + ", createTime=" + createTime + ", creator=" + creator + ", updateTime="
-	    + updateTime + ", updator=" + updator + "]";
+	return "WeiboMap [id=" + id + ", userMapId=" + userMapId + ", source=" + source + ", tqqWeiboId=" + tqqWeiboId + ", sinaWeiboId=" + sinaWeiboId + ", status=" + status + ", retryCount="
+	    + retryCount + ", createTime=" + createTime + ", creator=" + creator + ", updateTime=" + updateTime + ", updator=" + updator + "]";
   }
 
 }
