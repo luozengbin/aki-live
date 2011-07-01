@@ -18,7 +18,6 @@ public abstract class ApiBase {
   public ApiBase() {
 	super();
 	this.init();
-	this.subInit();
   }
 
   public ApiBase(AuthToken authToken) {
@@ -27,18 +26,20 @@ public abstract class ApiBase {
 	this.authToken = authToken;
 	this.weibo = new Weibo();
 	this.weibo.setOAuthAccessToken(this.authToken.getToken(), this.authToken.getTokenSecret());
-	this.subInit();
   }
 
   private void init() {
 	ConfigItemDao configItemDao = new ConfigItemDao();
 	this.configMap = configItemDao.getValues();
+
+	for (Map.Entry<String, String> entry : this.configMap.entrySet()) {
+	  System.out.println("xxxxx:\t" + entry.getKey() + ":\t" + entry.getValue());
+	}
+
 	Weibo.CONSUMER_KEY = configMap.get("sina.oauth.consumer.key");
 	Weibo.CONSUMER_SECRET = configMap.get("sina.oauth.consumer.secret");
 	System.setProperty("weibo4j.oauth.consumerKey", Weibo.CONSUMER_KEY);
 	System.setProperty("weibo4j.oauth.consumerSecret", Weibo.CONSUMER_SECRET);
   }
-
-  protected abstract void subInit();
 
 }
