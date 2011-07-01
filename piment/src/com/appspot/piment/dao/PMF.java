@@ -66,6 +66,7 @@ public final class PMF {
 	  pm = PMF.get().getPersistenceManager();
 	  @SuppressWarnings("unchecked")
 	  List<T> result = (List<T>) pm.newQuery(clzss).execute();
+	  pm.detachCopyAll(result);
 	  return result;
 	} finally {
 	  if (pm != null) {

@@ -8,7 +8,7 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-@PersistenceCapable(identityType = IdentityType.APPLICATION)
+@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
 public class WeiboMap {
 
   @PrimaryKey
@@ -22,10 +22,10 @@ public class WeiboMap {
   private WeiboSource source;
 
   @Persistent
-  private String tqqWeiboId;
+  private Long tqqWeiboId;
 
   @Persistent
-  private String sinaWeiboId;
+  private Long sinaWeiboId;
 
   @Persistent
   private WeiboStatus status;
@@ -73,19 +73,19 @@ public class WeiboMap {
 	this.source = source;
   }
 
-  public String getTqqWeiboId() {
+  public Long getTqqWeiboId() {
 	return tqqWeiboId;
   }
 
-  public void setTqqWeiboId(String tqqWeiboId) {
+  public void setTqqWeiboId(Long tqqWeiboId) {
 	this.tqqWeiboId = tqqWeiboId;
   }
 
-  public String getSinaWeiboId() {
+  public Long getSinaWeiboId() {
 	return sinaWeiboId;
   }
 
-  public void setSinaWeiboId(String sinaWeiboId) {
+  public void setSinaWeiboId(Long sinaWeiboId) {
 	this.sinaWeiboId = sinaWeiboId;
   }
 
@@ -136,7 +136,7 @@ public class WeiboMap {
   public void setUpdator(String updator) {
 	this.updator = updator;
   }
-  
+
   @Override
   public String toString() {
 	return "WeiboMap [id=" + id + ", userMapId=" + userMapId + ", source=" + source + ", tqqWeiboId=" + tqqWeiboId + ", sinaWeiboId=" + sinaWeiboId + ", status=" + status + ", retryCount="

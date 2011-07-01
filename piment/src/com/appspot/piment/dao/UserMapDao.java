@@ -26,7 +26,7 @@ public class UserMapDao {
 
 	  for (UserMap userMap : userMapList) {
 		//制御フラグより
-		if(!userMap.isDisable()){
+		if(!userMap.isDisable()){		  
 		  result.add(userMap);
 		}
 	  }

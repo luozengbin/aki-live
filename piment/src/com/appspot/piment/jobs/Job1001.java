@@ -74,33 +74,37 @@ public class Job1001 extends HttpServlet {
 		// AccessTokenでAPIオブジェクトを初期化する
 		tqqWeiboApi = new com.appspot.piment.api.tqq.WeiboApi(tqqAuthToken);
 
-		// リトライ処理を行う
-		List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(userMap.getId());
+		// ユーザの設定よりリトライ処理の判定
+		if (userMap.isRetryAction()) {
 
-		if (retryWeiboMaps.size() > 0) {
+		  // リトライ処理を行う
+		  List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(userMap.getId());
 
-		  String startId = retryWeiboMaps.get(0).getSinaWeiboId();
-		  String endId = retryWeiboMaps.get(retryWeiboMaps.size() - 1).getSinaWeiboId();
-		  
-		  //リトライの対象メッセージを取得
-		  List<Status> oldUserMessages = sinaWeiboApi.getUserTimeline(startId, endId);
+		  if (retryWeiboMaps.size() > 0) {
 
-		  Map<Long, Status> oldUserMessagesMap = new HashMap<Long, Status>();
-		  for (Status oldUserMessage : oldUserMessages) {
-			oldUserMessagesMap.put(oldUserMessage.getId(), oldUserMessage);
-		  }
+			Long startId = retryWeiboMaps.get(0).getSinaWeiboId() - 1;
+			Long endId = retryWeiboMaps.get(retryWeiboMaps.size() - 1).getSinaWeiboId();
 
-		  for (WeiboMap retryWeiboMap : retryWeiboMaps) {
-			if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
-			  // RETRY
-			  syncSinaUserMessage(tqqWeiboApi, userMap, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
+			// リトライの対象メッセージを取得
+			List<Status> oldUserMessages = sinaWeiboApi.getUserTimeline(startId, endId);
 
-			} else {
-			  // ABORT
-			  retryWeiboMap.setStatus(WeiboStatus.ABORT);
+			Map<Long, Status> oldUserMessagesMap = new HashMap<Long, Status>();
+			for (Status oldUserMessage : oldUserMessages) {
+			  oldUserMessagesMap.put(oldUserMessage.getId(), oldUserMessage);
+			}
 
-			  // 同期化履歴レコードを保存する
-			  retryWeiboMap = weiboMapDao.save(retryWeiboMap);
+			for (WeiboMap retryWeiboMap : retryWeiboMaps) {
+			  if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
+				// RETRY
+				syncSinaUserMessage(tqqWeiboApi, userMap, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
+
+			  } else {
+				// ABORT
+				retryWeiboMap.setStatus(WeiboStatus.ABORT);
+
+				// 同期化履歴レコードを保存する
+				retryWeiboMap = weiboMapDao.save(retryWeiboMap);
+			  }
 			}
 		  }
 		}
@@ -109,7 +113,7 @@ public class Job1001 extends HttpServlet {
 		WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(userMap.getId());
 
 		// sinaから前回の同期化以降対象ユーザが発表した新メッセージを取得する
-		List<Status> newUserMessages = sinaWeiboApi.getUserTimeline(lastestCreateWeiboMap.getSinaWeiboId(), null);
+		List<Status> newUserMessages = sinaWeiboApi.getUserTimeline(lastestCreateWeiboMap != null ? lastestCreateWeiboMap.getSinaWeiboId() : null, null);
 
 		log.info("同期化件数：" + newUserMessages.size());
 
@@ -124,6 +128,8 @@ public class Job1001 extends HttpServlet {
 		String msg001 = "sina[" + userMap.getSinaUserId() + "] から tqq[" + userMap.getTqqUserId() + "]へ同期化開始中不具合が起きました";
 		log.severe(msg001);
 		log.severe(JSON.encode(e, true));
+
+		e.printStackTrace();
 		// 例外が起きても次ぎのメッセージの同期化を行う
 	  }
 	}
@@ -143,39 +149,52 @@ public class Job1001 extends HttpServlet {
 	  if (StringUtils.isNotBlank(status.getText())) {
 
 		// 同期化履歴レコードの初期化
-		weiboMap.setSinaWeiboId(String.valueOf(status.getId()));
+		weiboMap.setSinaWeiboId(status.getId());
 		weiboMap.setTqqWeiboId(null);
 		weiboMap.setUserMapId(userMap.getId());
 		weiboMap.setSource(WeiboSource.Sina);
 		weiboMap.setStatus(WeiboStatus.UNKNOW);
 
 		// 同じメッセージをtqqへ発表する
-		Response response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getOriginal_pic(), null);
+		Response response = null;
+		Throwable throwable = null;
+		try {
+		  response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getOriginal_pic(), null);
+		} catch (Exception e) {
+		  throwable = e;
+		}
+
 		// 処理成功ならば、同期化レコードをデータストアへ保存する
-		if (Constants.TQQ_SUCCEED.equals(response.getErrcode()) && response.getData() != null) {
+		if (response != null && Constants.TQQ_SUCCEED.equals(response.getErrcode()) && response.getData() != null) {
 
 		  // 同期成功情報を履歴レコードに反映
 		  weiboMap.setStatus(WeiboStatus.SUCCESSED);
-		  weiboMap.setTqqWeiboId(response.getData().getId());
+		  weiboMap.setTqqWeiboId(Long.valueOf(response.getData().getId()));
 
 		  log.info("同期化成功！！！");
 		  log.info("メッセージID：" + status.getId());
 		  log.info("同期化履歴レコードID：" + weiboMap.getId());
 		} else {
 
-		  // 失敗フラグを設定
-
-		  weiboMap.setRetryCount(weiboMap.getRetryCount() + 1);
-		  if (weiboMap.getRetryCount() >= Integer.valueOf(this.configItemDao.getValue("app.max.retry"))) {
-			weiboMap.setStatus(WeiboStatus.ABORT);
+		  if (weiboMap.getId() != null) {
+			weiboMap.setRetryCount(weiboMap.getRetryCount() + 1);
+			// 失敗フラグを設定
+			if (weiboMap.getRetryCount() >= Integer.valueOf(this.configItemDao.getValue("app.sync.message.max.retry"))) {
+			  weiboMap.setStatus(WeiboStatus.ABORT);
+			} else {
+			  weiboMap.setStatus(WeiboStatus.FAILED);
+			}
 		  } else {
 			weiboMap.setStatus(WeiboStatus.FAILED);
 		  }
 
 		  String msg001 = "sina[" + status.getId() + "]メッセージをTQQへの送信が失敗しました。";
 		  log.severe(msg001);
-		  log.severe(response.toString());
-		  MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + status.toString() + "\n\nTQQからのレスポンス：\n" + response.toString() + "\n\n");
+
+		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
+		  log.severe(errorDetail);
+
+		  MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + status.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
 		}
 
 		// 同期化履歴レコードを保存する

@@ -8,7 +8,6 @@ import weibo4j.Status;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.AuthToken;
-import com.appspot.piment.shared.StringUtils;
 
 public class WeiboApi extends ApiBase {
 
@@ -37,7 +36,7 @@ public class WeiboApi extends ApiBase {
    * 
    * @return メッセージリスト
    */
-  public List<Status> getUserTimeline(String sinceId, String maxId) {
+  public List<Status> getUserTimeline(Long sinceId, Long maxId) {
 
 	try {
 	  // sinaへの問い合わせパラメータを初期化する
@@ -48,12 +47,12 @@ public class WeiboApi extends ApiBase {
 	  paging.setCount(Integer.valueOf(this.configMap.get("sina.usertimeline.paging.count")));
 
 	  // 取得範囲の開始位置の指定
-	  if (StringUtils.isNotBlank(sinceId)) {
+	  if (sinceId != null) {
 		paging.setSinceId(Long.valueOf(sinceId));
 	  }
 
 	  // 取得範囲の終了位置の指定
-	  if (StringUtils.isNotBlank(maxId)) {
+	  if (maxId != null) {
 		paging.setMaxId(Long.valueOf(maxId));
 	  }
 
