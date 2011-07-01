@@ -48,7 +48,7 @@
 
 	<servlet-mapping>
 		<servlet-name>job1002</servlet-name>
-		<url-pattern>/crons/job1002</url-pattern>
+		<url-pattern>/job1002</url-pattern>
 	</servlet-mapping>
 		
 	<!-- Default page to serve -->
