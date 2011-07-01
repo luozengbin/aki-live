@@ -6,4 +6,8 @@
 		<!-- <property name="status" direction="desc" /> -->
 		<property name="createTime" direction="desc" />
 	</datastore-index>
+
+	<datastore-index kind="Feature" ancestor="true" source="manual">
+		<property name="features_INTEGER_IDX" direction="asc" />
+	</datastore-index>
 </datastore-indexes>
