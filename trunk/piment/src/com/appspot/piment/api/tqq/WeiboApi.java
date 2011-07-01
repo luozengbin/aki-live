@@ -36,14 +36,14 @@ public class WeiboApi extends ApiBase {
 
 	String response = null;
 	if (StringUtils.isNotBlank(pic)) {
-	  
+
 	  params.put("oauth_signature", getSignature(Constants.HTTP_POST, this.sendPicUrl, params));
-	  
+
 	  Map<String, String> fileUrlMaps = new HashMap<String, String>();
 	  fileUrlMaps.put("pic", pic);
-	  
+
 	  response = HttpClient.doPostMultipart(this.sendPicUrl, params, fileUrlMaps);
-	  
+
 	} else {
 	  String postPayload = getSignedPayload(Constants.HTTP_POST, this.sendTextUrl, params);
 	  log.info("postPayload = " + postPayload);

@@ -70,28 +70,4 @@ public class ConfigItemDao {
 	  }
 	}
   }
-
-  private void initData() {
-
-	Map<String, String> values = new HashMap<String, String>();
-
-	try {
-	  pm = PMF.get().getPersistenceManager();
-	  
-	  //TODO add data
-	  
-	  for (Map.Entry<String, String> entry : values.entrySet()) {
-		ConfigItem configItem = new ConfigItem();
-		configItem.setKey(entry.getKey());
-		configItem.setValue(entry.getValue());
-		pm.makePersistent(configItem);
-	  }
-
-	} finally {
-	  if (pm != null) {
-		pm.close();
-		pm = null;
-	  }
-	}
-  }
 }

@@ -1,6 +1,5 @@
 package com.appspot.piment.dao;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -20,7 +19,7 @@ public class WeiboMapDao {
    */
   private static final String QL_001 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId";
 
-  private static final String QL_002 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId and status == :status";
+  private static final String QL_002 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
   private PersistenceManager pm = null;
 
@@ -50,8 +49,6 @@ public class WeiboMapDao {
 
   public List<WeiboMap> getFieldItem(Long userMapId) {
 
-	List<WeiboMap> result = new ArrayList<WeiboMap>();
-
 	try {
 	  pm = PMF.get().getPersistenceManager();
 	  Query query = pm.newQuery(QL_002);
@@ -64,11 +61,9 @@ public class WeiboMapDao {
 	  @SuppressWarnings("unchecked")
 	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.executeWithMap(params);
 
-	  for (WeiboMap weiboMap : weiboMapList) {
-		result.add(weiboMap);
-	  }
-
-	  return result;
+	  pm.detachCopyAll(weiboMapList);
+	  
+	  return weiboMapList;
 
 	} finally {
 	  if (pm != null) {
@@ -87,7 +82,7 @@ public class WeiboMapDao {
 	  }
 
 	  if (StringUtils.isBlank(weiboMap.getCreator())) {
-		weiboMap.setCreateTime(DateUtils.getSysDate());
+		weiboMap.setCreator(WeiboMapDao.class.getName());
 	  }
 
 	  weiboMap.setUpdateTime(DateUtils.getSysDate());

@@ -1,14 +1,17 @@
 package com.appspot.piment.model;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
+import javax.jdo.annotations.Element;
 import javax.jdo.annotations.IdGeneratorStrategy;
 import javax.jdo.annotations.IdentityType;
 import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-@PersistenceCapable(identityType = IdentityType.APPLICATION)
+@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
 public class UserMap {
 
   @PrimaryKey
@@ -24,6 +27,13 @@ public class UserMap {
   /** 同期化処理失敗時リトライ制約フラグ */
   @Persistent
   private boolean retryAction;
+
+  @Persistent
+  private int frequency;
+
+  @Persistent(mappedBy = "userMap")
+  @Element(dependent = "true")
+  public List<Feature> features = new ArrayList<Feature>();
 
   @Persistent
   private Date createTime;
@@ -83,6 +93,22 @@ public class UserMap {
 	this.retryAction = retryAction;
   }
 
+  public int getFrequency() {
+	return frequency;
+  }
+
+  public void setFrequency(int frequency) {
+	this.frequency = frequency;
+  }
+
+  public List<Feature> getFeatures() {
+	return features;
+  }
+
+  public void setFeatures(List<Feature> features) {
+	this.features = features;
+  }
+
   public Date getCreateTime() {
 	return createTime;
   }
@@ -125,7 +151,8 @@ public class UserMap {
 
   @Override
   public String toString() {
-	return "UserMap [id=" + id + ", tqqUserId=" + tqqUserId + ", sinaUserId=" + sinaUserId + ", retryAction=" + retryAction + ", createTime=" + createTime + ", creator=" + creator + ", updateTime="
-	    + updateTime + ", updator=" + updator + ", disable=" + disable + "]";
+	return "UserMap [id=" + id + ", tqqUserId=" + tqqUserId + ", sinaUserId=" + sinaUserId + ", retryAction=" + retryAction + ", frequency=" + frequency + ", features=" + features + ", createTime="
+	    + createTime + ", creator=" + creator + ", updateTime=" + updateTime + ", updator=" + updator + ", disable=" + disable + "]";
   }
+
 }
