@@ -15,7 +15,7 @@ public class TQQWeiboServiceImpl extends RemoteServiceServlet implements TQQWeib
     AuthToken authToken = authTokenDao.getByToken("");//TODO ADD Token
     WeiboApi weiboApi = new WeiboApi(authToken);
     try {
-      weiboApi.sendMessage(msg, getThreadLocalRequest().getRemoteAddr());
+      weiboApi.sendMessage(msg, null, getThreadLocalRequest().getRemoteAddr());
     } catch (Exception e) {
       throw new RuntimeException(e);
     }

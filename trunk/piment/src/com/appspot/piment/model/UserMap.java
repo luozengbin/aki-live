@@ -21,6 +21,10 @@ public class UserMap {
   @Persistent
   private String sinaUserId;
 
+  /** 同期化処理失敗時リトライ制約フラグ */
+  @Persistent
+  private boolean retryAction;
+
   @Persistent
   private Date createTime;
 
@@ -32,6 +36,10 @@ public class UserMap {
 
   @Persistent
   private String updator;
+
+  /** 制御フラグ */
+  @Persistent
+  private boolean disable;
 
   public UserMap() {
 	super();
@@ -67,6 +75,14 @@ public class UserMap {
 	this.sinaUserId = sinaUserId;
   }
 
+  public boolean isRetryAction() {
+	return retryAction;
+  }
+
+  public void setRetryAction(boolean retryAction) {
+	this.retryAction = retryAction;
+  }
+
   public Date getCreateTime() {
 	return createTime;
   }
@@ -99,10 +115,17 @@ public class UserMap {
 	this.updator = updator;
   }
 
-  @Override
-  public String toString() {
-	return "UserMap [id=" + id + ", tqqUserId=" + tqqUserId + ", sinaUserId=" + sinaUserId + ", createTime=" + createTime + ", creator=" + creator + ", updateTime=" + updateTime + ", updator="
-	    + updator + "]";
+  public boolean isDisable() {
+	return disable;
   }
 
+  public void setDisable(boolean disable) {
+	this.disable = disable;
+  }
+
+  @Override
+  public String toString() {
+	return "UserMap [id=" + id + ", tqqUserId=" + tqqUserId + ", sinaUserId=" + sinaUserId + ", retryAction=" + retryAction + ", createTime=" + createTime + ", creator=" + creator + ", updateTime="
+	    + updateTime + ", updator=" + updator + ", disable=" + disable + "]";
+  }
 }
