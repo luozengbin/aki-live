@@ -3,6 +3,7 @@
 	<datastore-index kind="WeiboMap" ancestor="false"
 		source="manual">
 		<property name="userMapId" direction="asc" />
+		<!-- <property name="status" direction="desc" /> -->
 		<property name="createTime" direction="desc" />
 	</datastore-index>
 </datastore-indexes>
