@@ -18,13 +18,14 @@ public class OAuthApi extends ApiBase {
 
   public OAuthApi() {
 	super();
+	this.subInit();
   }
 
   public OAuthApi(AuthToken authToken) {
 	super(authToken);
+	this.subInit();
   }
 
-  @Override
   protected void subInit() {
 	this.authCallbackUrl = configMap.get("sina.oauth.callback");
 	this.weibo = new Weibo();

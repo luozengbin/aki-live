@@ -7,38 +7,37 @@ import weibo4j.Paging;
 import weibo4j.Status;
 
 import com.appspot.piment.Constants;
-import com.appspot.piment.dao.WeiboMapDao;
 import com.appspot.piment.model.AuthToken;
-import com.appspot.piment.model.UserMap;
-import com.appspot.piment.model.WeiboMap;
+import com.appspot.piment.shared.StringUtils;
 
 public class WeiboApi extends ApiBase {
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
 
-  //private WeiboMapDao weiboMapDao = null;
-
   public WeiboApi() {
 	super();
+	this.subInit();
   }
 
   public WeiboApi(AuthToken authToken) {
 	super(authToken);
+	this.subInit();
   }
 
-  @Override
   protected void subInit() {
-	
   }
 
   /**
    * sinaのUserTimelineインタフェースへ問い合わせて、ユーザ発表したメッセージを取得する
    * 
-   * @param userMap
-   *          取得対象ユーザのID
+   * @param sinceId
+   *          取得条件開始位置のメッセージ
+   * @param sinceId
+   *          取得条件終了位置のメッセージ
+   * 
    * @return メッセージリスト
    */
-  public List<Status> getUserTimeline(UserMap userMap) {
+  public List<Status> getUserTimeline(String sinceId, String maxId) {
 
 	try {
 	  // sinaへの問い合わせパラメータを初期化する
@@ -48,12 +47,14 @@ public class WeiboApi extends ApiBase {
 	  // 取得数
 	  paging.setCount(Integer.valueOf(this.configMap.get("sina.usertimeline.paging.count")));
 
-	  // 前回同期化された最後の履歴レコードを取り出す
-	  WeiboMapDao weiboMapDao = new WeiboMapDao();
-	  WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(userMap.getId());
-	  if (lastestCreateWeiboMap != null) {
-		// 最後処理されたメッセージのIDを「SinceId」条件として設定する
-		paging.setSinceId(Long.valueOf(lastestCreateWeiboMap.getSinaWeiboId()));
+	  // 取得範囲の開始位置の指定
+	  if (StringUtils.isNotBlank(sinceId)) {
+		paging.setSinceId(Long.valueOf(sinceId));
+	  }
+
+	  // 取得範囲の終了位置の指定
+	  if (StringUtils.isNotBlank(maxId)) {
+		paging.setMaxId(Long.valueOf(maxId));
 	  }
 
 	  log.info("sinaからメッセージIDが \"" + paging.getSinceId() + "\"以降のユーザメッセージを取得する");
@@ -65,5 +66,4 @@ public class WeiboApi extends ApiBase {
 	  throw new RuntimeException(e);
 	}
   }
-
 }
