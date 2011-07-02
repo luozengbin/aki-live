@@ -13,7 +13,7 @@ public class AuthToken {
     super();
   }
 
-  public AuthToken(String type, String token, String tokenSecret) {
+  public AuthToken(WeiboSource type, String token, String tokenSecret) {
     super();
     this.type = type;
     this.token = token;
@@ -25,7 +25,7 @@ public class AuthToken {
   private Long id;
 
   @Persistent
-  private String type;
+  private WeiboSource type;
   
   @Persistent
   private String userName;
@@ -43,15 +43,15 @@ public class AuthToken {
   public void setId(Long id) {
     this.id = id;
   }
-
-  public String getType() {
+  
+  public WeiboSource getType() {
     return type;
   }
 
-  public void setType(String type) {
+  public void setType(WeiboSource type) {
     this.type = type;
   }
-  
+
   public String getUserName() {
     return userName;
   }
