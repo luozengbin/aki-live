@@ -8,6 +8,7 @@ import weibo4j.http.RequestToken;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.AuthToken;
+import com.appspot.piment.model.WeiboSource;
 import com.appspot.piment.rpc.SinaAuthServiceImpl;
 
 public class OAuthApi extends ApiBase {
@@ -40,7 +41,7 @@ public class OAuthApi extends ApiBase {
 	log.info("TokenSecret:" + requestToken.getTokenSecret());
 	log.info(requestToken.getAuthenticationURL());
 
-	AuthToken authToken = new AuthToken(Constants.SINA_WEIBO, requestToken.getToken(), requestToken.getTokenSecret());
+	AuthToken authToken = new AuthToken(WeiboSource.Sina, requestToken.getToken(), requestToken.getTokenSecret());
 
 	return authToken;
   }

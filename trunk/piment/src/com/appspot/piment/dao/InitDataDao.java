@@ -5,10 +5,14 @@ import java.util.Map;
 
 import javax.jdo.PersistenceManager;
 
+import com.appspot.piment.jobs.Job1001;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.ConfigItem;
 import com.appspot.piment.model.Feature;
+import com.appspot.piment.model.Job;
+import com.appspot.piment.model.JobStatus;
 import com.appspot.piment.model.UserMap;
+import com.appspot.piment.model.WeiboSource;
 import com.appspot.piment.util.DateUtils;
 
 public class InitDataDao {
@@ -48,7 +52,7 @@ public class InitDataDao {
 	  values.put("app.admin.email.displayname", "GAEMonitor");
 	  values.put("app.admin.email.address", "");
 	  values.put("app.sync.message.max.retry", "3");
-	  
+
 	  for (Map.Entry<String, String> entry : values.entrySet()) {
 		ConfigItem configItem = new ConfigItem();
 		configItem.setKey(entry.getKey());
@@ -86,16 +90,28 @@ public class InitDataDao {
 	AuthToken authToken_1 = new AuthToken();
 	authToken_1.setToken("");
 	authToken_1.setTokenSecret("");
-	authToken_1.setType("tqq");
+	authToken_1.setType(WeiboSource.Tqq);
 	authToken_1.setUserName("");
 
 	AuthToken authToken_2 = new AuthToken();
 	authToken_2.setToken("");
 	authToken_2.setTokenSecret("");
-	authToken_2.setType("sina");
+	authToken_2.setType(WeiboSource.Sina);
 	authToken_2.setUserName("");
 
 	PMF.saveEntity(authToken_1, authToken_2);
 
+  }
+
+  public void initJobStatus() {
+	Job job = new Job();
+	job.setJobId(Job1001.class.getName());
+	job.setJobName("Job1001");
+	job.setDescription("job1001's description");
+	job.setFrequency(15);
+	job.setStatus(JobStatus.SUCCESSED);
+	job.setLastExecuteTime(DateUtils.getSysDate());
+	job.setCostTime(2);
+	PMF.saveEntity(job);
   }
 }

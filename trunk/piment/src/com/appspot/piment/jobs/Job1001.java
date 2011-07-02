@@ -16,14 +16,19 @@ import com.appspot.piment.Constants;
 import com.appspot.piment.api.tqq.Response;
 import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.dao.ConfigItemDao;
+import com.appspot.piment.dao.JobDao;
+import com.appspot.piment.dao.PMF;
 import com.appspot.piment.dao.UserMapDao;
 import com.appspot.piment.dao.WeiboMapDao;
 import com.appspot.piment.model.AuthToken;
+import com.appspot.piment.model.Job;
+import com.appspot.piment.model.JobStatus;
 import com.appspot.piment.model.UserMap;
 import com.appspot.piment.model.WeiboMap;
 import com.appspot.piment.model.WeiboSource;
 import com.appspot.piment.model.WeiboStatus;
 import com.appspot.piment.shared.StringUtils;
+import com.appspot.piment.util.DateUtils;
 import com.appspot.piment.util.MailUtils;
 
 public class Job1001 extends HttpServlet {
@@ -36,6 +41,7 @@ public class Job1001 extends HttpServlet {
   private WeiboMapDao weiboMapDao = null;
   private UserMapDao userMapDao = null;
   private ConfigItemDao configItemDao = null;
+  private JobDao jobDao = null;
 
   public Job1001() {
 	super();
@@ -43,99 +49,128 @@ public class Job1001 extends HttpServlet {
 	this.weiboMapDao = new WeiboMapDao();
 	this.userMapDao = new UserMapDao();
 	this.configItemDao = new ConfigItemDao();
+	this.jobDao = new JobDao();
   }
 
   public void doGet(HttpServletRequest req, HttpServletResponse resp) {
 
 	log.info("-- job1001 start --");
+	long startTime = System.currentTimeMillis();
+	Job job = null;
+	try {
 
-	com.appspot.piment.api.sina.WeiboApi sinaWeiboApi = null;
-	com.appspot.piment.api.tqq.WeiboApi tqqWeiboApi = null;
+	  com.appspot.piment.api.sina.WeiboApi sinaWeiboApi = null;
+	  com.appspot.piment.api.tqq.WeiboApi tqqWeiboApi = null;
 
-	// 処理対象ユーザ一覧をデータストアから取得する
-	List<UserMap> uerMaps = userMapDao.getAllEnableUserMaps();
+	  job = this.jobDao.getJob(this.getClass().getName());
 
-	// ユーザ毎に同期化処理を行う
-	for (UserMap userMap : uerMaps) {
+	  job.setStatus(JobStatus.RUNNING);
+	  PMF.saveEntity(job);
 
-	  try {
+	  log.info("job's status:" + job);
 
-		log.info("sina[" + userMap.getSinaUserId() + "] から tqq[" + userMap.getTqqUserId() + "]へ同期化開始");
+	  // 処理対象ユーザ一覧をデータストアから取得する
+	  List<UserMap> uerMaps = userMapDao.getUserMaps(job.getFrequency());
 
-		// sinaのユーザIDを元にAccessTokenを取り出す
-		AuthToken sinaAuthToken = authTokenDao.getByUserId(userMap.getSinaUserId());
+	  // ユーザ毎に同期化処理を行う
+	  for (UserMap userMap : uerMaps) {
 
-		// AccessTokenでAPIオブジェクトを初期化する
-		sinaWeiboApi = new com.appspot.piment.api.sina.WeiboApi(sinaAuthToken);
+		try {
 
-		// tqqのユーザIDを元にAccessTokenを取り出す
-		AuthToken tqqAuthToken = authTokenDao.getByUserId(userMap.getTqqUserId());
+		  log.info("sina[" + userMap.getSinaUserId() + "] から tqq[" + userMap.getTqqUserId() + "]へ同期化開始");
 
-		// AccessTokenでAPIオブジェクトを初期化する
-		tqqWeiboApi = new com.appspot.piment.api.tqq.WeiboApi(tqqAuthToken);
+		  // sinaのユーザIDを元にAccessTokenを取り出す
+		  AuthToken sinaAuthToken = authTokenDao.getByUserId(userMap.getSinaUserId());
 
-		// ユーザの設定よりリトライ処理の判定
-		if (userMap.isRetryAction()) {
+		  // AccessTokenでAPIオブジェクトを初期化する
+		  sinaWeiboApi = new com.appspot.piment.api.sina.WeiboApi(sinaAuthToken);
 
-		  // リトライ処理を行う
-		  List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(userMap.getId());
+		  // tqqのユーザIDを元にAccessTokenを取り出す
+		  AuthToken tqqAuthToken = authTokenDao.getByUserId(userMap.getTqqUserId());
 
-		  if (retryWeiboMaps.size() > 0) {
+		  // AccessTokenでAPIオブジェクトを初期化する
+		  tqqWeiboApi = new com.appspot.piment.api.tqq.WeiboApi(tqqAuthToken);
 
-			Long startId = retryWeiboMaps.get(0).getSinaWeiboId() - 1;
-			Long endId = retryWeiboMaps.get(retryWeiboMaps.size() - 1).getSinaWeiboId();
+		  // ユーザの設定よりリトライ処理の判定
+		  if (userMap.isRetryAction()) {
 
-			// リトライの対象メッセージを取得
-			List<Status> oldUserMessages = sinaWeiboApi.getUserTimeline(startId, endId);
+			// リトライ処理を行う
+			List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(userMap.getId());
 
-			Map<Long, Status> oldUserMessagesMap = new HashMap<Long, Status>();
-			for (Status oldUserMessage : oldUserMessages) {
-			  oldUserMessagesMap.put(oldUserMessage.getId(), oldUserMessage);
-			}
+			if (retryWeiboMaps.size() > 0) {
 
-			for (WeiboMap retryWeiboMap : retryWeiboMaps) {
-			  if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
-				// RETRY
-				syncSinaUserMessage(tqqWeiboApi, userMap, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
+			  Long startId = retryWeiboMaps.get(0).getSinaWeiboId() - 1;
+			  Long endId = retryWeiboMaps.get(retryWeiboMaps.size() - 1).getSinaWeiboId();
 
-			  } else {
-				// ABORT
-				retryWeiboMap.setStatus(WeiboStatus.ABORT);
+			  // リトライの対象メッセージを取得
+			  List<Status> oldUserMessages = sinaWeiboApi.getUserTimeline(startId, endId);
 
-				// 同期化履歴レコードを保存する
-				retryWeiboMap = weiboMapDao.save(retryWeiboMap);
+			  Map<Long, Status> oldUserMessagesMap = new HashMap<Long, Status>();
+			  for (Status oldUserMessage : oldUserMessages) {
+				oldUserMessagesMap.put(oldUserMessage.getId(), oldUserMessage);
+			  }
+
+			  for (WeiboMap retryWeiboMap : retryWeiboMaps) {
+				if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
+				  // RETRY
+				  syncSinaUserMessage(tqqWeiboApi, userMap, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
+
+				} else {
+				  // ABORT
+				  retryWeiboMap.setStatus(WeiboStatus.ABORT);
+
+				  // 同期化履歴レコードを保存する
+				  retryWeiboMap = weiboMapDao.save(retryWeiboMap);
+				}
 			  }
 			}
 		  }
+
+		  // 前回同期化された最後の履歴レコードを取り出す
+		  WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(userMap.getId());
+
+		  // sinaから前回の同期化以降対象ユーザが発表した新メッセージを取得する
+		  List<Status> newUserMessages = sinaWeiboApi.getUserTimeline(lastestCreateWeiboMap != null ? lastestCreateWeiboMap.getSinaWeiboId() : null, null);
+
+		  log.info("同期化件数：" + newUserMessages.size());
+
+		  // メッセージ単位で同期化処理を行う
+		  Status status = null;
+		  for (int i = newUserMessages.size() - 1; i >= 0; i--) {
+			status = newUserMessages.get(i);
+			syncSinaUserMessage(tqqWeiboApi, userMap, status, new WeiboMap());
+		  }
+
+		} catch (Exception e) {
+		  String msg001 = "sina[" + userMap.getSinaUserId() + "] から tqq[" + userMap.getTqqUserId() + "]へ同期化開始中不具合が起きました";
+		  log.severe(msg001);
+		  log.severe(JSON.encode(e, true));
+
+		  e.printStackTrace();
+		  // 例外が起きても次ぎのメッセージの同期化を行う
 		}
-
-		// 前回同期化された最後の履歴レコードを取り出す
-		WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(userMap.getId());
-
-		// sinaから前回の同期化以降対象ユーザが発表した新メッセージを取得する
-		List<Status> newUserMessages = sinaWeiboApi.getUserTimeline(lastestCreateWeiboMap != null ? lastestCreateWeiboMap.getSinaWeiboId() : null, null);
-
-		log.info("同期化件数：" + newUserMessages.size());
-
-		// メッセージ単位で同期化処理を行う
-		Status status = null;
-		for (int i = newUserMessages.size() - 1; i >= 0; i--) {
-		  status = newUserMessages.get(i);
-		  syncSinaUserMessage(tqqWeiboApi, userMap, status, new WeiboMap());
-		}
-
-	  } catch (Exception e) {
-		String msg001 = "sina[" + userMap.getSinaUserId() + "] から tqq[" + userMap.getTqqUserId() + "]へ同期化開始中不具合が起きました";
-		log.severe(msg001);
-		log.severe(JSON.encode(e, true));
-
-		e.printStackTrace();
-		// 例外が起きても次ぎのメッセージの同期化を行う
 	  }
+
+	  // ジョブ状態変更
+	  job.setStatus(JobStatus.SUCCESSED);
+
+	} catch (Exception e) {
+	  // ジョブ状態変更
+	  if (job != null) {
+		job.setStatus(JobStatus.FAILED);
+	  }
+	  throw new RuntimeException(e);
+	} finally {
+
+	  long costTime = System.currentTimeMillis() - startTime;
+	  if (job != null) {
+		job.setLastExecuteTime(DateUtils.getSysDate());
+		job.setCostTime(costTime);
+		PMF.saveEntity(job);
+		log.info("job's status:" + job);
+	  }
+	  log.info("-- job1001 end [cost " + costTime + " TimeMillis]--");
 	}
-
-	log.info("-- job1001 end --");
-
   }
 
   private void syncSinaUserMessage(com.appspot.piment.api.tqq.WeiboApi tqqWeiboApi, UserMap userMap, Status status, WeiboMap weiboMap) {

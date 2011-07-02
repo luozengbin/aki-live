@@ -9,24 +9,29 @@ import com.appspot.piment.model.UserMap;
 
 public class UserMapDao {
 
+  /**
+   * DEFINATION OF QUERY
+   */
+  private static final String QL_001 = "select from " + UserMap.class.getName() + " where frequency == :frequency";
+
   private PersistenceManager pm = null;
 
   public UserMapDao() {
 	super();
   }
 
-  public List<UserMap> getAllEnableUserMaps() {
+  public List<UserMap> getUserMaps(int frequency) {
 
 	List<UserMap> result = new ArrayList<UserMap>();
 	try {
 
 	  pm = PMF.get().getPersistenceManager();
 	  @SuppressWarnings("unchecked")
-	  List<UserMap> userMapList = (List<UserMap>) pm.newQuery(UserMap.class).execute();
+	  List<UserMap> userMapList = (List<UserMap>) pm.newQuery(QL_001).execute(frequency);
 
 	  for (UserMap userMap : userMapList) {
-		//制御フラグより
-		if(!userMap.isDisable()){		  
+		// 制御フラグより
+		if (!userMap.isDisable()) {
 		  result.add(userMap);
 		}
 	  }

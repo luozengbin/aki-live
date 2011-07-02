@@ -30,7 +30,9 @@ public class Piment implements EntryPoint {
 
   private final SinaAuthServiceAsync sinaAuthService = GWT.create(SinaAuthService.class);
 
-  TextBox msgBox = new TextBox();
+  private String mode = null;
+
+  private TextBox msgBox = new TextBox();
 
   /**
    * This is the entry point method.
@@ -39,7 +41,7 @@ public class Piment implements EntryPoint {
 
 	com.google.gwt.core.client.GWT.log("loading!!!");
 
-	final Button sendButton = new Button("Add New User");
+	final Button sendButton = new Button("Add TQQ User");
 
 	sendButton.addClickHandler(new ClickHandler() {
 
@@ -53,6 +55,8 @@ public class Piment implements EntryPoint {
 			Window.alert(requestTokenUrl);
 
 			Window.Location.replace(requestTokenUrl);
+
+			mode = "Tqq";
 		  }
 
 		  @Override
@@ -135,6 +139,8 @@ public class Piment implements EntryPoint {
 			Window.alert("request sina auth token :" + requestTokenUrl);
 
 			Window.Location.replace(requestTokenUrl);
+
+			mode = "Sina";
 		  }
 
 		  @Override
@@ -153,9 +159,7 @@ public class Piment implements EntryPoint {
 
 	if (StringUtils.isNotBlank(oauth_token) && StringUtils.isNotBlank(oauth_verifier)) {
 
-	  //qqAuthService.exchangeToken(oauth_token, oauth_verifier, new AsyncCallback<String>() {
-	  
-	  sinaAuthService.exchangeToken(oauth_token, oauth_verifier, new AsyncCallback<String>() {
+	  AsyncCallback<String> asyncCallback_001 = new AsyncCallback<String>() {
 
 		@Override
 		public void onSuccess(String result) {
@@ -169,7 +173,15 @@ public class Piment implements EntryPoint {
 		  // TODO 詳細な例外処理
 		  Window.alert(caught.getMessage());
 		}
-	  });
+	  };
+
+	  //if ("Tqq".equals(mode)) {
+		//qqAuthService.exchangeToken(oauth_token, oauth_verifier, asyncCallback_001);
+	  //}
+
+	  //if ("Sina".equals(mode)) {
+		//sinaAuthService.exchangeToken(oauth_token, oauth_verifier, asyncCallback_001);
+	  //}
 	}
   }
 }

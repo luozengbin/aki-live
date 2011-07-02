@@ -5,40 +5,42 @@ import java.util.List;
 
 import javax.jdo.PersistenceManager;
 
+import com.appspot.piment.model.Job;
 import com.appspot.piment.model.JobStatus;
 import com.appspot.piment.util.DateUtils;
 
-public class JobStatusDao {
+public class JobDao {
 
   /**
    * DEFINATION OF QUERY
    */
-  private static final String QL_001 = "select from " + JobStatus.class.getName() + " where jobId == :jobId";
+  private static final String QL_001 = "select from " + Job.class.getName() + " where jobId == :jobId";
 
   private PersistenceManager pm = null;
 
-  public JobStatusDao() {
+  public JobDao() {
 	super();
   }
 
-  public JobStatus getJobStatus(String jobId) {
+  public Job getJob(String jobId) {
 
-	JobStatus result = null;
+	Job result = null;
 
 	try {
 	  pm = PMF.get().getPersistenceManager();
 
 	  @SuppressWarnings("unchecked")
-	  List<JobStatus> jobStatusList = (List<JobStatus>) pm.newQuery(QL_001).execute(jobId);
+	  List<Job> jobStatusList = (List<Job>) pm.newQuery(QL_001).execute(jobId);
 
 	  if (jobStatusList == null || jobStatusList.size() == 0) {
 
-		result = new JobStatus();
+		result = new Job();
 		result.setJobId(jobId);
 		result.setJobName(jobId);
+		result.setStatus(JobStatus.UNKNOW);
 		result.setDescription(jobId + "'s description");
 		result.setLastExecuteTime(DateUtils.getSysDate(Calendar.MINUTE, -30));
-		result.setLastExecuteResult("UNKNOW");
+		result.setCostTime(0);
 		result = pm.makePersistent(result);
 
 	  } else {

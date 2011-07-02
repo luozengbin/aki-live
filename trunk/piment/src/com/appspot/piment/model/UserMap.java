@@ -28,6 +28,7 @@ public class UserMap {
   @Persistent
   private boolean retryAction;
 
+  /** 同期化頻度 */
   @Persistent
   private int frequency;
 

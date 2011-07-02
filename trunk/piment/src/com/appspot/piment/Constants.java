@@ -6,10 +6,6 @@ public interface Constants {
   
   String FQCN = "piment.";
 
-  String TQQ = "tqq";
-
-  String SINA_WEIBO = "sina";
-
   String HTTP_GET = "GET";
 
   String HTTP_POST = "POST";
