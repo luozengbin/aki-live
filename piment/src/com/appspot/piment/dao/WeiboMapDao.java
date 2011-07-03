@@ -21,6 +21,8 @@ public class WeiboMapDao {
 
   private static final String QL_002 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
+  private static final String QL_003 = "select from " + WeiboMap.class.getName() + " where sinaWeiboId == :sinaWeiboId";
+
   private PersistenceManager pm = null;
 
   public WeiboMapDao() {
@@ -47,6 +49,24 @@ public class WeiboMapDao {
 	}
   }
 
+  public WeiboMap getBySinaWeiboId(Long sinaWeiboId) {
+	try {
+	  pm = PMF.get().getPersistenceManager();
+	  Query query = pm.newQuery(QL_003);
+
+	  @SuppressWarnings("unchecked")
+	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.execute(sinaWeiboId);
+
+	  return (weiboMapList != null && weiboMapList.size() > 0) ? weiboMapList.get(0) : null;
+
+	} finally {
+	  if (pm != null) {
+		pm.close();
+		pm = null;
+	  }
+	}
+  }
+
   public List<WeiboMap> getFieldItem(Long userMapId) {
 
 	try {
@@ -62,7 +82,7 @@ public class WeiboMapDao {
 	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.executeWithMap(params);
 
 	  pm.detachCopyAll(weiboMapList);
-	  
+
 	  return weiboMapList;
 
 	} finally {

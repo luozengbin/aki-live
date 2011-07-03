@@ -47,6 +47,8 @@ public class HttpClient {
 	HTTPRequest request = new HTTPRequest(url, HTTPMethod.POST, FetchOptions.Builder.withDeadline(TIMEOUT_SECONDS));
 
 	request.setPayload(payload.getBytes());
+	
+	log.info("doPost url :" + strUrl);
 
 	HTTPResponse response = ufs.fetch(request);
 

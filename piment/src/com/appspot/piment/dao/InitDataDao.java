@@ -40,6 +40,8 @@ public class InitDataDao {
 	  values.put("qq.weibo.broadcast.timeline.url", "http://open.t.qq.com/api/statuses/broadcast_timeline");
 	  values.put("qq.weibo.send.text.url", "http://open.t.qq.com/api/t/add");
 	  values.put("qq.weibo.send.pic.url", "http://open.t.qq.com/api/t/add_pic");
+	  values.put("qq.weibo.send.retweet.url", "http://open.t.qq.com/api/t/re_add");
+
 	  values.put("qq.weibo.broadcast.timeline.reqnum", "20");
 	  values.put("qq.weibo.broadcast.timeline.pageflag ", "0");
 	  values.put("qq.weibo.broadcast.timeline.pageflag", "0");
@@ -52,6 +54,9 @@ public class InitDataDao {
 	  values.put("app.admin.email.displayname", "GAEMonitor");
 	  values.put("app.admin.email.address", "");
 	  values.put("app.sync.message.max.retry", "3");
+
+	  values.put("qq.piment.robot.id", "");
+	  values.put("sina.piment.robot.id", "");
 
 	  for (Map.Entry<String, String> entry : values.entrySet()) {
 		ConfigItem configItem = new ConfigItem();
