@@ -6,6 +6,7 @@ import java.util.List;
 import javax.jdo.PersistenceManager;
 
 import com.appspot.piment.model.UserMap;
+import com.appspot.piment.shared.StringUtils;
 
 public class UserMapDao {
 
@@ -31,7 +32,7 @@ public class UserMapDao {
 
 	  for (UserMap userMap : userMapList) {
 		// 制御フラグより
-		if (!userMap.isDisable()) {
+		if (!userMap.isDisable() && StringUtils.isNotBlank(userMap.getSinaUserId()) && StringUtils.isNotBlank(userMap.getTqqUserId())) {
 		  result.add(userMap);
 		}
 	  }

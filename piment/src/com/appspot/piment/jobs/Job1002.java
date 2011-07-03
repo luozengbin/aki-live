@@ -25,13 +25,13 @@ public class Job1002 extends HttpServlet {
 
 	  InitDataDao initDataDao = new InitDataDao();
 
-	  // initDataDao.initConfigItem();
+	  initDataDao.initConfigItem();
 
 	  // initDataDao.initAuthToken();
 
-	   initDataDao.initUserMap();
+	  // initDataDao.initUserMap();
 
-	  //initDataDao.initJobStatus();
+	  // initDataDao.initJobStatus();
 
 	} catch (Exception e) {
 	  throw new RuntimeException(e);
