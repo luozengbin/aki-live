@@ -42,6 +42,7 @@ public class Job1001 extends HttpServlet {
   private UserMapDao userMapDao = null;
   private ConfigItemDao configItemDao = null;
   private JobDao jobDao = null;
+  private com.appspot.piment.api.tqq.WeiboApi tqqRobotWeiboApi = null;
 
   public Job1001() {
 	super();
@@ -50,6 +51,11 @@ public class Job1001 extends HttpServlet {
 	this.userMapDao = new UserMapDao();
 	this.configItemDao = new ConfigItemDao();
 	this.jobDao = new JobDao();
+
+	// tqqロボットユーザIDを元にAccessTokenを取り出す
+	AuthToken tqqRobotAuthToken = authTokenDao.getByUserId(this.configItemDao.getValue("qq.piment.robot.id"));
+	// tqqロボットのAccessTokenでAPIオブジェクトを初期化する
+	this.tqqRobotWeiboApi = new com.appspot.piment.api.tqq.WeiboApi(tqqRobotAuthToken);
   }
 
   public void doGet(HttpServletRequest req, HttpServletResponse resp) {
@@ -66,7 +72,6 @@ public class Job1001 extends HttpServlet {
 
 	  job.setStatus(JobStatus.RUNNING);
 	  PMF.saveEntity(job);
-
 	  log.info("job's status:" + job);
 
 	  // 処理対象ユーザ一覧をデータストアから取得する
@@ -74,9 +79,7 @@ public class Job1001 extends HttpServlet {
 
 	  // ユーザ毎に同期化処理を行う
 	  for (UserMap userMap : uerMaps) {
-
 		try {
-
 		  log.info("sina[" + userMap.getSinaUserId() + "] から tqq[" + userMap.getTqqUserId() + "]へ同期化開始");
 
 		  // sinaのユーザIDを元にAccessTokenを取り出す
@@ -194,13 +197,48 @@ public class Job1001 extends HttpServlet {
 		Response response = null;
 		Throwable throwable = null;
 		try {
-		  response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getOriginal_pic(), null);
+		  if (status.isRetweet()) {
+
+			String retweetId = null;
+			Status retweetedStatus = status.getRetweeted_status();
+			log.info("Retweet sina[" + retweetedStatus.getId() + "]");
+
+			WeiboMap processedWeibo = this.weiboMapDao.getBySinaWeiboId(retweetedStatus.getId());
+			if (processedWeibo != null) {
+			  retweetId = String.valueOf(processedWeibo.getTqqWeiboId());
+			} else {
+			  StringBuilder retweetMsg = new StringBuilder();
+			  retweetMsg.append("转发自新浪微博用户 @").append(retweetedStatus.getUser().getName()).append(" \n");
+			  retweetMsg.append(retweetedStatus.getText().trim()).append(" \n");
+			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
+			  if (middleResponse != null && middleResponse.isOK()) {
+				log.info("Retweet Successed!!!");
+				//データストアへ保存する
+				
+				// 同期化履歴レコードの初期化
+				WeiboMap retweetWeiboMap = new WeiboMap();
+				retweetWeiboMap.setSinaWeiboId(retweetedStatus.getId());
+				retweetWeiboMap.setTqqWeiboId(Long.valueOf(middleResponse.getData().getId()));
+				retweetWeiboMap.setUserMapId(null);
+				retweetWeiboMap.setSource(WeiboSource.Sina);
+				retweetWeiboMap.setStatus(WeiboStatus.SUCCESSED);
+				weiboMapDao.save(retweetWeiboMap);
+				retweetId = middleResponse.getData().getId();
+			  }
+			}
+			if (retweetId != null) {
+			  response = tqqWeiboApi.retweetMessage(retweetId, status.getText().trim(), status.getOriginal_pic(), null);
+			}
+
+		  } else {
+			response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getOriginal_pic(), null);
+		  }
 		} catch (Exception e) {
 		  throwable = e;
 		}
 
 		// 処理成功ならば、同期化レコードをデータストアへ保存する
-		if (response != null && Constants.TQQ_SUCCEED.equals(response.getErrcode()) && response.getData() != null) {
+		if (response != null && response.isOK()) {
 
 		  // 同期成功情報を履歴レコードに反映
 		  weiboMap.setStatus(WeiboStatus.SUCCESSED);

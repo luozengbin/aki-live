@@ -17,23 +17,38 @@ public class WeiboApi extends ApiBase {
   private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
 
   protected String sendTextUrl = null;
+  protected String sendretweetUrl = null;
   protected String sendPicUrl = null;
 
   public WeiboApi(AuthToken authToken) {
 	super(authToken);
 	this.sendTextUrl = configMap.get("qq.weibo.send.text.url");
+	this.sendretweetUrl = configMap.get("qq.weibo.send.retweet.url");
 	this.sendPicUrl = configMap.get("qq.weibo.send.pic.url");
   }
 
   public Response sendMessage(String msg, String pic, String clientIp) throws Exception {
-
 	Map<String, String> params = new LinkedHashMap<String, String>();
-
 	params.put("clientip", StringUtils.isNotBlank(clientIp) ? clientIp : Constants.LOOPBACK_IP);
 	params.put("content", msg);
 	params.put("format", "json");
 	params.putAll(getFixedParams());
 
+	return sendMessage(params, pic);
+  }
+
+  public Response retweetMessage(String retweetId, String msg, String pic, String clientIp) throws Exception {
+	Map<String, String> params = new LinkedHashMap<String, String>();
+	params.put("clientip", StringUtils.isNotBlank(clientIp) ? clientIp : Constants.LOOPBACK_IP);
+	params.put("content", msg);
+	params.put("format", "json");
+	params.putAll(getFixedParams());
+	params.put("reid", retweetId);
+
+	return sendMessage(params, pic);
+  }
+
+  private Response sendMessage(Map<String, String> params, String pic) throws Exception {
 	String response = null;
 	if (StringUtils.isNotBlank(pic)) {
 
@@ -45,9 +60,10 @@ public class WeiboApi extends ApiBase {
 	  response = HttpClient.doPostMultipart(this.sendPicUrl, params, fileUrlMaps);
 
 	} else {
-	  String postPayload = getSignedPayload(Constants.HTTP_POST, this.sendTextUrl, params);
+	  String url = params.containsKey("reid") ? this.sendretweetUrl : this.sendTextUrl;
+	  String postPayload = getSignedPayload(Constants.HTTP_POST, url, params);
 	  log.info("postPayload = " + postPayload);
-	  response = HttpClient.doPost(this.sendTextUrl, postPayload);
+	  response = HttpClient.doPost(url, postPayload);
 	}
 	log.info("result --> \n" + response);
 

@@ -53,4 +53,11 @@ public class Response implements java.io.Serializable {
 	return "Response [data=" + data + ", errcode=" + errcode + ", msg=" + msg + ", ret=" + ret + "]";
   }
 
+  public boolean isOK() {
+	boolean result = false;
+	if (ResponseStatus.SUCCEED.equals(getErrcode()) && getData() != null) {
+	  result = true;
+	}
+	return result;
+  }
 }
