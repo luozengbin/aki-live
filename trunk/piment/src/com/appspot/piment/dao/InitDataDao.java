@@ -34,7 +34,7 @@ public class InitDataDao {
 	  values.put("qq.oauth.version", "1.0");
 	  values.put("qq.oauth.signature.method", "HMAC-SHA1");
 	  values.put("qq.authorize.url", "http://open.t.qq.com/oauth_html/login.php");
-	  values.put("qq.oauth.callback", "http://weibotoqq.appspot.com");
+	  values.put("qq.oauth.callback", "http://weibotoqq.appspot.com/piment/auth/callback");
 	  values.put("qq.request.token.url", "https://open.t.qq.com/cgi-bin/request_token");
 	  values.put("qq.access.token.url", "https://open.t.qq.com/cgi-bin/access_token");
 	  values.put("qq.weibo.broadcast.timeline.url", "http://open.t.qq.com/api/statuses/broadcast_timeline");
@@ -46,7 +46,7 @@ public class InitDataDao {
 	  values.put("sina.oauth.consumer.key", "");
 	  values.put("sina.oauth.consumer.secret", "");
 	  values.put("sina.authorize.url", "http://api.t.sina.com.cn/oauth/authenticate");
-	  values.put("sina.oauth.callback", "http://weibotoqq.appspot.com");
+	  values.put("sina.oauth.callback", "http://weibotoqq.appspot.com/piment/auth/callback");
 	  values.put("sina.usertimeline.paging.page", "1");
 	  values.put("sina.usertimeline.paging.count", "20");
 	  values.put("app.admin.email.displayname", "GAEMonitor");

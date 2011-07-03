@@ -4,18 +4,20 @@ import com.appspot.piment.client.rpc.SinaAuthService;
 import com.appspot.piment.client.rpc.SinaAuthServiceAsync;
 import com.appspot.piment.client.rpc.TQQAuthService;
 import com.appspot.piment.client.rpc.TQQAuthServiceAsync;
-import com.appspot.piment.client.rpc.TQQWeiboService;
-import com.appspot.piment.client.rpc.TQQWeiboServiceAsync;
-import com.appspot.piment.shared.StringUtils;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
-import com.google.gwt.event.dom.client.ClickEvent;
-import com.google.gwt.event.dom.client.ClickHandler;
-import com.google.gwt.user.client.Window;
+import com.google.gwt.dom.client.IFrameElement;
 import com.google.gwt.user.client.rpc.AsyncCallback;
-import com.google.gwt.user.client.ui.Button;
-import com.google.gwt.user.client.ui.RootPanel;
-import com.google.gwt.user.client.ui.TextBox;
+import com.google.gwt.user.client.ui.Frame;
+import com.google.gwt.user.client.ui.HTML;
+import com.smartgwt.client.widgets.HTMLPane;
+import com.smartgwt.client.widgets.IButton;
+import com.smartgwt.client.widgets.Window;
+import com.smartgwt.client.widgets.events.ClickEvent;
+import com.smartgwt.client.widgets.events.ClickHandler;
+import com.smartgwt.client.widgets.events.CloseClickHandler;
+import com.smartgwt.client.widgets.events.CloseClientEvent;
+import com.smartgwt.client.widgets.layout.VLayout;
 
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
@@ -26,162 +28,95 @@ public class Piment implements EntryPoint {
    */
   private final TQQAuthServiceAsync qqAuthService = GWT.create(TQQAuthService.class);
 
-  private final TQQWeiboServiceAsync qqWeiboService = GWT.create(TQQWeiboService.class);
-
   private final SinaAuthServiceAsync sinaAuthService = GWT.create(SinaAuthService.class);
 
-  private String mode = null;
-
-  private TextBox msgBox = new TextBox();
+  private enum ActionMode {
+	Sina, Tqq
+  }
 
   /**
    * This is the entry point method.
    */
   public void onModuleLoad() {
 
-	com.google.gwt.core.client.GWT.log("loading!!!");
+	IButton btnAddSinaUser = new IButton("添加新浪微博帐号");
+	btnAddSinaUser.setShowRollOver(true);
+	btnAddSinaUser.setShowDown(true);
+	btnAddSinaUser.addClickHandler(new AddUserClickHandler(ActionMode.Sina));
 
-	final Button sendButton = new Button("Add TQQ User");
+	IButton btnAddTqqUser = new IButton("添加腾讯微博帐号");
+	btnAddTqqUser.setShowRollOver(true);
+	btnAddTqqUser.setShowDown(true);
+	btnAddTqqUser.addClickHandler(new AddUserClickHandler(ActionMode.Tqq));
 
-	sendButton.addClickHandler(new ClickHandler() {
+	VLayout layoutMain = new VLayout();
+	layoutMain.addMember(btnAddSinaUser);
+	layoutMain.addMember(btnAddTqqUser);
 
-	  public void onClick(ClickEvent event) {
+	layoutMain.draw();
+  }
 
-		qqAuthService.requestToken(new AsyncCallback<String>() {
+  class AddUserClickHandler implements ClickHandler {
 
-		  @Override
-		  public void onSuccess(String requestTokenUrl) {
+	private ActionMode mode;
 
-			Window.alert(requestTokenUrl);
+	public AddUserClickHandler(ActionMode mode) {
+	  super();
+	  this.mode = mode;
+	}
 
-			Window.Location.replace(requestTokenUrl);
+	public void onClick(ClickEvent event) {
 
-			mode = "Tqq";
-		  }
+	  final Window winModal = new Window();
+	  winModal.setWidth(800);
+	  winModal.setHeight(600);
+	  winModal.setTitle("帐号授权");
+	  winModal.setShowMinimizeButton(false);
+	  winModal.setIsModal(true);
+	  winModal.setShowModalMask(true);
+	  winModal.centerInPage();
+	  winModal.addCloseClickHandler(new CloseClickHandler() {
+		public void onCloseClick(CloseClientEvent event) {
+		  winModal.destroy();
+		}
+	  });
 
-		  @Override
-		  public void onFailure(Throwable caught) {
-			// TODO 詳細な例外処理
-			Window.alert(caught.getMessage());
-		  }
-		});
-	  }
-	});
+	  final HTMLPane londingContent = new HTMLPane();
+	  londingContent.setContents("<h3>正在处理中，请稍等片刻。</h3>");
+	  winModal.addItem(londingContent);
+	  winModal.show();
 
-	// Add the nameField and sendButton to the RootPanel
-	// Use RootPanel.get() to get the entire body element
-	RootPanel rootPanel = RootPanel.get("qq_content");
-	rootPanel.add(sendButton);
-
-	msgBox.setName("piment_msg_text");
-	rootPanel.add(msgBox);
-	msgBox.setSize("313px", "99px");
-
-	Button btnNewButton = new Button("Send Test Message");
-	btnNewButton.setSize("128px", "30px");
-
-	btnNewButton.addClickHandler(new ClickHandler() {
-
-	  public void onClick(ClickEvent event) {
-
-		qqWeiboService.sendMessage(msgBox.getText(), new AsyncCallback<Void>() {
-
-		  @Override
-		  public void onSuccess(Void result) {
-			Window.alert("scussed!!!");
-		  }
-
-		  @Override
-		  public void onFailure(Throwable caught) {
-			Window.alert("failed!!!");
-		  }
-		});
-	  }
-	});
-	rootPanel.add(btnNewButton);
-
-	Button ftechButton = new Button("FetchMessage");
-	ftechButton.addClickHandler(new ClickHandler() {
-
-	  public void onClick(ClickEvent event) {
-
-		qqWeiboService.fetchMessage(msgBox.getText(), new AsyncCallback<String>() {
-
-		  @Override
-		  public void onSuccess(String result) {
-			msgBox.setText(result);
-		  }
-
-		  @Override
-		  public void onFailure(Throwable caught) {
-			msgBox.setText(caught.getMessage());
-		  }
-		});
-	  }
-	});
-
-	// sina
-	rootPanel.add(ftechButton);
-
-	rootPanel = RootPanel.get("sina_content");
-
-	final Button addSinaButton = new Button("Add Sina User");
-
-	addSinaButton.addClickHandler(new ClickHandler() {
-
-	  public void onClick(ClickEvent event) {
-
-		sinaAuthService.requestToken(new AsyncCallback<String>() {
-
-		  @Override
-		  public void onSuccess(String requestTokenUrl) {
-
-			Window.alert("request sina auth token :" + requestTokenUrl);
-
-			Window.Location.replace(requestTokenUrl);
-
-			mode = "Sina";
-		  }
-
-		  @Override
-		  public void onFailure(Throwable caught) {
-			// TODO 詳細な例外処理
-			Window.alert(caught.getMessage());
-		  }
-		});
-	  }
-	});
-	rootPanel.add(addSinaButton);
-
-	// qq AccessToken取得
-	String oauth_token = Window.Location.getParameter("oauth_token");
-	String oauth_verifier = Window.Location.getParameter("oauth_verifier");
-
-	if (StringUtils.isNotBlank(oauth_token) && StringUtils.isNotBlank(oauth_verifier)) {
-
-	  AsyncCallback<String> asyncCallback_001 = new AsyncCallback<String>() {
-
+	  AsyncCallback<String> requestTokenCallback = new AsyncCallback<String>() {
 		@Override
-		public void onSuccess(String result) {
-		  Window.alert(result);
-
-		  Window.Location.replace(Window.Location.getPath());
+		public void onSuccess(String requestTokenUrl) {
+		  Frame frame = new Frame(requestTokenUrl);
+		  frame.setWidth("100%");
+		  frame.setHeight("100%");
+		  // setScrolling
+		  IFrameElement frameElement = IFrameElement.as(frame.getElement());
+		  frameElement.setScrolling("no");
+		  frameElement.setName("_self");
+		  londingContent.destroy();
+		  winModal.addItem(frame);
 		}
 
 		@Override
 		public void onFailure(Throwable caught) {
-		  // TODO 詳細な例外処理
-		  Window.alert(caught.getMessage());
+		  HTML errorContent = new HTML("<h3><font color='red'>" + caught.getMessage() + "</font></h3>");
+		  winModal.addItem(errorContent);
 		}
 	  };
 
-	  //if ("Tqq".equals(mode)) {
-		//qqAuthService.exchangeToken(oauth_token, oauth_verifier, asyncCallback_001);
-	  //}
-
-	  //if ("Sina".equals(mode)) {
-		//sinaAuthService.exchangeToken(oauth_token, oauth_verifier, asyncCallback_001);
-	  //}
+	  switch (mode) {
+	  case Sina:
+		sinaAuthService.requestToken(requestTokenCallback);
+		break;
+	  case Tqq:
+		qqAuthService.requestToken(requestTokenCallback);
+		break;
+	  default:
+		break;
+	  }
 	}
   }
 }
