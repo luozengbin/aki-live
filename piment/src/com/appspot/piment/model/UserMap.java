@@ -11,7 +11,7 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
-@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
+@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
 public class UserMap {
 
   @PrimaryKey
@@ -23,10 +23,6 @@ public class UserMap {
 
   @Persistent
   private String sinaUserId;
-
-  /** 同期化処理失敗時リトライ制約フラグ */
-  @Persistent
-  private boolean retryAction;
 
   /** 同期化頻度 */
   @Persistent
@@ -84,14 +80,6 @@ public class UserMap {
 
   public void setSinaUserId(String sinaUserId) {
 	this.sinaUserId = sinaUserId;
-  }
-
-  public boolean isRetryAction() {
-	return retryAction;
-  }
-
-  public void setRetryAction(boolean retryAction) {
-	this.retryAction = retryAction;
   }
 
   public int getFrequency() {
@@ -152,8 +140,33 @@ public class UserMap {
 
   @Override
   public String toString() {
-	return "UserMap [id=" + id + ", tqqUserId=" + tqqUserId + ", sinaUserId=" + sinaUserId + ", retryAction=" + retryAction + ", frequency=" + frequency + ", features=" + features + ", createTime="
-	    + createTime + ", creator=" + creator + ", updateTime=" + updateTime + ", updator=" + updator + ", disable=" + disable + "]";
+	return "UserMap [id=" + id + ", tqqUserId=" + tqqUserId + ", sinaUserId=" + sinaUserId + ", frequency=" + frequency + ", features=" + features + ", createTime=" + createTime + ", creator="
+	    + creator + ", updateTime=" + updateTime + ", updator=" + updator + ", disable=" + disable + "]";
+  }
+  
+  //SINAからTQQへの同期化制御値
+  public boolean sinaToTqq() {
+	return Boolean.valueOf(getFeatureValue(Feature.Name.SINA_TO_TQQ));
+  }
+  
+  //自動リトライするか？
+  public boolean isAutoRetry() {
+	return Boolean.valueOf(getFeatureValue(Feature.Name.AUTO_RETRY));
   }
 
+  // メッセージ検証するか？
+  public boolean isNeededMessageVirify() {
+	return Boolean.valueOf(getFeatureValue(Feature.Name.MESSAGE_VIRIFY));
+  }
+
+  public String getFeatureValue(Feature.Name featureName) {
+	if (this.features != null) {
+	  for (Feature feature : this.features) {
+		if (feature.getName().equals(Feature.Name.MESSAGE_VIRIFY)) {
+		  return feature.getValue();
+		}
+	  }
+	}
+	return null;
+  }
 }

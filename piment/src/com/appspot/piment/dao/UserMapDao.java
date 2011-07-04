@@ -33,6 +33,8 @@ public class UserMapDao {
 	  for (UserMap userMap : userMapList) {
 		// 制御フラグより
 		if (!userMap.isDisable() && StringUtils.isNotBlank(userMap.getSinaUserId()) && StringUtils.isNotBlank(userMap.getTqqUserId())) {
+		  userMap.getFeatures().size();
+		  userMap = pm.detachCopy(userMap);
 		  result.add(userMap);
 		}
 	  }

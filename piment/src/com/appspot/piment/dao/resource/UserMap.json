@@ -1,0 +1,53 @@
+[
+	{
+		"autoRetry": true,
+		"createTime": 1309767278343,
+		"creator": "com.appspot.piment.dao.UserMapDao",
+		"disable": false,
+		"features": [
+			{
+				"id": null,
+				"name": 0,
+				"strName": "SINA_TO_TQQ",
+				"value": "true"
+			},
+			{
+				"id": null,
+				"name": 1,
+				"strName": "SINA_TO_TQQ_COMMENT",
+				"value": "true"
+			},
+			{
+				"id": null,
+				"name": 2,
+				"strName": "TQQ_O_SINA",
+				"value": "true"
+			},
+			{
+				"id": null,
+				"name": 3,
+				"strName": "TQQ_O_SINA_COMMENT",
+				"value": "true"
+			},
+			{
+				"id": null,
+				"name": 4,
+				"strName": "AUTO_RETRY",
+				"value": "true"
+			},
+			{
+				"id": null,
+				"name": 5,
+				"strName": "MESSAGE_VIRIFY",
+				"value": "true"
+			}
+		],
+		"frequency": 15,
+		"id": 36014,
+		"neededMessageVirify": true,
+		"sinaUserId": "",
+		"tqqUserId": "",
+		"updateTime": 1309767278343,
+		"updator": "com.appspot.piment.dao.UserMapDao"
+	}
+]

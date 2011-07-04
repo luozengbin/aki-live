@@ -1,0 +1,137 @@
+[
+	{
+		"id": null,
+		"key": "qq.oauth.consumer.key",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "qq.oauth.consumer.secret",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "qq.oauth.version",
+		"value": "1.0"
+	},
+	{
+		"id": null,
+		"key": "qq.oauth.signature.method",
+		"value": "HMAC-SHA1"
+	},
+	{
+		"id": null,
+		"key": "qq.authorize.url",
+		"value": "http://open.t.qq.com/oauth_html/login.php"
+	},
+	{
+		"id": null,
+		"key": "qq.oauth.callback",
+		"value": "http://weibotoqq.appspot.com/piment/auth/callback"
+	},
+	{
+		"id": null,
+		"key": "qq.request.token.url",
+		"value": "https://open.t.qq.com/cgi-bin/request_token"
+	},
+	{
+		"id": null,
+		"key": "qq.access.token.url",
+		"value": "https://open.t.qq.com/cgi-bin/access_token"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.broadcast.timeline.url",
+		"value": "http://open.t.qq.com/api/statuses/broadcast_timeline"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.send.text.url",
+		"value": "http://open.t.qq.com/api/t/add"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.send.pic.url",
+		"value": "http://open.t.qq.com/api/t/add_pic"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.send.retweet.url",
+		"value": "http://open.t.qq.com/api/t/re_add"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.broadcast.timeline.reqnum",
+		"value": "20"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.broadcast.timeline.pageflag ",
+		"value": "0"
+	},
+	{
+		"id": null,
+		"key": "qq.weibo.broadcast.timeline.pageflag",
+		"value": "0"
+	},
+	{
+		"id": null,
+		"key": "sina.oauth.consumer.key",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "sina.oauth.consumer.secret",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "sina.authorize.url",
+		"value": "http://api.t.sina.com.cn/oauth/authenticate"
+	},
+	{
+		"id": null,
+		"key": "sina.oauth.callback",
+		"value": "http://weibotoqq.appspot.com/piment/auth/callback"
+	},
+	{
+		"id": null,
+		"key": "sina.usertimeline.paging.page",
+		"value": "1"
+	},
+	{
+		"id": null,
+		"key": "sina.usertimeline.paging.count",
+		"value": "20"
+	},
+	{
+		"id": null,
+		"key": "app.admin.email.displayname",
+		"value": "GAEMonitor"
+	},
+	{
+		"id": null,
+		"key": "app.admin.email.address",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "app.sync.message.max.retry",
+		"value": "3"
+	},
+	{
+		"id": null,
+		"key": "qq.piment.robot.id",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "sina.piment.robot.id",
+		"value": ""
+	},
+	{
+		"id": null,
+		"key": "app.piment.unsync.keyword",
+		"value": ""
+	}
+]

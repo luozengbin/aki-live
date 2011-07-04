@@ -6,17 +6,23 @@ import javax.jdo.annotations.PersistenceCapable;
 import javax.jdo.annotations.Persistent;
 import javax.jdo.annotations.PrimaryKey;
 
+import net.arnx.jsonic.JSONHint;
+
 import com.google.appengine.api.datastore.Key;
 
-@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable="true")
+@PersistenceCapable(identityType = IdentityType.APPLICATION, detachable = "true")
 public class Feature {
+
+  public enum Name {
+	SINA_TO_TQQ, SINA_TO_TQQ_COMMENT, TQQ_O_SINA, TQQ_O_SINA_COMMENT, AUTO_RETRY, MESSAGE_VIRIFY
+  }
 
   @PrimaryKey
   @Persistent(valueStrategy = IdGeneratorStrategy.IDENTITY)
   private Key id;
 
   @Persistent
-  private String name;
+  private Feature.Name name;
 
   @Persistent
   private String value;
@@ -28,7 +34,7 @@ public class Feature {
 	super();
   }
 
-  public Feature(com.appspot.piment.model.UserMap userMap, String name, String value) {
+  public Feature(com.appspot.piment.model.UserMap userMap, Feature.Name name, String value) {
 	super();
 	this.name = name;
 	this.value = value;
@@ -43,12 +49,17 @@ public class Feature {
 	this.id = id;
   }
 
-  public String getName() {
+  public Feature.Name getName() {
 	return name;
+
   }
 
-  public void setName(String name) {
+  public void setName(Feature.Name name) {
 	this.name = name;
+  }
+
+  public String getStrName() {
+	return name.toString();
   }
 
   public String getValue() {
@@ -59,6 +70,7 @@ public class Feature {
 	this.value = value;
   }
 
+  @JSONHint(ignore = true)
   public UserMap getUserMap() {
 	return userMap;
   }
