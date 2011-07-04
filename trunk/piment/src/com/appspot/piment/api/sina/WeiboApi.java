@@ -3,11 +3,15 @@ package com.appspot.piment.api.sina;
 import java.util.List;
 import java.util.logging.Logger;
 
+import net.arnx.jsonic.JSON;
+
 import weibo4j.Paging;
 import weibo4j.Status;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.AuthToken;
+import com.appspot.piment.shared.StringUtils;
+import com.appspot.piment.util.HttpClient;
 
 public class WeiboApi extends ApiBase {
 
@@ -69,4 +73,28 @@ public class WeiboApi extends ApiBase {
   public static String getStatusPageURL(Long userId, Long statusId) {
 	return "http://api.t.sina.com.cn/" + String.valueOf(userId) + "/statuses/" + String.valueOf(statusId);
   }
+  
+  public String getOriginalMsg(String sinaMsg) {
+	List<String> urls = StringUtils.getUrlList(sinaMsg);
+	for (String url : urls) {
+	  sinaMsg = sinaMsg.replace(url, expandShortUrl(url));
+    }
+	return sinaMsg;
+  }
+
+  public String expandShortUrl(String shortUrl) {
+
+	StringBuilder url = new StringBuilder();
+	try {
+	  url.append("http://api.t.sina.com.cn/short_url/expand.json?");
+	  url.append("source=").append(this.configMap.get("sina.oauth.consumer.key"));
+	  url.append("&url_short=").append(shortUrl);
+	  String response = HttpClient.doGet(url.toString());
+	  ExpandURL expandURL = JSON.decode(response, ExpandURL.class);
+	  return expandURL.getUrl_long() != null ? expandURL.getUrl_long() : shortUrl;
+	} catch (Exception e) {
+	  return shortUrl;
+	}
+  }
+
 }

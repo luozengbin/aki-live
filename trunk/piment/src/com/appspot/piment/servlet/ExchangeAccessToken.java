@@ -10,13 +10,12 @@ import com.appspot.piment.Constants;
 import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.WeiboSource;
-import com.appspot.piment.rpc.TQQAuthServiceImpl;
 
 public class ExchangeAccessToken extends HttpServlet {
 
   private static final long serialVersionUID = 6662180842235417313L;
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + TQQAuthServiceImpl.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + ExchangeAccessToken.class.getName());
 
   private AuthTokenDao authTokenDao = new AuthTokenDao();
 

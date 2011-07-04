@@ -122,7 +122,7 @@ public class Job1001 extends HttpServlet {
 				for (WeiboMap retryWeiboMap : retryWeiboMaps) {
 				  if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
 					// RETRY
-					syncSinaUserMessage(tqqWeiboApi, userMap, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
+					syncSinaUserMessage(sinaWeiboApi, tqqWeiboApi, userMap, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
 
 				  } else {
 					// ABORT
@@ -147,7 +147,7 @@ public class Job1001 extends HttpServlet {
 			Status status = null;
 			for (int i = newUserMessages.size() - 1; i >= 0; i--) {
 			  status = newUserMessages.get(i);
-			  syncSinaUserMessage(tqqWeiboApi, userMap, status, new WeiboMap());
+			  syncSinaUserMessage(sinaWeiboApi, tqqWeiboApi, userMap, status, new WeiboMap());
 			}
 		  } // -- [ST001 END]
 		} catch (Exception e) {
@@ -182,11 +182,11 @@ public class Job1001 extends HttpServlet {
 	}
   }
 
-  private void syncSinaUserMessage(com.appspot.piment.api.tqq.WeiboApi tqqWeiboApi, UserMap userMap, Status status, WeiboMap weiboMap) {
+  private void syncSinaUserMessage(com.appspot.piment.api.sina.WeiboApi sinaWeiboApi, com.appspot.piment.api.tqq.WeiboApi tqqWeiboApi, UserMap userMap, Status status, WeiboMap weiboMap) {
 	try {
 
 	  log.info("sina[" + status.getId() + "]メッセージ同期化中...");
-	  
+
 	  log.info(JSON.encode(status, true));
 
 	  // テキストメッセージなら
@@ -216,6 +216,7 @@ public class Job1001 extends HttpServlet {
 		// 同じメッセージをtqqへ発表する
 		Response response = null;
 		Throwable throwable = null;
+		String originalMsg = null;
 		try {
 		  // 转发微博的处理
 		  if (status.isRetweet()) {
@@ -228,10 +229,13 @@ public class Job1001 extends HttpServlet {
 			if (processedWeibo != null) {
 			  retweetId = String.valueOf(processedWeibo.getTqqWeiboId());
 			} else {
+
+			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
+
 			  StringBuilder retweetMsg = new StringBuilder();
 			  retweetMsg.append("转发自Sina//@").append(retweetedStatus.getUser().getName());
-			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.WeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()) + "//源内容:");
-			  retweetMsg.append(retweetedStatus.getText().trim()).append(" \n");
+			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.WeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()) + "//源内容-->");
+			  retweetMsg.append(originalMsg).append(" \n");
 
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
@@ -250,12 +254,14 @@ public class Job1001 extends HttpServlet {
 			  }
 			}
 			if (retweetId != null) {
-			  response = tqqWeiboApi.retweetMessage(retweetId, status.getText().trim(), status.getOriginal_pic(), null);
+			  originalMsg = sinaWeiboApi.getOriginalMsg(status.getText().trim());
+			  response = tqqWeiboApi.retweetMessage(retweetId, originalMsg, status.getOriginal_pic(), null);
 			}
 
 		  } else { // 转发微博的处理　-　END
 
 			// 普通微博的处理
+			originalMsg = sinaWeiboApi.getOriginalMsg(status.getText().trim());
 			response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getOriginal_pic(), null);
 		  }
 		} catch (Exception e) {
