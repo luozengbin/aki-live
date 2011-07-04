@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
 	<cron>
-		<url>/crons/job1001</url>
+		<url>/piment/crons/job1001</url>
 		<description>cronttwit the run every 15 minutes</description>
 		<schedule>every 15 minutes</schedule>
 		<timezone>Asia/Tokyo</timezone>
