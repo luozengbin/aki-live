@@ -2,7 +2,7 @@ package com.appspot.piiman.client;
 
 import java.io.UnsupportedEncodingException;
 
-import com.appspot.piment.dao.InitDataDao;
+import com.appspot.piment.shared.StringUtils;
 
 public class JSONTest001 {
 
@@ -12,8 +12,22 @@ public class JSONTest001 {
    */
   public static void main(String[] args) throws UnsupportedEncodingException {
 
-	InitDataDao initDataDao = new InitDataDao();
-	initDataDao.initUserMap();
+	
+	System.out.println(StringUtils.getUrlList("http://www.google.com"));
+	
+	System.out.println(StringUtils.getUrlList(" http://www.google.com "));
+	
+	System.out.println(StringUtils.getUrlList(" http://www.google.com http://www.sina.com"));
+	
+	System.out.println(StringUtils.getUrlList(" http://www.google.com　http://www.sina.com"));
+	System.out.println(StringUtils.getUrlList(" http://www.google.com　http://www.sina.com　"));
+	
+	System.out.println(StringUtils.getUrlList("　　　http://www.google.com　http://www.sina.com　"));
+	
+	System.out.println(StringUtils.getUrlList("　　　http://www.google.com　/n/n/nhttp://www.sina.com　"));
+	
+	System.out.println(StringUtils.getUrlList("　　　http://www.google.com,http://www.sina.com　"));
+	
   }
 
 }
