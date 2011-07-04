@@ -2,7 +2,7 @@
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
                          "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
-	<!-- Servlets -->
+	<!-- RPC ervlets -->
 	<servlet>
 		<servlet-name>tqqAuthServlet</servlet-name>
 		<servlet-class>com.appspot.piment.rpc.TQQAuthServiceImpl</servlet-class>
@@ -11,17 +11,21 @@
 		<servlet-name>tqqWeiboServlet</servlet-name>
 		<servlet-class>com.appspot.piment.rpc.TQQWeiboServiceImpl</servlet-class>
 	</servlet>
-
 	<servlet>
 		<servlet-name>sinaAuthServlet</servlet-name>
 		<servlet-class>com.appspot.piment.rpc.SinaAuthServiceImpl</servlet-class>
+	</servlet>
+	<!-- Http Servlets -->
+	<servlet>
+		<servlet-name>initStoreData</servlet-name>
+		<servlet-class>com.appspot.piment.servlet.InitStoreData</servlet-class>
 	</servlet>
 	<servlet>
 		<servlet-name>exchangeAccessToken</servlet-name>
 		<servlet-class>com.appspot.piment.servlet.ExchangeAccessToken</servlet-class>
 	</servlet>
 
-
+	<!-- Http Servlets for jobs -->
 	<servlet>
 		<servlet-name>job1001</servlet-name>
 		<servlet-class>com.appspot.piment.jobs.Job1001</servlet-class>
@@ -40,12 +44,15 @@
 		<servlet-name>tqqWeiboServlet</servlet-name>
 		<url-pattern>/piment/tqq/weibo</url-pattern>
 	</servlet-mapping>
-
 	<servlet-mapping>
 		<servlet-name>sinaAuthServlet</servlet-name>
 		<url-pattern>/piment/sina/auth</url-pattern>
 	</servlet-mapping>
 
+	<servlet-mapping>
+		<servlet-name>initStoreData</servlet-name>
+		<url-pattern>/piment/admin/initStoreData</url-pattern>
+	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>exchangeAccessToken</servlet-name>
 		<url-pattern>/piment/auth/callback</url-pattern>
@@ -53,12 +60,11 @@
 
 	<servlet-mapping>
 		<servlet-name>job1001</servlet-name>
-		<url-pattern>/crons/job1001</url-pattern>
+		<url-pattern>/piment/crons/job1001</url-pattern>
 	</servlet-mapping>
-
 	<servlet-mapping>
 		<servlet-name>job1002</servlet-name>
-		<url-pattern>/crons/job1002</url-pattern>
+		<url-pattern>/piment/crons/job1002</url-pattern>
 	</servlet-mapping>
 
 	<!-- Default page to serve -->
@@ -69,7 +75,8 @@
 	<!-- Security and Authentication -->
 	<security-constraint>
 		<web-resource-collection>
-			<url-pattern>/crons/*</url-pattern>
+			<url-pattern>/piment/crons/*</url-pattern>
+			<url-pattern>/piment/admin/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>admin</role-name>
