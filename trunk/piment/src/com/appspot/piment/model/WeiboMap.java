@@ -142,5 +142,4 @@ public class WeiboMap {
 	return "WeiboMap [id=" + id + ", userMapId=" + userMapId + ", source=" + source + ", tqqWeiboId=" + tqqWeiboId + ", sinaWeiboId=" + sinaWeiboId + ", status=" + status + ", retryCount="
 	    + retryCount + ", createTime=" + createTime + ", creator=" + creator + ", updateTime=" + updateTime + ", updator=" + updator + "]";
   }
-
 }

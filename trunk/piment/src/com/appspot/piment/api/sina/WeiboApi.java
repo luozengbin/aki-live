@@ -65,4 +65,8 @@ public class WeiboApi extends ApiBase {
 	  throw new RuntimeException(e);
 	}
   }
+
+  public static String getStatusPageURL(Long userId, Long statusId) {
+	return "http://api.t.sina.com.cn/" + String.valueOf(userId) + "/statuses/" + String.valueOf(statusId);
+  }
 }

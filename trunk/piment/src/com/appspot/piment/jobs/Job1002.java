@@ -23,18 +23,21 @@ public class Job1002 extends HttpServlet {
 
 	try {
 
+	  log.info("-- job1002 start --");
 	  InitDataDao initDataDao = new InitDataDao();
 
 	  initDataDao.initConfigItem();
 
-	  // initDataDao.initAuthToken();
+	  initDataDao.initJobStatus();
 
-	  // initDataDao.initUserMap();
+	  initDataDao.initAuthToken();
 
-	  // initDataDao.initJobStatus();
+	  initDataDao.initUserMap();
 
 	} catch (Exception e) {
 	  throw new RuntimeException(e);
+	} finally {
+	  log.info("-- job1002 end --");
 	}
 
   }
