@@ -33,6 +33,12 @@
 		<servlet-class>com.appspot.piment.jobs.Job1002</servlet-class>
 	</servlet>
 	
+	<!-- データクリアジョブ -->
+	<servlet>
+		<servlet-name>job1009</servlet-name>
+		<servlet-class>com.appspot.piment.jobs.Job1009</servlet-class>
+	</servlet>
+		
 	<!-- RPC URL -->
 	<servlet-mapping>
 		<servlet-name>tqqAuthServlet</servlet-name>
@@ -62,7 +68,11 @@
 		<servlet-name>job1002</servlet-name>
 		<url-pattern>/piment/crons/job1002</url-pattern>
 	</servlet-mapping>
-
+	<servlet-mapping>
+		<servlet-name>job1009</servlet-name>
+		<url-pattern>/piment/crons/job1009</url-pattern>
+	</servlet-mapping>
+	
 	<!-- Default page to serve -->
 	<welcome-file-list>
 		<welcome-file>piment.html</welcome-file>
