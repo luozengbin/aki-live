@@ -18,11 +18,5 @@ public interface Constants {
   String HTTP_ENCODEING = "utf-8";
   
   String LOOPBACK_IP = "127.0.0.1";
-  
-  String HTTP_URL_PREFIX = "http://";
-  
-  String HALF_SPACE = " ";
-  
-  String FULL_SPACE = "　";
 
 }

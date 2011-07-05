@@ -73,28 +73,31 @@ public class WeiboApi extends ApiBase {
   public static String getStatusPageURL(Long userId, Long statusId) {
 	return "http://api.t.sina.com.cn/" + String.valueOf(userId) + "/statuses/" + String.valueOf(statusId);
   }
-  
+
   public String getOriginalMsg(String sinaMsg) {
 	List<String> urls = StringUtils.getUrlList(sinaMsg);
 	for (String url : urls) {
-	  sinaMsg = sinaMsg.replace(url, expandShortUrl(url));
-    }
+	  sinaMsg = sinaMsg.replace(url, getLongUrl(url));
+	}
 	return sinaMsg;
   }
 
-  public String expandShortUrl(String shortUrl) {
-
+  public String getLongUrl(String shortUrl) {
+	String result = null;
+	log.info("ShortUrl : " + shortUrl);
 	StringBuilder url = new StringBuilder();
 	try {
 	  url.append("http://api.t.sina.com.cn/short_url/expand.json?");
 	  url.append("source=").append(this.configMap.get("sina.oauth.consumer.key"));
 	  url.append("&url_short=").append(shortUrl);
 	  String response = HttpClient.doGet(url.toString());
-	  ExpandURL expandURL = JSON.decode(response, ExpandURL.class);
-	  return expandURL.getUrl_long() != null ? expandURL.getUrl_long() : shortUrl;
+	  ExpandURL expandURL = (JSON.decode(response, ExpandURL[].class))[0];
+	  result = expandURL.getUrl_long() != null ? expandURL.getUrl_long() : shortUrl;
 	} catch (Exception e) {
-	  return shortUrl;
+	  result = shortUrl;
 	}
+	log.info("LongUrl : " + result);
+	return result;
   }
 
 }
