@@ -9,7 +9,6 @@ import java.util.logging.Logger;
 import net.arnx.jsonic.JSON;
 
 import com.appspot.piment.Constants;
-import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.HttpClient;
 
@@ -23,8 +22,8 @@ public class WeiboApi extends ApiBase {
 
   protected String sendPicUrl = null;
 
-  public WeiboApi(AuthToken authToken) {
-	super(authToken);
+  public WeiboApi(Map<String, String> configItem) {
+	super(configItem);
 	this.sendTextUrl = configMap.get("qq.weibo.send.text.url");
 	this.sendVideoUrl = configMap.get("qq.weibo.send.video.url");
 	this.sendretweetUrl = configMap.get("qq.weibo.send.retweet.url");

@@ -37,11 +37,19 @@ public class ApiBase {
 	this.authToken = authToken;
   }
 
+  public ApiBase(Map<String, String> configMap) {
+	super();
+	this.configMap = configMap;
+	this.init();
+  }
+
   private void init() {
 
-	ConfigItemDao configItemDao = new ConfigItemDao();
+	if (this.configMap == null) {
+	  ConfigItemDao configItemDao = new ConfigItemDao();
 
-	this.configMap = configItemDao.getValues();
+	  this.configMap = configItemDao.getValues();
+	}
 
 	this.baseParams = new BaseParams();
 
@@ -72,7 +80,7 @@ public class ApiBase {
 	String payload = urlParams.toString() + "&oauth_signature=" + encode(oauth_signature);
 	return payload;
   }
-  
+
   public String getSignature(String httpMethod, String targetURL, Map<String, String> params) throws Exception {
 
 	String urlParams = getURLParams(params);
@@ -160,4 +168,7 @@ public class ApiBase {
 	return buf.toString();
   }
 
+  public void setAuthToken(AuthToken authToken) {
+	this.authToken = authToken;
+  }
 }

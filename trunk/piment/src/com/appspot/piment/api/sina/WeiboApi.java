@@ -1,15 +1,14 @@
 package com.appspot.piment.api.sina;
 
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Logger;
 
 import net.arnx.jsonic.JSON;
-
 import weibo4j.Paging;
 import weibo4j.Status;
 
 import com.appspot.piment.Constants;
-import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.HttpClient;
 
@@ -22,8 +21,8 @@ public class WeiboApi extends ApiBase {
 	this.subInit();
   }
 
-  public WeiboApi(AuthToken authToken) {
-	super(authToken);
+  public WeiboApi(Map<String, String> configItem) {
+	super(configItem);
 	this.subInit();
   }
 

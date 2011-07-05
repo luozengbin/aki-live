@@ -20,21 +20,33 @@ public abstract class ApiBase {
 	this.init();
   }
 
+  public ApiBase(Map<String, String> configMap) {
+	super();
+	this.configMap = configMap;
+	this.init();
+  }
+
   public ApiBase(AuthToken authToken) {
 	super();
 	this.init();
-	this.authToken = authToken;
-	this.weibo = new Weibo();
-	this.weibo.setOAuthAccessToken(this.authToken.getToken(), this.authToken.getTokenSecret());
+	this.setAuthToken(authToken);
   }
 
   private void init() {
-	ConfigItemDao configItemDao = new ConfigItemDao();
-	this.configMap = configItemDao.getValues();
+	if (this.configMap == null) {
+	  ConfigItemDao configItemDao = new ConfigItemDao();
+	  this.configMap = configItemDao.getValues();
+	}
 	Weibo.CONSUMER_KEY = configMap.get("sina.oauth.consumer.key");
 	Weibo.CONSUMER_SECRET = configMap.get("sina.oauth.consumer.secret");
 	System.setProperty("weibo4j.oauth.consumerKey", Weibo.CONSUMER_KEY);
 	System.setProperty("weibo4j.oauth.consumerSecret", Weibo.CONSUMER_SECRET);
+
+	this.weibo = new Weibo();
   }
 
+  public void setAuthToken(AuthToken authToken) {
+	this.authToken = authToken;
+	this.weibo.setOAuthAccessToken(this.authToken.getToken(), this.authToken.getTokenSecret());
+  }
 }
