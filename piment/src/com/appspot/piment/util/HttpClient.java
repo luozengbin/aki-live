@@ -44,7 +44,7 @@ public class HttpClient {
 
 	java.net.URL url = new java.net.URL(strUrl);
 
-	HTTPRequest request = new HTTPRequest(url, HTTPMethod.POST, FetchOptions.Builder.withDeadline(TIMEOUT_SECONDS));
+	HTTPRequest request = new HTTPRequest(url, HTTPMethod.POST, FetchOptions.Builder.withDeadline(TIMEOUT_SECONDS).allowTruncate());
 
 	request.setPayload(payload.getBytes());
 	
@@ -63,7 +63,7 @@ public class HttpClient {
 
 	java.net.URL url = new java.net.URL(strUrl);
 
-	HTTPRequest request = new HTTPRequest(url, HTTPMethod.POST, FetchOptions.Builder.withDeadline(TIMEOUT_SECONDS));
+	HTTPRequest request = new HTTPRequest(url, HTTPMethod.POST, FetchOptions.Builder.withDeadline(TIMEOUT_SECONDS).allowTruncate());
 
 	String boundary = makeBoundary();
 	request.setHeader(new HTTPHeader("Content-Type", "multipart/form-data; boundary=" + boundary));
