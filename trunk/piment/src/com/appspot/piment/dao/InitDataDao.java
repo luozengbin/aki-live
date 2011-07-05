@@ -64,6 +64,7 @@ public class InitDataDao {
 	  Field field = null;
 	  StringBuilder filterStr = null;
 	  Map<String, Object> paramsMap = null;
+
 	  for (Map<String, String> jobEntry : entityList) {
 
 		entity = JSON.decode(JSON.encode(jobEntry), entityClzss);
@@ -72,29 +73,39 @@ public class InitDataDao {
 
 		paramsMap = new LinkedHashMap<String, Object>();
 
+		List<T> results = null;
 		filterStr = new StringBuilder();
 		String optStr = " && ";
+		boolean checkUpdate = true;
 		for (String fieldName : filterFields) {
 		  filterStr.append(fieldName).append(" == :").append(fieldName);
 		  filterStr.append(optStr);
 
 		  field = entityClzss.getDeclaredField(fieldName);
 		  field.setAccessible(true);
+
+		  if (field.get(entity) == null) {
+			checkUpdate = false;
+			break;
+		  }
+
 		  paramsMap.put(fieldName, field.get(entity));
 
 		}
-		filterStr = filterStr.delete(filterStr.length() - optStr.length(), filterStr.length() - 1);
+		if (checkUpdate) {
+		  filterStr = filterStr.delete(filterStr.length() - optStr.length(), filterStr.length() - 1);
 
-		query.setFilter(filterStr.toString());
+		  query.setFilter(filterStr.toString());
 
-		List<T> results = (List<T>) query.executeWithMap(paramsMap);
+		  results = (List<T>) query.executeWithMap(paramsMap);
+		}
 
 		if (results != null && results.size() > 0) {
-		  entity = results.get(0);
-		  log.info("updating --> " + entity);
-		} else {
-		  log.info("creating --> " + entity);
+		  pm.deletePersistent(results.get(0));
+		  log.info("delete  --> " + entity);
 		}
+		
+		log.info("creating --> " + entity);
 
 		pm.makePersistent(entity);
 	  }

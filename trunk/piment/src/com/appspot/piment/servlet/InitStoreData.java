@@ -1,5 +1,7 @@
 package com.appspot.piment.servlet;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServlet;
@@ -18,16 +20,26 @@ public class InitStoreData extends HttpServlet {
   public void doGet(HttpServletRequest req, HttpServletResponse resp) {
 
 	log.info("InitStoreData -- start");
-	
+
 	InitDataDao initDataDao = new InitDataDao();
 
-	initDataDao.initConfigItem();
+	List<String> initTargets = Arrays.asList(req.getParameter("initTarget").split(","));
 
-	initDataDao.initJobStatus();
+	if (initTargets.contains("ConfigItem")) {
+	  initDataDao.initConfigItem();
+	}
 
-	initDataDao.initAuthToken();
+	if (initTargets.contains("JobStatus")) {
+	  initDataDao.initJobStatus();
+	}
 
-	initDataDao.initUserMap();
+	if (initTargets.contains("AuthToken")) {
+	  initDataDao.initAuthToken();
+	}
+
+	if (initTargets.contains("UserMap")) {
+	  initDataDao.initUserMap();
+	}
 
 	log.info("InitStoreData -- end");
   }
