@@ -5,9 +5,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.appspot.piment.Constants;
-
 public class StringUtils {
+
+  private static final String HTTP_URL_PREFIX = "http://";
+
+  private static final String HALF_SPACE = " ";
+
+  private static final String FULL_SPACE = "　";
 
   public static Map<String, String> toParamMap(String str) {
 
@@ -49,12 +53,12 @@ public class StringUtils {
 
 	int idxOfURLPerfix = -1;
 	int idxOfSpace = -1;
-	while ((idxOfURLPerfix = sb.lastIndexOf(Constants.HTTP_URL_PREFIX)) >= 0) {
+	while ((idxOfURLPerfix = sb.lastIndexOf(HTTP_URL_PREFIX)) >= 0) {
 
 	  String tempStr = sb.substring(idxOfURLPerfix);
-	  idxOfSpace = tempStr.indexOf(Constants.HALF_SPACE);
+	  idxOfSpace = tempStr.indexOf(HALF_SPACE);
 	  if (idxOfSpace < 0) {
-		idxOfSpace = tempStr.indexOf(Constants.FULL_SPACE);
+		idxOfSpace = tempStr.indexOf(FULL_SPACE);
 	  }
 
 	  if (idxOfSpace >= 0) {

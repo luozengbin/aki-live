@@ -7,7 +7,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.appspot.piment.Constants;
-import com.appspot.piment.dao.InitDataDao;
 
 public class Job1002 extends HttpServlet {
 
@@ -24,7 +23,6 @@ public class Job1002 extends HttpServlet {
 	try {
 
 	  log.info("-- job1002 start --");
-
 
 	} catch (Exception e) {
 	  throw new RuntimeException(e);

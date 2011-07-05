@@ -61,6 +61,11 @@
 	},
 	{
 		"id": null,
+		"key": "qq.weibo.send.video.url",
+		"value": "http://open.t.qq.com/api/t/add_video"
+	},
+	{
+		"id": null,
 		"key": "qq.weibo.broadcast.timeline.reqnum",
 		"value": "20"
 	},
@@ -133,5 +138,10 @@
 		"id": null,
 		"key": "app.piment.unsync.keyword",
 		"value": ""
+	},
+	{
+		"id": null,
+		"key": "app.piment.video.sites",
+		"value": "youku.com,ku6.com,tudou.com,56.com,video.sina.com.cn,www.joy.cn,.youtube."
 	}
 ]
