@@ -1,9 +1,10 @@
 [
 	{
+		"createTime": 1309767278343,
 		"id": null,
 		"token": "",
 		"tokenSecret": "",
 		"type": 1,
-		"userName": ""
+		"userName": null
 	}
 ]

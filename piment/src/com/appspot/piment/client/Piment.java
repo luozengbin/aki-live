@@ -7,6 +7,8 @@ import com.appspot.piment.client.rpc.TQQAuthServiceAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.dom.client.IFrameElement;
+import com.google.gwt.event.dom.client.LoadEvent;
+import com.google.gwt.event.dom.client.LoadHandler;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
@@ -90,6 +92,17 @@ public class Piment implements EntryPoint {
 		@Override
 		public void onSuccess(String requestTokenUrl) {
 		  Frame frame = new Frame(requestTokenUrl);
+		  
+//		  frame.addLoadHandler(new LoadHandler() {
+//		    
+//		    @Override
+//		    public void onLoad(LoadEvent event) {
+//		      
+//		      IFrameElement frameElement = IFrameElement.as(((Frame)event.getSource()).getElement());
+//		      frameElement.setName("_self");
+//		    }
+//		  });
+
 		  frame.setWidth("100%");
 		  frame.setHeight("100%");
 		  // setScrolling

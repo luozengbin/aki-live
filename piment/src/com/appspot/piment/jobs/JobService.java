@@ -13,6 +13,7 @@ import com.appspot.piment.dao.UserMapDao;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.Job;
 import com.appspot.piment.model.UserMap;
+import com.appspot.piment.model.WeiboSource;
 
 public class JobService {
 
@@ -34,7 +35,7 @@ public class JobService {
 	this.configMap = configItemDao.getValues();
 
 	// tqqロボットユーザIDを元にAccessTokenを取り出す
-	AuthToken tqqRobotAuthToken = authTokenDao.getByUserId(this.configMap.get("qq.piment.robot.id"));
+	AuthToken tqqRobotAuthToken = authTokenDao.getByUserId(this.configMap.get("qq.piment.robot.id"), WeiboSource.Tqq);
 
 	this.sinaMessageSync = new SinaMessageSync(this.configMap);
 	this.sinaMessageSync.setTqqRobotToken(tqqRobotAuthToken);
@@ -50,9 +51,9 @@ public class JobService {
 
 	  try {
 		// sinaのユーザIDを元にAccessTokenを取り出す
-		AuthToken sinaAuthToken = authTokenDao.getByUserId(user.getSinaUserId());
+		AuthToken sinaAuthToken = authTokenDao.getByUserId(user.getSinaUserId(), WeiboSource.Sina);
 		// tqqのユーザIDを元にAccessTokenを取り出す
-		AuthToken tqqAuthToken = authTokenDao.getByUserId(user.getTqqUserId());
+		AuthToken tqqAuthToken = authTokenDao.getByUserId(user.getTqqUserId(), WeiboSource.Tqq);
 
 		// トークン情報渡す
 		this.sinaMessageSync.setSinaToken(sinaAuthToken);
