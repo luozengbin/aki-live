@@ -157,10 +157,11 @@ public class SinaMessageSync {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
 
 			  StringBuilder retweetMsg = new StringBuilder();
-			  retweetMsg.append("转发自Sina//@").append(retweetedStatus.getUser().getName());
-			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.WeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()) + "//源内容-->");
-			  retweetMsg.append(originalMsg).append(" \n");
-
+			  retweetMsg.append("转自Sina//@").append(retweetedStatus.getUser().getName()).append("//");
+			  retweetMsg.append(originalMsg);
+			  //TODO 長さ判定
+			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.WeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
+			  
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
 				log.info("Retweet Successed!!!");
