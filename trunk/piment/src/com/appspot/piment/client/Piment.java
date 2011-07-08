@@ -6,9 +6,13 @@ import com.appspot.piment.client.rpc.TQQAuthService;
 import com.appspot.piment.client.rpc.TQQAuthServiceAsync;
 import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Document;
 import com.google.gwt.dom.client.IFrameElement;
-import com.google.gwt.event.dom.client.LoadEvent;
-import com.google.gwt.event.dom.client.LoadHandler;
+import com.google.gwt.http.client.Request;
+import com.google.gwt.http.client.RequestBuilder;
+import com.google.gwt.http.client.RequestCallback;
+import com.google.gwt.http.client.RequestException;
+import com.google.gwt.http.client.Response;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.Frame;
 import com.google.gwt.user.client.ui.HTML;
@@ -31,6 +35,8 @@ public class Piment implements EntryPoint {
   private final TQQAuthServiceAsync qqAuthService = GWT.create(TQQAuthService.class);
 
   private final SinaAuthServiceAsync sinaAuthService = GWT.create(SinaAuthService.class);
+
+  private final Frame frame = new Frame();
 
   private enum ActionMode {
 	Sina, Tqq
@@ -85,32 +91,72 @@ public class Piment implements EntryPoint {
 
 	  final HTMLPane londingContent = new HTMLPane();
 	  londingContent.setContents("<h3>正在处理中，请稍等片刻。</h3>");
-	  winModal.addItem(londingContent);
+
+	  final HTMLPane htmlPane = new HTMLPane();
+	  htmlPane.setShowEdges(true);
+	  // htmlPane.setContentsURL("http://www.google.com/");
+	  // htmlPane.setContentsType(ContentsType.PAGE);
+	  htmlPane.setWidth100();
+	  htmlPane.setHeight100();
+
+	  // winModal.addItem(londingContent);
+	  // winModal.addItem(htmlPane);
 	  winModal.show();
 
 	  AsyncCallback<String> requestTokenCallback = new AsyncCallback<String>() {
 		@Override
 		public void onSuccess(String requestTokenUrl) {
-		  Frame frame = new Frame(requestTokenUrl);
-		  
-//		  frame.addLoadHandler(new LoadHandler() {
-//		    
-//		    @Override
-//		    public void onLoad(LoadEvent event) {
-//		      
-//		      IFrameElement frameElement = IFrameElement.as(((Frame)event.getSource()).getElement());
-//		      frameElement.setName("_self");
-//		    }
-//		  });
 
-		  frame.setWidth("100%");
-		  frame.setHeight("100%");
-		  // setScrolling
-		  IFrameElement frameElement = IFrameElement.as(frame.getElement());
-		  frameElement.setScrolling("no");
-		  frameElement.setName("_self");
-		  londingContent.destroy();
-		  winModal.addItem(frame);
+		  // /htmlPane.setContentsURL(requestTokenUrl);
+
+		  /* FANGFA1 */
+		  RequestBuilder rb = new RequestBuilder(RequestBuilder.GET, requestTokenUrl);
+
+		  rb.setCallback(new RequestCallback() {
+
+			@Override
+			public void onResponseReceived(Request request, Response response) {
+			  htmlPane.setContents(response.getText());
+			  winModal.addItem(htmlPane);
+			  winModal.draw();
+			}
+
+			@Override
+			public void onError(Request request, Throwable exception) {
+			  // TODO Auto-generated method stub
+
+			}
+		  });
+
+		  try {
+			rb.send();
+		  } catch (RequestException e) {
+			GWT.log("error " + e);
+		  }
+
+		  /* FANGFA2 */
+		  // frame.setUrl(requestTokenUrl);
+		  //
+		  // frame.addLoadHandler(new LoadHandler() {
+		  //
+		  // @Override
+		  // public void onLoad(LoadEvent event) {
+		  // }
+		  // });
+		  //
+		  // frame.setWidth("100%");
+		  // frame.setHeight("100%");
+		  // // setScrolling
+		  // IFrameElement frameElement = IFrameElement.as(frame.getElement());
+		  // frameElement.setScrolling("no");
+		  // frameElement.setName("_self");
+		  // londingContent.destroy();
+		  // winModal.addItem(frame);
+		  //
+		  // Document frameDocument = getIFrameDocument(frameElement);
+		  // if (frameDocument != null) {
+		  // showMessage("aaa");
+		  // }
 		}
 
 		@Override
@@ -132,4 +178,31 @@ public class Piment implements EntryPoint {
 	  }
 	}
   }
+
+  private native Document getIFrameDocument(IFrameElement iframe)/*-{
+		return iframe.contentDocument;
+  }-*/;
+
+  public native void showMessage(String msg) /*-{
+		alert(msg);
+  }-*/;
+
+  public static native void popup(String url, String windowname, String width, String height) /*-{
+		var features = "location=no, menubar=no, status=yes, scrollbars=yes, resizable=yes, toolbar=no";
+		if (width) {
+			if (window.screen.width > width)
+				features += ", left=" + (window.screen.width - width) / 2;
+			else
+				width = window.screen.width;
+			features += ", width=" + width;
+		}
+		if (height) {
+			if (window.screen.height > height)
+				features += ", top=" + (window.screen.height - height) / 2;
+			else
+				height = window.screen.height;
+			features += ", height=" + height;
+		}
+		window.open(url, windowname, features);
+  }-*/;
 }
