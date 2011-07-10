@@ -12,9 +12,9 @@ import com.appspot.piment.Constants;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.HttpClient;
 
-public class WeiboApi extends ApiBase {
+public class TqqWeiboApi extends ApiBase {
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + TqqWeiboApi.class.getName());
 
   protected String sendTextUrl = null;
   protected String sendVideoUrl = null;
@@ -22,7 +22,7 @@ public class WeiboApi extends ApiBase {
 
   protected String sendPicUrl = null;
 
-  public WeiboApi(Map<String, String> configItem) {
+  public TqqWeiboApi(Map<String, String> configItem) {
 	super(configItem);
 	this.sendTextUrl = configMap.get("qq.weibo.send.text.url");
 	this.sendVideoUrl = configMap.get("qq.weibo.send.video.url");

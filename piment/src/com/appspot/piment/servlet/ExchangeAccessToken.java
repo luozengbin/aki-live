@@ -7,6 +7,8 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.appspot.piment.Constants;
+import com.appspot.piment.api.sina.SinaAuthApi;
+import com.appspot.piment.api.tqq.TqqAuthApi;
 import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.WeiboSource;
@@ -34,20 +36,23 @@ public class ExchangeAccessToken extends HttpServlet {
 	  AuthToken authToken = this.authTokenDao.getByToken(oauth_token);
 	  switch (source) {
 	  case Sina:
-		com.appspot.piment.api.sina.OAuthApi sinaOAuth = new com.appspot.piment.api.sina.OAuthApi(authToken);
+		SinaAuthApi sinaOAuth = new SinaAuthApi(authToken);
 		authToken = sinaOAuth.exchangeToken(oauth_verifier);
 		break;
 	  case Tqq:
-		com.appspot.piment.api.tqq.OAuthApi tqqOAuth = new com.appspot.piment.api.tqq.OAuthApi(authToken);
+		TqqAuthApi tqqOAuth = new TqqAuthApi(authToken);
 		authToken = tqqOAuth.exchangeToken(oauth_verifier);
 		break;
 	  default:
 		break;
 	  }
-	  
+
 	  authTokenDao.save(authToken);
 
-	  resp.getWriter().write("<h1>" + authToken.getUserName() + "，您的授权已经通过！</h1>");
+	  String reloadPage = "<html><head><script type='text/javascript'>if (window.opener && !window.opener.closed) {parent.window.opener.location.reload();}window.close();</script></head></html>";
+
+	  resp.getWriter().write(reloadPage);
+
 	  resp.getWriter().flush();
 
 	} catch (Exception e) {

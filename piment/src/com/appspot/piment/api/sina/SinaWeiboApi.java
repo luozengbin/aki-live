@@ -12,16 +12,16 @@ import com.appspot.piment.Constants;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.HttpClient;
 
-public class WeiboApi extends ApiBase {
+public class SinaWeiboApi extends ApiBase {
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboApi.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + SinaWeiboApi.class.getName());
 
-  public WeiboApi() {
+  public SinaWeiboApi() {
 	super();
 	this.subInit();
   }
 
-  public WeiboApi(Map<String, String> configItem) {
+  public SinaWeiboApi(Map<String, String> configItem) {
 	super(configItem);
 	this.subInit();
   }
