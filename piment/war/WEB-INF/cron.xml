@@ -1,9 +1,15 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <cronentries>
 	<cron>
-		<url>/piment/crons/job1001</url>
-		<description>cronttwit the run every 15 minutes</description>
+		<url>/admin/crons/job1001</url>
+		<description>running message sync job every 15 minutes</description>
 		<schedule>every 15 minutes</schedule>
+		<timezone>Asia/Tokyo</timezone>
+	</cron>
+	<cron>
+		<url>/admin/crons/job1009</url>
+		<description>running data clean job every morning</description>
+		<schedule>every day 5:00</schedule>
 		<timezone>Asia/Tokyo</timezone>
 	</cron>
 </cronentries>

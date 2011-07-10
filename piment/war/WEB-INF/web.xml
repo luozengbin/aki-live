@@ -2,17 +2,7 @@
 <!DOCTYPE web-app PUBLIC "-//Sun Microsystems, Inc.//DTD Web Application 2.3//EN"
                          "http://java.sun.com/dtd/web-app_2_3.dtd">
 <web-app>
-	<!-- RPC Servlets -->
-	<servlet>
-		<servlet-name>tqqAuthServlet</servlet-name>
-		<servlet-class>com.appspot.piment.rpc.TQQAuthServiceImpl</servlet-class>
-	</servlet>
-	
-	<servlet>
-		<servlet-name>sinaAuthServlet</servlet-name>
-		<servlet-class>com.appspot.piment.rpc.SinaAuthServiceImpl</servlet-class>
-	</servlet>
-	
+
 	<!-- Http Servlets -->
 	<servlet>
 		<servlet-name>initStoreData</servlet-name>
@@ -21,6 +11,10 @@
 	<servlet>
 		<servlet-name>exchangeAccessToken</servlet-name>
 		<servlet-class>com.appspot.piment.servlet.ExchangeAccessToken</servlet-class>
+	</servlet>
+	<servlet>
+		<servlet-name>getRequestToken</servlet-name>
+		<servlet-class>com.appspot.piment.servlet.GetRequestToken</servlet-class>
 	</servlet>
 
 	<!-- Http Servlets for jobs -->
@@ -32,57 +26,62 @@
 		<servlet-name>job1002</servlet-name>
 		<servlet-class>com.appspot.piment.jobs.Job1002</servlet-class>
 	</servlet>
-	
+
 	<!-- データクリアジョブ -->
 	<servlet>
 		<servlet-name>job1009</servlet-name>
 		<servlet-class>com.appspot.piment.jobs.Job1009</servlet-class>
 	</servlet>
-		
-	<!-- RPC URL -->
-	<servlet-mapping>
-		<servlet-name>tqqAuthServlet</servlet-name>
-		<url-pattern>/piment/tqq/auth</url-pattern>
-	</servlet-mapping>
-	<servlet-mapping>
-		<servlet-name>sinaAuthServlet</servlet-name>
-		<url-pattern>/piment/sina/auth</url-pattern>
-	</servlet-mapping>
 
 	<!-- Servlet URL -->
 	<servlet-mapping>
 		<servlet-name>initStoreData</servlet-name>
-		<url-pattern>/piment/admin/initStoreData</url-pattern>
+		<url-pattern>/admin/initStoreData</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>exchangeAccessToken</servlet-name>
-		<url-pattern>/piment/auth/callback</url-pattern>
+		<url-pattern>/user/auth/callback</url-pattern>
+	</servlet-mapping>
+	<servlet-mapping>
+		<servlet-name>getRequestToken</servlet-name>
+		<url-pattern>/user/auth/requestToken</url-pattern>
 	</servlet-mapping>
 
 	<!-- Job URL -->
 	<servlet-mapping>
 		<servlet-name>job1001</servlet-name>
-		<url-pattern>/piment/crons/job1001</url-pattern>
+		<url-pattern>/admin/crons/job1001</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>job1002</servlet-name>
-		<url-pattern>/piment/crons/job1002</url-pattern>
+		<url-pattern>/admin/crons/job1002</url-pattern>
 	</servlet-mapping>
 	<servlet-mapping>
 		<servlet-name>job1009</servlet-name>
-		<url-pattern>/piment/crons/job1009</url-pattern>
+		<url-pattern>/admin/crons/job1009</url-pattern>
 	</servlet-mapping>
-	
+
+
 	<!-- Default page to serve -->
 	<welcome-file-list>
-		<welcome-file>piment.html</welcome-file>
+		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
 	<!-- Security and Authentication -->
+
 	<security-constraint>
 		<web-resource-collection>
-			<url-pattern>/piment/crons/*</url-pattern>
-			<url-pattern>/piment/admin/*</url-pattern>
+			<url-pattern>/user/*</url-pattern>
+			<url-pattern>/piment.html</url-pattern>
+		</web-resource-collection>
+		<auth-constraint>
+			<role-name>*</role-name>
+		</auth-constraint>
+	</security-constraint>
+
+	<security-constraint>
+		<web-resource-collection>
+			<url-pattern>/admin/*</url-pattern>
 		</web-resource-collection>
 		<auth-constraint>
 			<role-name>admin</role-name>
