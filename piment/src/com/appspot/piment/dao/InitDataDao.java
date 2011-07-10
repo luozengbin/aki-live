@@ -65,9 +65,9 @@ public class InitDataDao {
 	  StringBuilder filterStr = null;
 	  Map<String, Object> paramsMap = null;
 
-	  for (Map<String, String> jobEntry : entityList) {
+	  for (Map<String, String> entry : entityList) {
 
-		entity = JSON.decode(JSON.encode(jobEntry), entityClzss);
+		entity = JSON.decode(JSON.encode(entry), entityClzss);
 
 		Query query = pm.newQuery(entityClzss);
 

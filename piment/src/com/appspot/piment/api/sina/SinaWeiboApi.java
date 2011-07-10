@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import net.arnx.jsonic.JSON;
+import weibo4j.Comment;
 import weibo4j.Paging;
 import weibo4j.Status;
 
@@ -67,6 +68,36 @@ public class SinaWeiboApi extends ApiBase {
 	} catch (Exception e) {
 	  throw new RuntimeException(e);
 	}
+  }
+
+  public List<Comment> getCommentTimeline(Long sinceId, Long maxId) {
+	try {
+	  // sinaへの問い合わせパラメータを初期化する
+	  Paging paging = new Paging();
+	  // 取得ページ数
+	  paging.setPage(Integer.valueOf(this.configMap.get("sina.usercomment.paging.page")));
+	  // 取得数
+	  paging.setCount(Integer.valueOf(this.configMap.get("sina.usercomment.paging.count")));
+
+	  // 取得範囲の開始位置の指定
+	  if (sinceId != null) {
+		paging.setSinceId(Long.valueOf(sinceId));
+	  }
+
+	  // 取得範囲の終了位置の指定
+	  if (maxId != null) {
+		paging.setMaxId(Long.valueOf(maxId));
+	  }
+
+	  log.info("sinaからコメントIDが \"" + paging.getSinceId() + "\"以降のユーザコメントを取得する");
+
+	  // 問い合わせを行う
+	  return this.weibo.getCommentsTimeline(paging);
+
+	} catch (Exception e) {
+	  throw new RuntimeException(e);
+	}
+
   }
 
   public static String getStatusPageURL(Long userId, Long statusId) {

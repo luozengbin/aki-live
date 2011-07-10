@@ -22,12 +22,12 @@
 	{
 		"id": null,
 		"key": "qq.authorize.url",
-		"value": "http://open.t.qq.com/oauth_html/login.php"
+		"value": "https://open.t.qq.com/cgi-bin/authorize"
 	},
 	{
 		"id": null,
 		"key": "qq.oauth.callback",
-		"value": "http://weibotoqq.appspot.com/user/auth/callback"
+		"value": "http://weibotoqq.appspot.com/user/auth/callback?weibo_source=Tqq"
 	},
 	{
 		"id": null,
@@ -97,7 +97,7 @@
 	{
 		"id": null,
 		"key": "sina.oauth.callback",
-		"value": "http://weibotoqq.appspot.com/user/auth/callback"
+		"value": "http://weibotoqq.appspot.com/user/auth/callback?weibo_source=Sina"
 	},
 	{
 		"id": null,
@@ -137,7 +137,7 @@
 	{
 		"id": null,
 		"key": "app.piment.unsync.keyword",
-		"value": ""
+		"value": "@不用给力"
 	},
 	{
 		"id": null,
@@ -147,11 +147,21 @@
 	{
 		"id": null,
 		"key": "app.piment.temptoken.lifetime",
-		"value": "5"
+		"value": "3"
 	},
 	{
 		"id": null,
 		"key": "app.piment.weibomap.lifetime",
-		"value": "5"
+		"value": "14"
+	},
+	{
+		"id": null,
+		"key": "sina.usercomment.paging.page",
+		"value": "1"
+	},
+	{
+		"id": null,
+		"key": "sina.usercomment.paging.count",
+		"value": "10"
 	}
 ]

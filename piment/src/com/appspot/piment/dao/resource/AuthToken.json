@@ -4,7 +4,7 @@
 		"id": null,
 		"token": "",
 		"tokenSecret": "",
-		"type": 1,
-		"userName": null
+		"type": 0,
+		"userName": 
 	}
 ]

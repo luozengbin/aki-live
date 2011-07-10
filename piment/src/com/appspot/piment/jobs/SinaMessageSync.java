@@ -6,12 +6,15 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import net.arnx.jsonic.JSON;
+import weibo4j.Comment;
 import weibo4j.Status;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.api.tqq.Response;
+import com.appspot.piment.dao.CommentMapDao;
 import com.appspot.piment.dao.WeiboMapDao;
 import com.appspot.piment.model.AuthToken;
+import com.appspot.piment.model.CommentMap;
 import com.appspot.piment.model.UserMap;
 import com.appspot.piment.model.WeiboMap;
 import com.appspot.piment.model.WeiboSource;
@@ -25,6 +28,8 @@ public class SinaMessageSync {
 
   private Map<String, String> configMap = null;
   private WeiboMapDao weiboMapDao = null;
+  private CommentMapDao commentMapDao = null;
+
   private com.appspot.piment.api.tqq.TqqWeiboApi tqqRobotWeiboApi = null;
   private com.appspot.piment.api.tqq.TqqWeiboApi tqqWeiboApi = null;
   private com.appspot.piment.api.sina.SinaWeiboApi sinaWeiboApi = null;
@@ -38,6 +43,7 @@ public class SinaMessageSync {
 	this.sinaWeiboApi = new com.appspot.piment.api.sina.SinaWeiboApi(this.configMap);
 
 	this.weiboMapDao = new WeiboMapDao();
+	this.commentMapDao = new CommentMapDao();
   }
 
   public void setTqqRobotToken(AuthToken authToken) {
@@ -106,6 +112,24 @@ public class SinaMessageSync {
 	return null;
   }
 
+  public List<CommentMap> syncUserComment(UserMap user) {
+
+	// 前回同期化された最後のコメント履歴レコードを取り出す
+	CommentMap lastestCreateCommentMap = commentMapDao.getNewestItem(user.getId());
+
+	// sinaから前回の同期化以降の新コメントを取得する
+	List<Comment> newComments = sinaWeiboApi.getCommentTimeline(lastestCreateCommentMap != null ? lastestCreateCommentMap.getSinaCommentId() : null, null);
+
+	// メッセージ単位で同期化処理を行う
+	Comment comment = null;
+	for (int i = newComments.size() - 1; i >= 0; i--) {
+	  comment = newComments.get(i);
+	  log.info("new comment -->" + JSON.encode(comment, true));
+	}
+
+	return null;
+  }
+
   private void syncSinaUserMessage(UserMap userMap, Status status, WeiboMap weiboMap) {
 	try {
 
@@ -159,9 +183,9 @@ public class SinaMessageSync {
 			  StringBuilder retweetMsg = new StringBuilder();
 			  retweetMsg.append("转自Sina//@").append(retweetedStatus.getUser().getName()).append("//");
 			  retweetMsg.append(originalMsg);
-			  //TODO 長さ判定
+			  // TODO 長さ判定
 			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
-			  
+
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
 				log.info("Retweet Successed!!!");
