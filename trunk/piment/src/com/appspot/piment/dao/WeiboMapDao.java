@@ -1,12 +1,15 @@
 package com.appspot.piment.dao;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Logger;
 
 import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
+import com.appspot.piment.Constants;
 import com.appspot.piment.model.WeiboMap;
 import com.appspot.piment.model.WeiboStatus;
 import com.appspot.piment.shared.StringUtils;
@@ -14,6 +17,8 @@ import com.appspot.piment.util.DateUtils;
 
 public class WeiboMapDao {
 
+  private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboMapDao.class.getName());
+  
   /**
    * DEFINATION OF QUERY
    */
@@ -22,6 +27,8 @@ public class WeiboMapDao {
   private static final String QL_002 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
   private static final String QL_003 = "select from " + WeiboMap.class.getName() + " where sinaWeiboId == :sinaWeiboId";
+
+  private static final String QL_004 = "select from " + WeiboMap.class.getName() + " where updateTime <= :before";
 
   private PersistenceManager pm = null;
 
@@ -110,6 +117,30 @@ public class WeiboMapDao {
 
 	  weiboMap = pm.makePersistent(weiboMap);
 	  return weiboMap;
+	} finally {
+	  if (pm != null) {
+		pm.close();
+		pm = null;
+	  }
+	}
+  }
+
+  public void removeOlder(int dayBefore) {
+	try {
+	  pm = PMF.get().getPersistenceManager();
+
+	  Calendar cal = Calendar.getInstance();
+	  cal.add(Calendar.DAY_OF_YEAR, -dayBefore);
+
+	  @SuppressWarnings("unchecked")
+	  List<WeiboMap> weiboMapList = (List<WeiboMap>) pm.newQuery(QL_004).execute(cal.getTime());
+	  if (weiboMapList != null && weiboMapList.size() > 0) {
+		for (WeiboMap oldWeiboMap : weiboMapList) {
+		  log.info("同期化履歴の削除：" + oldWeiboMap.getId());
+		  pm.deletePersistent(oldWeiboMap);
+		}
+	  }
+
 	} finally {
 	  if (pm != null) {
 		pm.close();

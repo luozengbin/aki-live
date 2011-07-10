@@ -16,6 +16,7 @@ import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.dao.ConfigItemDao;
 import com.appspot.piment.dao.JobDao;
 import com.appspot.piment.dao.PMF;
+import com.appspot.piment.dao.WeiboMapDao;
 import com.appspot.piment.model.Job;
 import com.appspot.piment.model.JobStatus;
 import com.appspot.piment.util.DateUtils;
@@ -46,12 +47,15 @@ public class Job1009 extends HttpServlet {
 	  job.setStatus(JobStatus.RUNNING);
 	  PMF.saveEntity(job);
 	  log.info("job's status:" + job);
-
-	  AuthTokenDao authTokenDao = new AuthTokenDao();
-	  //authTokenDao.clearTempToken(Integer.valueOf(this.configMap.get("app.piment.temptoken.lifetime")));
 	  
-	  authTokenDao.clearTempToken(5);
+	  //トークン情報の削除
+	  AuthTokenDao authTokenDao = new AuthTokenDao();
+	  authTokenDao.clearTempToken(Integer.valueOf(this.configMap.get("app.piment.temptoken.lifetime")));
 
+	  //メッセージ履歴の掃除
+	  WeiboMapDao weiboMapDao = new WeiboMapDao();
+	  weiboMapDao.removeOlder(Integer.valueOf(this.configMap.get("app.piment.weibomap.lifetime")));
+	  
 	  // ジョブ状態変更
 	  job.setStatus(JobStatus.SUCCESSED);
 

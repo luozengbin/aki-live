@@ -10,9 +10,9 @@ import com.appspot.piment.model.WeiboSource;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.HttpClient;
 
-public class OAuthApi extends ApiBase {
+public class TqqAuthApi extends ApiBase {
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + OAuthApi.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + TqqAuthApi.class.getName());
 
   // 获取未授权的Request Token的URL
   String requestTokenUrl = null;
@@ -22,12 +22,12 @@ public class OAuthApi extends ApiBase {
   // 认证成功后浏览器会被重定向到这个url中
   String authCallbackUrl = null;
 
-  public OAuthApi() {
+  public TqqAuthApi() {
 	super();
 	subInit();
   }
 
-  public OAuthApi(AuthToken authToken) {
+  public TqqAuthApi(AuthToken authToken) {
 	super(authToken);
 	subInit();
   }

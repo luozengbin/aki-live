@@ -9,20 +9,19 @@ import weibo4j.http.RequestToken;
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.WeiboSource;
-import com.appspot.piment.rpc.SinaAuthServiceImpl;
 
-public class OAuthApi extends ApiBase {
+public class SinaAuthApi extends ApiBase {
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + SinaAuthServiceImpl.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + SinaAuthApi.class.getName());
 
   private String authCallbackUrl;
 
-  public OAuthApi() {
+  public SinaAuthApi() {
 	super();
 	this.subInit();
   }
 
-  public OAuthApi(AuthToken authToken) {
+  public SinaAuthApi(AuthToken authToken) {
 	super(authToken);
 	this.subInit();
   }

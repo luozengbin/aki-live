@@ -27,7 +27,7 @@
 	{
 		"id": null,
 		"key": "qq.oauth.callback",
-		"value": "http://weibotoqq.appspot.com/piment/auth/callback"
+		"value": "http://weibotoqq.appspot.com/user/auth/callback"
 	},
 	{
 		"id": null,
@@ -97,7 +97,7 @@
 	{
 		"id": null,
 		"key": "sina.oauth.callback",
-		"value": "http://weibotoqq.appspot.com/piment/auth/callback"
+		"value": "http://weibotoqq.appspot.com/user/auth/callback"
 	},
 	{
 		"id": null,
@@ -147,6 +147,11 @@
 	{
 		"id": null,
 		"key": "app.piment.temptoken.lifetime",
+		"value": "5"
+	},
+	{
+		"id": null,
+		"key": "app.piment.weibomap.lifetime",
 		"value": "5"
 	}
 ]

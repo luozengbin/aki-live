@@ -25,17 +25,17 @@ public class SinaMessageSync {
 
   private Map<String, String> configMap = null;
   private WeiboMapDao weiboMapDao = null;
-  private com.appspot.piment.api.tqq.WeiboApi tqqRobotWeiboApi = null;
-  private com.appspot.piment.api.tqq.WeiboApi tqqWeiboApi = null;
-  private com.appspot.piment.api.sina.WeiboApi sinaWeiboApi = null;
+  private com.appspot.piment.api.tqq.TqqWeiboApi tqqRobotWeiboApi = null;
+  private com.appspot.piment.api.tqq.TqqWeiboApi tqqWeiboApi = null;
+  private com.appspot.piment.api.sina.SinaWeiboApi sinaWeiboApi = null;
 
   public SinaMessageSync(Map<String, String> configMap) {
 	this.configMap = configMap;
 
-	this.tqqRobotWeiboApi = new com.appspot.piment.api.tqq.WeiboApi(this.configMap);
+	this.tqqRobotWeiboApi = new com.appspot.piment.api.tqq.TqqWeiboApi(this.configMap);
 
-	this.tqqWeiboApi = new com.appspot.piment.api.tqq.WeiboApi(this.configMap);
-	this.sinaWeiboApi = new com.appspot.piment.api.sina.WeiboApi(this.configMap);
+	this.tqqWeiboApi = new com.appspot.piment.api.tqq.TqqWeiboApi(this.configMap);
+	this.sinaWeiboApi = new com.appspot.piment.api.sina.SinaWeiboApi(this.configMap);
 
 	this.weiboMapDao = new WeiboMapDao();
   }
@@ -160,7 +160,7 @@ public class SinaMessageSync {
 			  retweetMsg.append("转自Sina//@").append(retweetedStatus.getUser().getName()).append("//");
 			  retweetMsg.append(originalMsg);
 			  //TODO 長さ判定
-			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.WeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
+			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
 			  
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
