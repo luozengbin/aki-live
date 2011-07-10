@@ -22,7 +22,7 @@ public class Piment implements EntryPoint {
 
 	  @Override
 	  public void onClick(ClickEvent event) {
-		popup("/user/auth/requestToken?weiboSource=Sina", null, 850, 650);
+		popup("/user/auth/requestToken?weibo_source=Sina", null, 850, 650);
 	  }
 	});
 
@@ -31,7 +31,7 @@ public class Piment implements EntryPoint {
 
 	  @Override
 	  public void onClick(ClickEvent event) {
-		popup("/user/auth/requestToken?weiboSource=Tqq", null, 850, 650);
+		popup("/user/auth/requestToken?weibo_source=Tqq", null, 850, 650);
 	  }
 	});
 

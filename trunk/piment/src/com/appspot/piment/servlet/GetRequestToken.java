@@ -31,7 +31,7 @@ public class GetRequestToken extends HttpServlet {
 
 	  log.fine("-- processing requestToken  --");
 
-	  String source = req.getParameter("weiboSource");
+	  String source = req.getParameter("weibo_source");
 	  AuthToken authToken = null;
 	  String authURL = null;
 	  switch (WeiboSource.valueOf(source)) {

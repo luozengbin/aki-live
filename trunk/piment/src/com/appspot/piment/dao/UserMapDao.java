@@ -27,6 +27,7 @@ public class UserMapDao {
 	try {
 
 	  pm = PMF.get().getPersistenceManager();
+	  
 	  @SuppressWarnings("unchecked")
 	  List<UserMap> userMapList = (List<UserMap>) pm.newQuery(QL_001).execute(frequency);
 

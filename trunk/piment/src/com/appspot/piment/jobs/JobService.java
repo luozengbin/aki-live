@@ -68,6 +68,9 @@ public class JobService {
 			this.sinaMessageSync.retrySyncUserMessage(user);
 		  }
 		  this.sinaMessageSync.syncUserMessage(user);
+		  
+		  this.sinaMessageSync.syncUserComment(user);
+		  
 
 		} // -- [ST001 END]
 	  } catch (Exception e) {
