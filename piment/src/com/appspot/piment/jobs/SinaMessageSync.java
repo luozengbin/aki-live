@@ -118,14 +118,14 @@ public class SinaMessageSync {
 	CommentMap lastestCreateCommentMap = commentMapDao.getNewestItem(user.getId());
 
 	// sinaから前回の同期化以降の新コメントを取得する
-	List<Comment> newComments = sinaWeiboApi.getCommentTimeline(lastestCreateCommentMap != null ? lastestCreateCommentMap.getSinaCommentId() : null, null);
+	//List<Comment> newComments = sinaWeiboApi.getCommentTimeline(lastestCreateCommentMap != null ? lastestCreateCommentMap.getSinaCommentId() : null, null);
 
 	// メッセージ単位で同期化処理を行う
-	Comment comment = null;
-	for (int i = newComments.size() - 1; i >= 0; i--) {
-	  comment = newComments.get(i);
-	  log.info("new comment -->" + JSON.encode(comment, true));
-	}
+//	Comment comment = null;
+//	for (int i = newComments.size() - 1; i >= 0; i--) {
+//	  comment = newComments.get(i);
+//	  //log.info("new comment -->" + JSON.encode(comment, true));
+//	}
 
 	return null;
   }
