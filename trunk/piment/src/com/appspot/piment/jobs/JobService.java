@@ -60,17 +60,21 @@ public class JobService {
 		this.sinaMessageSync.setTqqToken(tqqAuthToken);
 
 		// [ST001 START] - SINAからTQQへ同期化判定 -
-		if (user.sinaToTqq()) {
+		if (user.isSinaToTqq()) {
 		  log.info("sina[" + user.getSinaUserId() + "] から tqq[" + user.getTqqUserId() + "]へ同期化開始");
 
 		  // ユーザの設定よりリトライ処理の判定
 		  if (user.isAutoRetry()) {
 			this.sinaMessageSync.retrySyncUserMessage(user);
 		  }
+
+		  // メッセージ同期化
 		  this.sinaMessageSync.syncUserMessage(user);
-		  
-		  this.sinaMessageSync.syncUserComment(user);
-		  
+
+		  if (user.isSinaToTqqComment()) {
+			// コメント同期化
+			this.sinaMessageSync.syncUserComment(user);
+		  }
 
 		} // -- [ST001 END]
 	  } catch (Exception e) {

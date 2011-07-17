@@ -62,6 +62,13 @@ public class ApiBase {
 	this.baseParams.setAuthVersion(configMap.get("qq.oauth.version"));
   }
 
+  public String getUsetId() {
+	if (this.authToken != null) {
+	  return this.authToken.getUserName();
+	}
+	return null;
+  }
+
   public String getSignedURL(String httpMethod, String targetURL, Map<String, String> params) throws Exception {
 	String urlParams = getURLParams(params);
 	// 签名

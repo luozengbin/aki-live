@@ -3,7 +3,7 @@
 		"autoRetry": true,
 		"createTime": 1309767278343,
 		"creator": "com.appspot.piment.dao.UserMapDao",
-		"disable": false,
+		"disable": true,
 		"features": [
 			{
 				"id": null,
@@ -20,13 +20,13 @@
 			{
 				"id": null,
 				"name": 2,
-				"strName": "TQQ_O_SINA",
+				"strName": "TQQ_TO_SINA",
 				"value": "true"
 			},
 			{
 				"id": null,
 				"name": 3,
-				"strName": "TQQ_O_SINA_COMMENT",
+				"strName": "TQQ_TO_SINA_COMMENT",
 				"value": "true"
 			},
 			{

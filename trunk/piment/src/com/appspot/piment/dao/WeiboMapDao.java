@@ -1,5 +1,6 @@
 package com.appspot.piment.dao;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import javax.jdo.PersistenceManager;
 import javax.jdo.Query;
 
 import com.appspot.piment.Constants;
+import com.appspot.piment.model.UserMap;
 import com.appspot.piment.model.WeiboMap;
 import com.appspot.piment.model.WeiboStatus;
 import com.appspot.piment.shared.StringUtils;
@@ -18,7 +20,7 @@ import com.appspot.piment.util.DateUtils;
 public class WeiboMapDao {
 
   private static final Logger log = Logger.getLogger(Constants.FQCN + WeiboMapDao.class.getName());
-  
+
   /**
    * DEFINATION OF QUERY
    */
@@ -125,19 +127,44 @@ public class WeiboMapDao {
 	}
   }
 
-  public void removeOlder(int dayBefore) {
+  @SuppressWarnings("unchecked")
+  public void removeOlder(List<UserMap> userMaps, int dayBefore) {
 	try {
 	  pm = PMF.get().getPersistenceManager();
+
+	  Query query = pm.newQuery(QL_001);
+	  query.setOrdering("createTime desc");
+	  query.setRange(0, 1);
+
+	  List<WeiboMap> keepWeiboMaps = new ArrayList<WeiboMap>();
+	  for (UserMap userMap : userMaps) {
+		List<WeiboMap> weiboMapList = (List<WeiboMap>) query.execute(userMap.getId());
+		if (weiboMapList != null && weiboMapList.size() > 0) {
+		  keepWeiboMaps.add(weiboMapList.get(0));
+		}
+	  }
 
 	  Calendar cal = Calendar.getInstance();
 	  cal.add(Calendar.DAY_OF_YEAR, -dayBefore);
 
-	  @SuppressWarnings("unchecked")
 	  List<WeiboMap> weiboMapList = (List<WeiboMap>) pm.newQuery(QL_004).execute(cal.getTime());
 	  if (weiboMapList != null && weiboMapList.size() > 0) {
 		for (WeiboMap oldWeiboMap : weiboMapList) {
-		  log.info("同期化履歴の削除：" + oldWeiboMap.getId());
-		  pm.deletePersistent(oldWeiboMap);
+
+		  boolean keepIt = false;
+		  for (WeiboMap keepWeiboMap : keepWeiboMaps) {
+			if (keepWeiboMap.getId().equals(oldWeiboMap.getId())) {
+			  keepWeiboMaps.remove(keepWeiboMap);
+			  keepIt = true;
+			  log.info("同期化履歴の削除をスキップする：" + oldWeiboMap.getId());
+			  break;
+			}
+		  }
+
+		  if (!keepIt) {
+			log.info("同期化履歴の削除：" + oldWeiboMap.getId());
+			pm.deletePersistent(oldWeiboMap);
+		  }
 		}
 	  }
 
