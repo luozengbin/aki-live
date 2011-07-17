@@ -1,5 +1,6 @@
 package com.appspot.piment.dao;
 
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
@@ -11,6 +12,7 @@ import javax.jdo.Query;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.CommentMap;
+import com.appspot.piment.model.UserMap;
 import com.appspot.piment.model.WeiboStatus;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.DateUtils;
@@ -128,19 +130,44 @@ public class CommentMapDao {
 	}
   }
 
-  public void removeOlder(int dayBefore) {
+  @SuppressWarnings("unchecked")
+  public void removeOlder(List<UserMap> userMaps, int dayBefore) {
 	try {
 	  pm = PMF.get().getPersistenceManager();
+
+	  Query query = pm.newQuery(QL_001);
+	  query.setOrdering("createTime desc");
+	  query.setRange(0, 1);
+
+	  List<CommentMap> keepCommentMaps = new ArrayList<CommentMap>();
+	  for (UserMap userMap : userMaps) {
+		List<CommentMap> CommentMapList = (List<CommentMap>) query.execute(userMap.getId());
+		if (CommentMapList != null && CommentMapList.size() > 0) {
+		  keepCommentMaps.add(CommentMapList.get(0));
+		}
+	  }
 
 	  Calendar cal = Calendar.getInstance();
 	  cal.add(Calendar.DAY_OF_YEAR, -dayBefore);
 
-	  @SuppressWarnings("unchecked")
 	  List<CommentMap> CommentMapList = (List<CommentMap>) pm.newQuery(QL_004).execute(cal.getTime());
 	  if (CommentMapList != null && CommentMapList.size() > 0) {
 		for (CommentMap oldCommentMap : CommentMapList) {
-		  log.info("コメント同期化履歴の削除：" + oldCommentMap.getId());
-		  pm.deletePersistent(oldCommentMap);
+
+		  boolean keepIt = false;
+		  for (CommentMap keepCommentMap : keepCommentMaps) {
+			if (keepCommentMap.getId().equals(oldCommentMap.getId())) {
+			  keepCommentMaps.remove(keepCommentMap);
+			  keepIt = true;
+			  log.info("コメント同期化履歴の削除をスキップする：" + oldCommentMap.getId());
+			  break;
+			}
+		  }
+
+		  if (!keepIt) {
+			log.info("コメント同期化履歴の削除：" + oldCommentMap.getId());
+			pm.deletePersistent(oldCommentMap);
+		  }
 		}
 	  }
 

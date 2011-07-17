@@ -14,7 +14,7 @@ import com.google.appengine.api.datastore.Key;
 public class Feature {
 
   public enum Name {
-	SINA_TO_TQQ, SINA_TO_TQQ_COMMENT, TQQ_O_SINA, TQQ_O_SINA_COMMENT, AUTO_RETRY, MESSAGE_VIRIFY
+	SINA_TO_TQQ, SINA_TO_TQQ_COMMENT, TQQ_TO_SINA, TQQ_TO_SINA_COMMENT, AUTO_RETRY, MESSAGE_VIRIFY
   }
 
   @PrimaryKey

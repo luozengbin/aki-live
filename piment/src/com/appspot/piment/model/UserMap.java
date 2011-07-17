@@ -144,8 +144,8 @@ public class UserMap {
 	    + creator + ", updateTime=" + updateTime + ", updator=" + updator + ", disable=" + disable + "]";
   }
   
-  //SINAからTQQへの同期化制御値
-  public boolean sinaToTqq() {
+  //SINAからTQQへメッセージの同期化制御値
+  public boolean isSinaToTqq() {
 	return Boolean.valueOf(getFeatureValue(Feature.Name.SINA_TO_TQQ));
   }
   
@@ -157,6 +157,11 @@ public class UserMap {
   // メッセージ検証するか？
   public boolean isNeededMessageVirify() {
 	return Boolean.valueOf(getFeatureValue(Feature.Name.MESSAGE_VIRIFY));
+  }
+  
+  //SINAからTQQへコメントの同期化制御値
+  public boolean isSinaToTqqComment() {
+	return Boolean.valueOf(getFeatureValue(Feature.Name.SINA_TO_TQQ_COMMENT));
   }
 
   public String getFeatureValue(Feature.Name featureName) {

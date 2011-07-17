@@ -10,8 +10,12 @@ import weibo4j.Comment;
 import weibo4j.Status;
 
 import com.appspot.piment.Constants;
+import com.appspot.piment.api.sina.SinaWeiboApi;
 import com.appspot.piment.api.tqq.Response;
+import com.appspot.piment.api.tqq.TqqWeiboApi;
+import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.dao.CommentMapDao;
+import com.appspot.piment.dao.UserMapDao;
 import com.appspot.piment.dao.WeiboMapDao;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.CommentMap;
@@ -29,21 +33,24 @@ public class SinaMessageSync {
   private Map<String, String> configMap = null;
   private WeiboMapDao weiboMapDao = null;
   private CommentMapDao commentMapDao = null;
+  private UserMapDao userMapDao = null;
+  private AuthTokenDao authTokenDao = null;
 
-  private com.appspot.piment.api.tqq.TqqWeiboApi tqqRobotWeiboApi = null;
-  private com.appspot.piment.api.tqq.TqqWeiboApi tqqWeiboApi = null;
-  private com.appspot.piment.api.sina.SinaWeiboApi sinaWeiboApi = null;
+  private TqqWeiboApi tqqRobotWeiboApi = null;
+  private TqqWeiboApi tqqTempWeiboApi = null;
+  private TqqWeiboApi tqqWeiboApi = null;
+  private SinaWeiboApi sinaWeiboApi = null;
 
   public SinaMessageSync(Map<String, String> configMap) {
 	this.configMap = configMap;
-
-	this.tqqRobotWeiboApi = new com.appspot.piment.api.tqq.TqqWeiboApi(this.configMap);
-
-	this.tqqWeiboApi = new com.appspot.piment.api.tqq.TqqWeiboApi(this.configMap);
-	this.sinaWeiboApi = new com.appspot.piment.api.sina.SinaWeiboApi(this.configMap);
-
+	this.tqqRobotWeiboApi = new TqqWeiboApi(this.configMap);
+	this.tqqTempWeiboApi = new TqqWeiboApi(this.configMap);
+	this.tqqWeiboApi = new TqqWeiboApi(this.configMap);
+	this.sinaWeiboApi = new SinaWeiboApi(this.configMap);
 	this.weiboMapDao = new WeiboMapDao();
 	this.commentMapDao = new CommentMapDao();
+	this.userMapDao = new UserMapDao();
+	this.authTokenDao = new AuthTokenDao();
   }
 
   public void setTqqRobotToken(AuthToken authToken) {
@@ -118,15 +125,85 @@ public class SinaMessageSync {
 	CommentMap lastestCreateCommentMap = commentMapDao.getNewestItem(user.getId());
 
 	// sinaから前回の同期化以降の新コメントを取得する
-	//List<Comment> newComments = sinaWeiboApi.getCommentTimeline(lastestCreateCommentMap != null ? lastestCreateCommentMap.getSinaCommentId() : null, null);
+	List<Comment> newComments = sinaWeiboApi.getCommentTimeline(lastestCreateCommentMap != null ? lastestCreateCommentMap.getSinaCommentId() : null, null);
 
 	// メッセージ単位で同期化処理を行う
-//	Comment comment = null;
-//	for (int i = newComments.size() - 1; i >= 0; i--) {
-//	  comment = newComments.get(i);
-//	  //log.info("new comment -->" + JSON.encode(comment, true));
-//	}
+	Comment comment = null;
+	CommentMap commentMap = null;
 
+	for (int i = newComments.size() - 1; i >= 0; i--) {
+	  comment = newComments.get(i);
+	  log.info("comment[" + comment.getId() + "]コメント同期化中...");
+	  commentMap = new CommentMap();
+	  commentMap.setSinaCommentId(comment.getId());
+	  commentMap.setTqqCommentId(null);
+	  commentMap.setUserMapId(user.getId());
+	  commentMap.setSource(WeiboSource.Sina);
+	  commentMap.setStatus(WeiboStatus.UNKNOW);
+	  commentMap.setWeiboId(comment.getStatus().getId());
+
+	  // 同期化対象判定
+	  if (user.isNeededMessageVirify()) {
+		// 同期化不要のキーワードが合ったら処理をスキップする
+		if (comment.getText().contains(this.configMap.get("app.piment.unsync.keyword"))) {
+		  commentMap.setStatus(WeiboStatus.SKIPPED);
+		  log.info("comment[" + comment.getId() + "]コメント同期化対象外とする");
+		  break;
+		}
+	  }
+
+	  try {
+		Long sinaWeiboId = comment.getStatus().getId();
+		WeiboMap weiboMap = this.weiboMapDao.getBySinaWeiboId(sinaWeiboId);
+
+		if (weiboMap != null && StringUtils.isNotBlank(String.valueOf(weiboMap.getTqqWeiboId()))) {
+		  Response response = null;
+		  TqqWeiboApi tqqApi = null;
+
+		  String commentUserId = String.valueOf(comment.getUser().getId());
+		  String tqqWeiboId = String.valueOf(weiboMap.getTqqWeiboId());
+		  String commentMsg = comment.getText();
+
+		  if (commentUserId.equals(this.tqqWeiboApi.getUsetId())) {
+			tqqApi = this.tqqWeiboApi;
+		  } else {
+			UserMap userMap = this.userMapDao.getUserMap(commentUserId);
+			if (userMap != null && StringUtils.isNotBlank(userMap.getTqqUserId())) {
+			  AuthToken tempAuthToken = this.authTokenDao.getByUserId(userMap.getTqqUserId(), WeiboSource.Tqq);
+			  this.tqqTempWeiboApi.setAuthToken(tempAuthToken);
+			  tqqApi = this.tqqTempWeiboApi;
+			} else {
+			  tqqApi = this.tqqRobotWeiboApi;
+			  commentMsg = "Sina @" + comment.getUser().getScreenName() + "//" + commentMsg;
+			}
+		  }
+
+		  response = tqqApi.sendComment(tqqWeiboId, commentMsg, null);
+
+		  // 処理成功ならば、同期化レコードをデータストアへ保存する
+		  if (response != null && response.isOK()) {
+			// 同期成功情報を履歴レコードに反映
+			commentMap.setStatus(WeiboStatus.SUCCESSED);
+			commentMap.setTqqCommentId(Long.valueOf(response.getData().getId()));
+			log.info("コメント同期化成功！！！");
+			log.info("コメントメッセージID：" + comment.getId());
+		  } else {
+
+		  }
+		}
+
+	  } catch (Exception e) {
+		String msg001 = "同期化失敗しました、コメントメッセージID：" + comment.getId();
+		log.severe(msg001);
+		log.severe(JSON.encode(e, true));
+		MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + comment.toString() + "\n\n例外：\n" + JSON.encode(e, true));
+		// 例外が起きても次ぎのメッセージの同期化を行う
+	  } finally {
+		// 同期化履歴レコードを保存する
+		commentMap = commentMapDao.save(commentMap);
+		log.info("コメント同期化履歴レコードID：" + commentMap.getId());
+	  }
+	}
 	return null;
   }
 
@@ -134,8 +211,6 @@ public class SinaMessageSync {
 	try {
 
 	  log.info("sina[" + status.getId() + "]メッセージ同期化中...");
-
-	  log.info(JSON.encode(status, true));
 
 	  // テキストメッセージなら
 	  if (StringUtils.isNotBlank(status.getText())) {
@@ -181,10 +256,10 @@ public class SinaMessageSync {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
 
 			  StringBuilder retweetMsg = new StringBuilder();
-			  retweetMsg.append("转自Sina//@").append(retweetedStatus.getUser().getName()).append("//");
+			  retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
 			  retweetMsg.append(originalMsg);
 			  // TODO 長さ判定
-			  retweetMsg.append("//源链接：").append(com.appspot.piment.api.sina.SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
+			  retweetMsg.append("//Sina源：").append(SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
 
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {

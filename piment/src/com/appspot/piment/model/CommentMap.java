@@ -22,7 +22,7 @@ public class CommentMap {
   private WeiboSource source;
 
   @Persistent
-  private Long wieboId;
+  private Long weiboId;
 
   @Persistent
   private Long tqqCommentId;
@@ -72,12 +72,12 @@ public class CommentMap {
 	this.source = source;
   }
 
-  public Long getWieboId() {
-	return wieboId;
+  public Long getWeiboId() {
+	return weiboId;
   }
 
-  public void setWieboId(Long wieboId) {
-	this.wieboId = wieboId;
+  public void setWeiboId(Long weiboId) {
+	this.weiboId = weiboId;
   }
 
   public Long getTqqCommentId() {
@@ -146,7 +146,7 @@ public class CommentMap {
 
   @Override
   public String toString() {
-	return "CommentMap [id=" + id + ", userMapId=" + userMapId + ", source=" + source + ", wieboId=" + wieboId + ", tqqCommentId=" + tqqCommentId + ", sinaCommentId=" + sinaCommentId + ", status="
+	return "CommentMap [id=" + id + ", userMapId=" + userMapId + ", source=" + source + ", wieboId=" + weiboId + ", tqqCommentId=" + tqqCommentId + ", sinaCommentId=" + sinaCommentId + ", status="
 	    + status + ", retryCount=" + retryCount + ", createTime=" + createTime + ", creator=" + creator + ", updateTime=" + updateTime + ", updator=" + updator + "]";
   }
 

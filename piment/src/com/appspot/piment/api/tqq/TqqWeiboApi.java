@@ -49,6 +49,26 @@ public class TqqWeiboApi extends ApiBase {
 	return sendMessage(params, pic);
   }
 
+  public Response sendComment(String retId, String comment, String clientIp) throws Exception {
+
+	Map<String, String> params = new LinkedHashMap<String, String>();
+	params.put("clientip", StringUtils.isNotBlank(clientIp) ? clientIp : Constants.LOOPBACK_IP);
+	params.put("content", comment);
+	params.put("format", "json");
+	params.putAll(getFixedParams());
+	params.put("reid", retId);
+
+	String url = "http://open.t.qq.com/api/t/comment";
+
+	String postPayload = getSignedPayload(Constants.HTTP_POST, url, params);
+	log.info("postPayload = " + postPayload);
+	String response = HttpClient.doPost(url, postPayload);
+
+	log.info("result --> \n" + response);
+	Response responseObj = JSON.decode(response, Response.class);
+	return responseObj;
+  }
+
   private Response sendMessage(Map<String, String> params, String pic) throws Exception {
 
 	String url = this.sendTextUrl;
@@ -59,7 +79,7 @@ public class TqqWeiboApi extends ApiBase {
 	  // Videoメッセージ対応
 	  String videoUrl = getVideoUrl(params.get("content"));
 	  if (StringUtils.isNotBlank(videoUrl)) {
-		pic = null; //画像送信しない
+		pic = null; // 画像送信しない
 		params.put("url", videoUrl);
 		url = this.sendVideoUrl;
 	  }
