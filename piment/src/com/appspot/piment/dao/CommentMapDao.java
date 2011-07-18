@@ -28,8 +28,7 @@ public class CommentMapDao {
 
   private static final String QL_002 = "select from " + CommentMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
-  // private static final String QL_003 = "select from " +
-  // CommentMap.class.getName() + " where sinaWeiboId == :sinaWeiboId";
+  private static final String QL_003 = "select from " + CommentMap.class.getName() + " where sinaCommentId == :sinaCommentId";
 
   private static final String QL_004 = "select from " + CommentMap.class.getName() + " where updateTime <= :before";
 
@@ -59,25 +58,23 @@ public class CommentMapDao {
 	}
   }
 
-  // public CommentMap getBySinaWeiboId(Long sinaWeiboId) {
-  // try {
-  // pm = PMF.get().getPersistenceManager();
-  // Query query = pm.newQuery(QL_003);
-  //
-  // @SuppressWarnings("unchecked")
-  // List<CommentMap> CommentMapList = (List<CommentMap>)
-  // query.execute(sinaWeiboId);
-  //
-  // return (CommentMapList != null && CommentMapList.size() > 0) ?
-  // CommentMapList.get(0) : null;
-  //
-  // } finally {
-  // if (pm != null) {
-  // pm.close();
-  // pm = null;
-  // }
-  // }
-  // }
+  public CommentMap getBySinaCommentId(Long sinaCommentId) {
+	try {
+	  pm = PMF.get().getPersistenceManager();
+	  Query query = pm.newQuery(QL_003);
+
+	  @SuppressWarnings("unchecked")
+	  List<CommentMap> CommentMapList = (List<CommentMap>) query.execute(sinaCommentId);
+
+	  return (CommentMapList != null && CommentMapList.size() > 0) ? CommentMapList.get(0) : null;
+
+	} finally {
+	  if (pm != null) {
+		pm.close();
+		pm = null;
+	  }
+	}
+  }
 
   public List<CommentMap> getFieldItem(Long userMapId) {
 

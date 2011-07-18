@@ -32,7 +32,7 @@ public class Job1001 extends HttpServlet {
 	  PMF.saveEntity(job);
 	  log.info("job's status:" + job);
 
-	  JobService jobService = new JobService();
+	  JobServiceController jobService = new JobServiceController();
 	  jobService.run(job);
 
 	  // ジョブ状態変更

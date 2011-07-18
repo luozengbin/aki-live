@@ -15,16 +15,16 @@ import com.appspot.piment.model.Job;
 import com.appspot.piment.model.UserMap;
 import com.appspot.piment.model.WeiboSource;
 
-public class JobService {
+public class JobServiceController {
 
-  private static final Logger log = Logger.getLogger(Constants.FQCN + JobService.class.getName());
+  private static final Logger log = Logger.getLogger(Constants.FQCN + JobServiceController.class.getName());
 
   private AuthTokenDao authTokenDao = null;
   private UserMapDao userMapDao = null;
   protected Map<String, String> configMap = null;
   private SinaMessageSync sinaMessageSync = null;
 
-  public JobService() {
+  public JobServiceController() {
 	super();
 
 	this.authTokenDao = new AuthTokenDao();
@@ -66,6 +66,10 @@ public class JobService {
 		  // ユーザの設定よりリトライ処理の判定
 		  if (user.isAutoRetry()) {
 			this.sinaMessageSync.retrySyncUserMessage(user);
+
+			if (user.isSinaToTqqComment()) {
+			  this.sinaMessageSync.retrySyncUserComment(user);
+			}
 		  }
 
 		  // メッセージ同期化
@@ -78,15 +82,14 @@ public class JobService {
 
 		} // -- [ST001 END]
 	  } catch (Exception e) {
-		String msg001 = "sina[" + user.getSinaUserId() + "] から tqq[" + user.getTqqUserId() + "]へ同期化開始中不具合が起きました";
+		String msg001 = "sina[" + user.getSinaUserId() + "] と tqq[" + user.getTqqUserId() + "]の同期化中不具合が起きました";
 		log.severe(msg001);
 		log.severe(JSON.encode(e, true));
 
 		e.printStackTrace();
-		// 例外が起きても次ぎのメッセージの同期化を行う
+		// 例外が起きても次ぎの処理対象の同期化を行う
 	  }
 	}
-
   }
 
 }
