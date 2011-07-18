@@ -1,5 +1,7 @@
 package com.appspot.piment.api.tqq;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -9,6 +11,11 @@ import java.util.logging.Logger;
 import net.arnx.jsonic.JSON;
 
 import com.appspot.piment.Constants;
+import com.appspot.piment.api.tqq.model.MessageData;
+import com.appspot.piment.api.tqq.model.MessageResponse;
+import com.appspot.piment.api.tqq.model.Response;
+import com.appspot.piment.api.tqq.model.TimelineData;
+import com.appspot.piment.api.tqq.model.TimelineResponse;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.HttpClient;
 
@@ -120,19 +127,78 @@ public class TqqWeiboApi extends ApiBase {
 	return url;
   }
 
-  public String fetchMessage(String startTime) throws Exception {
-	log.info("start fetchMessage --> startTime: " + startTime);
+  public List<MessageResponse> getUserTimeline(Long sinceId) throws Exception {
+
+	List<MessageResponse> result = new ArrayList<MessageResponse>();
+
+	log.info("start fetchMessage --> sinceId: " + sinceId);
 	Map<String, String> params = new LinkedHashMap<String, String>();
 	params.put("format", "json");
-	params.put("lastid", "0");
 	params.putAll(getFixedParams());
-	params.put("pageflag", "0");
-	params.put("pagetime", "0");
-	params.put("reqnum", "20");
-	String url = configMap.get("qq.weibo.broadcast.timeline.url");
-	String final_url = getSignedURL(Constants.HTTP_GET, url, params);
-	log.info("final_url -->" + final_url);
-	String response = HttpClient.doGet(final_url);
-	return response;
+
+	Map<String, String> tempParams = new LinkedHashMap<String, String>();
+	if (sinceId != null) {
+
+	  tempParams.put("format", "json");
+	  tempParams.put("id", String.valueOf(sinceId));
+	  tempParams.putAll(getFixedParams());
+
+	  String single_status_url = "http://open.t.qq.com/api/t/show";
+	  String final_single_status_url = getSignedURL(Constants.HTTP_GET, single_status_url, tempParams);
+	  log.info("final_single_status_url -->" + final_single_status_url);
+	  String singleStatusResponse = HttpClient.doGet(final_single_status_url);
+
+	  tempParams.clear();
+
+	  MessageResponse msgResponse = JSON.decode(singleStatusResponse, MessageResponse.class);
+	  if (msgResponse.isOK()) {
+		Date sinceDate = msgResponse.getData().getTimestamp();
+		tempParams.putAll(params);
+		tempParams.put("pageflag", "2");
+		tempParams.put("reqnum", "0");
+		tempParams.put("lastid", "0");
+		tempParams.put("pagetime", Long.toString(sinceDate.getTime()));
+	  } else {
+		throw new RuntimeException(singleStatusResponse);
+	  }
+	} else {
+	  tempParams.putAll(params);
+	  tempParams.put("reqnum", this.configMap.get("qq.broadcast.timeline.reqnum"));
+	}
+	tempParams.put("type", "1");
+
+	String timeline_url = "http://open.t.qq.com/api/statuses/broadcast_timeline_ids";
+	String final_timeline_url = getSignedURL(Constants.HTTP_GET, timeline_url, tempParams);
+	log.info("final_timeline_url -->" + final_timeline_url);
+	String response = HttpClient.doGet(final_timeline_url);
+
+	TimelineResponse timelineResponse = JSON.decode(response, TimelineResponse.class);
+
+	if (timelineResponse != null && timelineResponse.isOK()) {
+	  for (TimelineData.Info timelineInfo : timelineResponse.getData().getInfo()) {
+		tempParams.clear();
+		tempParams.put("format", "json");
+		tempParams.put("id", timelineInfo.getId());
+		tempParams.putAll(getFixedParams());
+
+		String url = "http://open.t.qq.com/api/t/show";
+		String final_url = getSignedURL(Constants.HTTP_GET, url, tempParams);
+		log.info("final_url -->" + final_url);
+		String singleStatusResponse = HttpClient.doGet(final_url);
+
+		MessageResponse msgResponse = JSON.decode(singleStatusResponse, MessageResponse.class);
+		if (msgResponse.isOK()) {
+		  result.add(msgResponse);
+		} else {
+		  MessageData data = new MessageData();
+		  data.setId(timelineInfo.getId());
+		  data.setTimestamp(timelineInfo.getTimestamp());
+		  msgResponse.setData(data);
+		  result.add(msgResponse);
+		}
+	  }
+	}
+
+	return result;
   }
 }

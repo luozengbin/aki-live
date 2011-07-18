@@ -1,4 +1,4 @@
-package com.appspot.piment.api.tqq;
+package com.appspot.piment.api.tqq.model;
 
 public class ResponseData implements java.io.Serializable {
 

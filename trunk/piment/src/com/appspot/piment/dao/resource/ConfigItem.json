@@ -66,18 +66,8 @@
 	},
 	{
 		"id": null,
-		"key": "qq.weibo.broadcast.timeline.reqnum",
-		"value": "20"
-	},
-	{
-		"id": null,
-		"key": "qq.weibo.broadcast.timeline.pageflag ",
-		"value": "0"
-	},
-	{
-		"id": null,
-		"key": "qq.weibo.broadcast.timeline.pageflag",
-		"value": "0"
+		"key": "qq.broadcast.timeline.reqnum",
+		"value": "5"
 	},
 	{
 		"id": null,
