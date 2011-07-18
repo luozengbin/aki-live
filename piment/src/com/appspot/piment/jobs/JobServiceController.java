@@ -23,6 +23,7 @@ public class JobServiceController {
   private UserMapDao userMapDao = null;
   protected Map<String, String> configMap = null;
   private SinaMessageSync sinaMessageSync = null;
+  private TqqMessageSync tqqMessageSync = null;
 
   public JobServiceController() {
 	super();
@@ -37,14 +38,20 @@ public class JobServiceController {
 	// tqqロボットユーザIDを元にAccessTokenを取り出す
 	AuthToken tqqRobotAuthToken = authTokenDao.getByUserId(this.configMap.get("qq.piment.robot.id"), WeiboSource.Tqq);
 
+	// sinaロボットユーザIDを元にAccessTokenを取り出す
+	AuthToken sinaRobotAuthToken = authTokenDao.getByUserId(this.configMap.get("sina.piment.robot.id"), WeiboSource.Sina);
+
 	this.sinaMessageSync = new SinaMessageSync(this.configMap);
 	this.sinaMessageSync.setTqqRobotToken(tqqRobotAuthToken);
+
+	this.tqqMessageSync = new TqqMessageSync(configMap);
+	this.tqqMessageSync.setSinaRobotToken(sinaRobotAuthToken);
   }
 
   public void run(Job job) {
 
 	// 処理対象ユーザ一覧をデータストアから取得する
-	List<UserMap> uerMaps = userMapDao.getUserMaps(job.getFrequency());
+	List<UserMap> uerMaps = userMapDao.getUserMaps(15/* job.getFrequency() */);
 
 	// ユーザ毎に同期化処理を行う
 	for (UserMap user : uerMaps) {
@@ -58,6 +65,8 @@ public class JobServiceController {
 		// トークン情報渡す
 		this.sinaMessageSync.setSinaToken(sinaAuthToken);
 		this.sinaMessageSync.setTqqToken(tqqAuthToken);
+		this.tqqMessageSync.setSinaToken(sinaAuthToken);
+		this.tqqMessageSync.setTqqToken(tqqAuthToken);
 
 		// [ST001 START] - SINAからTQQへ同期化判定 -
 		if (user.isSinaToTqq()) {
@@ -81,6 +90,15 @@ public class JobServiceController {
 		  }
 
 		} // -- [ST001 END]
+
+		// [ST002 START] - TQQからSINAへ同期化判定 -
+		if (user.isTqqToSina()) {
+		  log.info("tqq[" + user.getTqqUserId() + "] から sina[" + user.getSinaUserId() + "]へ同期化開始");
+
+		  // メッセージ同期化
+		  this.tqqMessageSync.syncUserMessage(user);
+		}
+
 	  } catch (Exception e) {
 		String msg001 = "sina[" + user.getSinaUserId() + "] と tqq[" + user.getTqqUserId() + "]の同期化中不具合が起きました";
 		log.severe(msg001);

@@ -3,7 +3,7 @@
 		"autoRetry": true,
 		"createTime": 1309767278343,
 		"creator": "com.appspot.piment.dao.UserMapDao",
-		"disable": true,
+		"disable": false,
 		"features": [
 			{
 				"id": null,

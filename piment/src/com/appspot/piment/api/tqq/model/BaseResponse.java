@@ -1,24 +1,14 @@
-package com.appspot.piment.api.tqq;
+package com.appspot.piment.api.tqq.model;
 
-public class Response implements java.io.Serializable {
+public class BaseResponse implements java.io.Serializable {
 
-  private static final long serialVersionUID = 3709675295989105677L;
-
-  private ResponseData data;
+  private static final long serialVersionUID = -2437899264178056345L;
 
   private String errcode;
 
   private String msg;
 
   private String ret;
-
-  public ResponseData getData() {
-	return data;
-  }
-
-  public void setData(ResponseData data) {
-	this.data = data;
-  }
 
   public String getErrcode() {
 	return errcode;
@@ -44,20 +34,17 @@ public class Response implements java.io.Serializable {
 	this.ret = ret;
   }
 
-  public static long getSerialversionuid() {
-	return serialVersionUID;
-  }
-
   @Override
   public String toString() {
-	return "Response [data=" + data + ", errcode=" + errcode + ", msg=" + msg + ", ret=" + ret + "]";
+	return "BaseResponse [errcode=" + errcode + ", msg=" + msg + ", ret=" + ret + "]";
   }
 
   public boolean isOK() {
 	boolean result = false;
-	if (ResponseStatus.SUCCEED.equals(getErrcode()) && getData() != null) {
+	if (ResponseStatus.SUCCEED.equals(getRet())) {
 	  result = true;
 	}
 	return result;
   }
+
 }

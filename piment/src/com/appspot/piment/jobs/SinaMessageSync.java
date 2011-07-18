@@ -11,8 +11,8 @@ import weibo4j.Status;
 
 import com.appspot.piment.Constants;
 import com.appspot.piment.api.sina.SinaWeiboApi;
-import com.appspot.piment.api.tqq.Response;
 import com.appspot.piment.api.tqq.TqqWeiboApi;
+import com.appspot.piment.api.tqq.model.Response;
 import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.dao.CommentMapDao;
 import com.appspot.piment.dao.UserMapDao;

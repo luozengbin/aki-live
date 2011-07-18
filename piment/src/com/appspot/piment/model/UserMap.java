@@ -148,6 +148,11 @@ public class UserMap {
   public boolean isSinaToTqq() {
 	return Boolean.valueOf(getFeatureValue(Feature.Name.SINA_TO_TQQ));
   }
+
+  //SINAからTQQへメッセージの同期化制御値
+  public boolean isTqqToSina() {
+	return Boolean.valueOf(getFeatureValue(Feature.Name.TQQ_TO_SINA));
+  }
   
   //自動リトライするか？
   public boolean isAutoRetry() {
