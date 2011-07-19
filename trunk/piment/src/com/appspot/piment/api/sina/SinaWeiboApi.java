@@ -100,6 +100,24 @@ public class SinaWeiboApi extends ApiBase {
 
   }
 
+  public Status updateStatus(String message, String pics) {
+	Status result = null;
+	try {
+
+	  if (StringUtils.isBlank(pics)) {
+		log.info("DEBUG --> " + message);
+		result = this.weibo.updateStatus(message);
+	  }
+	  // photo
+	  // this.weibo.uploadStatus(status, item);
+
+	  return result;
+
+	} catch (Exception e) {
+	  throw new RuntimeException(e);
+	}
+  }
+
   public static String getStatusPageURL(Long userId, Long statusId) {
 	return "http://api.t.sina.com.cn/" + String.valueOf(userId) + "/statuses/" + String.valueOf(statusId);
   }

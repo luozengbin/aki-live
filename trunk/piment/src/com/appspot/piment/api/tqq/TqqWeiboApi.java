@@ -148,16 +148,24 @@ public class TqqWeiboApi extends ApiBase {
 	  log.info("final_single_status_url -->" + final_single_status_url);
 	  String singleStatusResponse = HttpClient.doGet(final_single_status_url);
 
+	  log.info("DEBUG --->" + singleStatusResponse);
+
 	  tempParams.clear();
 
 	  MessageResponse msgResponse = JSON.decode(singleStatusResponse, MessageResponse.class);
 	  if (msgResponse.isOK()) {
-		Date sinceDate = msgResponse.getData().getTimestamp();
-		tempParams.putAll(params);
-		tempParams.put("pageflag", "2");
-		tempParams.put("reqnum", "0");
-		tempParams.put("lastid", "0");
-		tempParams.put("pagetime", Long.toString(sinceDate.getTime()));
+		if (msgResponse.getData() != null) {
+		  Date sinceDate = msgResponse.getData().getTimestamp();
+		  tempParams.putAll(params);
+		  tempParams.put("pageflag", "2");
+		  //tempParams.put("reqnum", "0");
+		  //tempParams.put("lastid", "0");
+		  tempParams.put("pagetime", Long.toString(sinceDate.getTime()));
+		} else {
+		  //FIXME
+		  tempParams.putAll(params);
+		  tempParams.put("reqnum", "1");
+		}
 	  } else {
 		throw new RuntimeException(singleStatusResponse);
 	  }
@@ -171,6 +179,8 @@ public class TqqWeiboApi extends ApiBase {
 	String final_timeline_url = getSignedURL(Constants.HTTP_GET, timeline_url, tempParams);
 	log.info("final_timeline_url -->" + final_timeline_url);
 	String response = HttpClient.doGet(final_timeline_url);
+	
+	log.info("DEBUG --> " + response);
 
 	TimelineResponse timelineResponse = JSON.decode(response, TimelineResponse.class);
 
@@ -185,6 +195,8 @@ public class TqqWeiboApi extends ApiBase {
 		String final_url = getSignedURL(Constants.HTTP_GET, url, tempParams);
 		log.info("final_url -->" + final_url);
 		String singleStatusResponse = HttpClient.doGet(final_url);
+		
+		log.info("DEBUG --> " + singleStatusResponse);
 
 		MessageResponse msgResponse = JSON.decode(singleStatusResponse, MessageResponse.class);
 		if (msgResponse.isOK()) {

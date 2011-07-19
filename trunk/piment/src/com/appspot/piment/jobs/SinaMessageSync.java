@@ -68,7 +68,8 @@ public class SinaMessageSync {
   public List<WeiboMap> retrySyncUserMessage(UserMap user) {
 
 	// リトライ処理を行う
-	List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(user.getId());
+	//FIXME
+	List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(user.getId(), WeiboSource.Sina);
 
 	if (retryWeiboMaps.size() > 0) {
 
@@ -103,7 +104,7 @@ public class SinaMessageSync {
   public List<WeiboMap> syncUserMessage(UserMap user) {
 
 	// 前回同期化された最後の履歴レコードを取り出す
-	WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(user.getId());
+	WeiboMap lastestCreateWeiboMap = weiboMapDao.getNewestItem(user.getId(), WeiboSource.Sina);
 
 	// sinaから前回の同期化以降対象ユーザが発表した新メッセージを取得する
 	List<Status> newUserMessages = sinaWeiboApi.getUserTimeline(lastestCreateWeiboMap != null ? lastestCreateWeiboMap.getSinaWeiboId() : null, null);
