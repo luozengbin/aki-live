@@ -51,7 +51,7 @@ public class JobServiceController {
   public void run(Job job) {
 
 	// 処理対象ユーザ一覧をデータストアから取得する
-	List<UserMap> uerMaps = userMapDao.getUserMaps(15/* job.getFrequency() */);
+	List<UserMap> uerMaps = userMapDao.getUserMaps(job.getFrequency());
 
 	// ユーザ毎に同期化処理を行う
 	for (UserMap user : uerMaps) {
@@ -93,10 +93,10 @@ public class JobServiceController {
 
 		// [ST002 START] - TQQからSINAへ同期化判定 -
 		if (user.isTqqToSina()) {
-		  log.info("tqq[" + user.getTqqUserId() + "] から sina[" + user.getSinaUserId() + "]へ同期化開始");
+		  //log.info("tqq[" + user.getTqqUserId() + "] から sina[" + user.getSinaUserId() + "]へ同期化開始");
 
 		  // メッセージ同期化
-		  this.tqqMessageSync.syncUserMessage(user);
+		  //this.tqqMessageSync.syncUserMessage(user);
 		}
 
 	  } catch (Exception e) {

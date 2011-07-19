@@ -13,6 +13,7 @@ import javax.jdo.Query;
 import com.appspot.piment.Constants;
 import com.appspot.piment.model.UserMap;
 import com.appspot.piment.model.WeiboMap;
+import com.appspot.piment.model.WeiboSource;
 import com.appspot.piment.model.WeiboStatus;
 import com.appspot.piment.shared.StringUtils;
 import com.appspot.piment.util.DateUtils;
@@ -24,7 +25,7 @@ public class WeiboMapDao {
   /**
    * DEFINATION OF QUERY
    */
-  private static final String QL_001 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId";
+  private static final String QL_001 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId && source == :source";
 
   private static final String QL_002 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
@@ -40,15 +41,16 @@ public class WeiboMapDao {
 	super();
   }
 
-  public WeiboMap getNewestItem(Long userMapId) {
+  public WeiboMap getNewestItem(Long userMapId, WeiboSource source) {
 	try {
 	  pm = PMF.get().getPersistenceManager();
 	  Query query = pm.newQuery(QL_001);
 	  query.setOrdering("createTime desc");
 	  query.setRange(0, 1);
+	  
 
 	  @SuppressWarnings("unchecked")
-	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.execute(userMapId);
+	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.executeWithArray(userMapId, source);
 
 	  return (weiboMapList != null && weiboMapList.size() > 0) ? weiboMapList.get(0) : null;
 
@@ -96,8 +98,9 @@ public class WeiboMapDao {
 	}
   }
 
-  public List<WeiboMap> getFieldItem(Long userMapId) {
+  public List<WeiboMap> getFieldItem(Long userMapId, WeiboSource source) {
 
+	List<WeiboMap> result = new ArrayList<WeiboMap>();
 	try {
 	  pm = PMF.get().getPersistenceManager();
 	  Query query = pm.newQuery(QL_002);
@@ -109,10 +112,14 @@ public class WeiboMapDao {
 
 	  @SuppressWarnings("unchecked")
 	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.executeWithMap(params);
+	  for (WeiboMap weiboMap : weiboMapList) {
+		if(weiboMap.getSource().equals(source)){
+		  weiboMap = pm.detachCopy(weiboMap);
+		  result.add(weiboMap);
+		}
+      }
 
-	  pm.detachCopyAll(weiboMapList);
-
-	  return weiboMapList;
+	  return result;
 
 	} finally {
 	  if (pm != null) {
