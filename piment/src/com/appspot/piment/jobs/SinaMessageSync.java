@@ -116,7 +116,7 @@ public class SinaMessageSync {
 	for (int i = newUserMessages.size() - 1; i >= 0; i--) {
 	  status = newUserMessages.get(i);
 	  
-	  if(this.weiboMapDao.getBySinaWeiboId(status.getId()) == null){
+	  if(this.weiboMapDao.getBySinaWeiboId(status.getId(), user.getId()) == null){
 		syncSinaUserMessage(user, status, new WeiboMap());
 	  }else{
 		log.info("Sina message --> [" + status.getId() + "] 同期化済みでスキップする。");
@@ -175,7 +175,7 @@ public class SinaMessageSync {
 
 	for (int i = newComments.size() - 1; i >= 0; i--) { // FOR-101
 	  comment = newComments.get(i);
-	  if(this.commentMapDao.getBySinaCommentId(comment.getId()) == null){
+	  if(this.commentMapDao.getBySinaCommentId(comment.getId(), user.getId()) == null){
 		syncSinaUserComment(user, comment, new CommentMap());
 	  }else{
 		log.info("Sina comment --> [" + comment.getId() + "] 同期化済みでスキップする。");
@@ -208,7 +208,7 @@ public class SinaMessageSync {
 	  }
 
 	  Long sinaWeiboId = comment.getStatus().getId();
-	  WeiboMap weiboMap = this.weiboMapDao.getBySinaWeiboId(sinaWeiboId);
+	  WeiboMap weiboMap = this.weiboMapDao.getBySinaWeiboId(sinaWeiboId, user.getId());
 
 	  if (weiboMap != null && StringUtils.isNotBlank(String.valueOf(weiboMap.getTqqWeiboId()))) {
 
@@ -333,7 +333,7 @@ public class SinaMessageSync {
 			Status retweetedStatus = status.getRetweeted_status();
 			log.info("Sina Message --> Retweet [" + retweetedStatus.getId() + "]");
 
-			WeiboMap processedWeibo = this.weiboMapDao.getBySinaWeiboId(retweetedStatus.getId());
+			WeiboMap processedWeibo = this.weiboMapDao.getBySinaWeiboId(retweetedStatus.getId(), userMap.getId());
 			if (processedWeibo != null) {
 			  retweetId = String.valueOf(processedWeibo.getTqqWeiboId());
 			} else {
