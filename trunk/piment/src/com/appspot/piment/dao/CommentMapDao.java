@@ -28,7 +28,7 @@ public class CommentMapDao {
 
   private static final String QL_002 = "select from " + CommentMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
-  private static final String QL_003 = "select from " + CommentMap.class.getName() + " where sinaCommentId == :sinaCommentId";
+  private static final String QL_003 = "select from " + CommentMap.class.getName() + " where sinaCommentId == :sinaCommentId & userMapId == :userMapId";
 
   private static final String QL_004 = "select from " + CommentMap.class.getName() + " where updateTime <= :before";
 
@@ -58,13 +58,13 @@ public class CommentMapDao {
 	}
   }
 
-  public CommentMap getBySinaCommentId(Long sinaCommentId) {
+  public CommentMap getBySinaCommentId(Long sinaCommentId, Long userMapId) {
 	try {
 	  pm = PMF.get().getPersistenceManager();
 	  Query query = pm.newQuery(QL_003);
 
 	  @SuppressWarnings("unchecked")
-	  List<CommentMap> CommentMapList = (List<CommentMap>) query.execute(sinaCommentId);
+	  List<CommentMap> CommentMapList = (List<CommentMap>) query.executeWithArray(sinaCommentId, userMapId);
 
 	  return (CommentMapList != null && CommentMapList.size() > 0) ? CommentMapList.get(0) : null;
 

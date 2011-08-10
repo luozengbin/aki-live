@@ -29,7 +29,7 @@ public class WeiboMapDao {
 
   private static final String QL_002 = "select from " + WeiboMap.class.getName() + " where userMapId == :userMapId && status == :status";
 
-  private static final String QL_003 = "select from " + WeiboMap.class.getName() + " where sinaWeiboId == :sinaWeiboId";
+  private static final String QL_003 = "select from " + WeiboMap.class.getName() + " where sinaWeiboId == :sinaWeiboId && userMapId == :userMapId";
 
   private static final String QL_004 = "select from " + WeiboMap.class.getName() + " where updateTime <= :before";
 
@@ -62,13 +62,13 @@ public class WeiboMapDao {
 	}
   }
 
-  public WeiboMap getBySinaWeiboId(Long sinaWeiboId) {
+  public WeiboMap getBySinaWeiboId(Long sinaWeiboId, Long userMapId) {
 	try {
 	  pm = PMF.get().getPersistenceManager();
 	  Query query = pm.newQuery(QL_003);
 
 	  @SuppressWarnings("unchecked")
-	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.execute(sinaWeiboId);
+	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.executeWithArray(sinaWeiboId, userMapId);
 
 	  return (weiboMapList != null && weiboMapList.size() > 0) ? weiboMapList.get(0) : null;
 
