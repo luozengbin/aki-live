@@ -208,6 +208,7 @@ public class SinaMessageSync {
 	  }
 
 	  Long sinaWeiboId = comment.getStatus().getId();
+	  
 	  WeiboMap weiboMap = this.weiboMapDao.getBySinaWeiboId(sinaWeiboId, user.getId());
 
 	  if (weiboMap != null && StringUtils.isNotBlank(String.valueOf(weiboMap.getTqqWeiboId()))) {
