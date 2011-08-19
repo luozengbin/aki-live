@@ -70,7 +70,7 @@ public class WeiboMapDao {
 	  @SuppressWarnings("unchecked")
 	  List<WeiboMap> weiboMapList = (List<WeiboMap>) query.executeWithArray(sinaWeiboId, userMapId);
 
-	  return (weiboMapList != null && weiboMapList.size() > 0) ? weiboMapList.get(0) : null;
+	  return (weiboMapList != null && weiboMapList.size() > 0 && weiboMapList.get(0).getStatus().equals(WeiboStatus.SUCCESSED)) ? weiboMapList.get(0) : null;
 
 	} finally {
 	  if (pm != null) {
