@@ -271,9 +271,12 @@ public class SinaMessageSync {
 
 		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
 		  log.severe(errorDetail);
-
-		  MailUtils.sendErrorReport(msg001 + "\n\n処理コメント：" + comment.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
-
+		  
+		  if(response != null && ("10".equals(response.getErrcode()) || "13".equals(response.getErrcode()))){
+			System.out.println("DOT NOT SEND EMAIL!");
+		  }else{
+			MailUtils.sendErrorReport(msg001 + "\n\n処理コメント：" + comment.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
+		  }
 		}
 	  } else {
 		commentMap.setStatus(WeiboStatus.SKIPPED);
