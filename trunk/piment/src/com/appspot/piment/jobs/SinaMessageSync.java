@@ -345,11 +345,18 @@ public class SinaMessageSync {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
 
 			  StringBuilder retweetMsg = new StringBuilder();
-			  retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
-			  retweetMsg.append(originalMsg);
+			  
 			  // TODO 長さ判定
-			  retweetMsg.append("//Sina源：").append(SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
-
+			  if(originalMsg.length() < 200){
+				retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
+			  }
+			  
+			  retweetMsg.append(originalMsg);
+			  
+			  // TODO 長さ判定
+			  if(originalMsg.length() < 200){
+				retweetMsg.append(" //Sina源：").append(SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
+			  }
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
 				log.info("Sina Message --> Retweet Successed!!!");

@@ -92,14 +92,21 @@ public class TqqWeiboApi extends ApiBase {
 	  }
 	}
 
+	boolean sended = false;
 	String response = null;
-
+	
 	if (StringUtils.isNotBlank(pic)) {
 	  params.put("oauth_signature", getSignature(Constants.HTTP_POST, this.sendPicUrl, params));
 	  Map<String, String> fileUrlMaps = new HashMap<String, String>();
 	  fileUrlMaps.put("pic", pic);
 	  response = HttpClient.doPostMultipart(this.sendPicUrl, params, fileUrlMaps);
-	} else {
+	  if(!JSON.decode(response, Response.class).isOK()){
+		sended = false;
+	  }else{
+		sended = true;
+	  }
+	}
+	if(!sended) {
 	  String postPayload = getSignedPayload(Constants.HTTP_POST, url, params);
 	  log.info("postPayload = " + postPayload);
 	  response = HttpClient.doPost(url, postPayload);
