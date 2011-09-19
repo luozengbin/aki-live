@@ -3,7 +3,7 @@
 	<cron>
 		<url>/admin/crons/job1001</url>
 		<description>running message sync job every 15 minutes</description>
-		<schedule>every 15 minutes</schedule>
+		<schedule>every 5 minutes</schedule>
 		<timezone>Asia/Tokyo</timezone>
 	</cron>
 	<cron>
