@@ -73,6 +73,7 @@ public class TqqWeiboApi extends ApiBase {
 
 	log.info("result --> \n" + response);
 	Response responseObj = JSON.decode(response, Response.class);
+	
 	return responseObj;
   }
 
@@ -113,6 +114,7 @@ public class TqqWeiboApi extends ApiBase {
 	}
 	log.info("result --> \n" + response);
 	Response responseObj = JSON.decode(response, Response.class);
+		
 	return responseObj;
   }
 

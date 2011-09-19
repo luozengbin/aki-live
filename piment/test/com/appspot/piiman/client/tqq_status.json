@@ -1,0 +1,40 @@
+{
+    "data":{
+        "city_code":"",
+        "count":1,
+        "country_code":"",
+        "from":"腾讯微博",
+        "geo":0,
+        "head":"http://app.qlogo.cn/mbloghead/8ef2b89dc84e12ea4a1a",
+        "id":"63524066135241",
+        "image":null,
+        "isvip":0,
+        "location":"",
+        "mcount":0,
+        "music":null,
+        "name":"piment_robot",
+        "nick":"Piment助手",
+        "origtext":"转发自Sina//@震爷的震//源链接：http://url.cn/0zOASN 源内容-->gaga输了。哈哈哈，多有想象力啊！ http://url.cn/0p05kX ",
+        "province_code":"",
+        "self":0,
+        "source":null,
+        "status":0,
+        "text":"转发自Sina//@震爷的震//源链接：<a href=\"http://url.cn/0zOASN\" target=\"_blank\">http://url.cn/0zOASN</a> 源内容-->gaga输了。哈哈哈，多有想象力啊！ <a href=\"http://url.cn/0p05kX\" target=\"_blank\">http://url.cn/0p05kX</a> ",
+        "timestamp":1310082970,
+        "timestamp_now":1310983973,
+        "type":1,
+        "user":{
+            "piment_robot":"Piment助手"
+        },
+        "video":{
+            "picurl":"http://g2.ykimg.com/0100641F464E01D3AD8F74047E0184996510DA-918D-DDB3-EE3D-83796A32A123",
+            "player":"http://player.youku.com/player.php/partnerid/XOTcy/sid/XMjc4NDk2MTE2/v.swf",
+            "realurl":"http://v.youku.com/v_show/id_XMjc4NDk2MTE2.html",
+            "shorturl":"http://url.cn/0p05kX",
+            "title":"完美推荐:Weird Al Yankovic恶搞Lady Gaga首单Perform This Wa  "
+        }
+    },
+    "errcode":0,
+    "msg":"ok",
+    "ret":0
+}

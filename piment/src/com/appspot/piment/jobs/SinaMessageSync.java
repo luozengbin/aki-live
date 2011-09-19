@@ -17,6 +17,7 @@ import com.appspot.piment.dao.AuthTokenDao;
 import com.appspot.piment.dao.CommentMapDao;
 import com.appspot.piment.dao.UserMapDao;
 import com.appspot.piment.dao.WeiboMapDao;
+import com.appspot.piment.model.ApiLimitedException;
 import com.appspot.piment.model.AuthToken;
 import com.appspot.piment.model.CommentMap;
 import com.appspot.piment.model.UserMap;
@@ -68,7 +69,7 @@ public class SinaMessageSync {
   public List<WeiboMap> retrySyncUserMessage(UserMap user) {
 
 	// リトライ処理を行う
-	//FIXME
+	// FIXME
 	List<WeiboMap> retryWeiboMaps = this.weiboMapDao.getFieldItem(user.getId(), WeiboSource.Sina);
 
 	if (retryWeiboMaps.size() > 0) {
@@ -83,19 +84,20 @@ public class SinaMessageSync {
 	  for (Status oldUserMessage : oldUserMessages) {
 		oldUserMessagesMap.put(oldUserMessage.getId(), oldUserMessage);
 	  }
-
-	  for (WeiboMap retryWeiboMap : retryWeiboMaps) {
-		if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
-		  // RETRY
-		  syncSinaUserMessage(user, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
-
-		} else {
-		  // ABORT
-		  retryWeiboMap.setStatus(WeiboStatus.ABORT);
-
-		  // 同期化履歴レコードを保存する
-		  retryWeiboMap = weiboMapDao.save(retryWeiboMap);
+	  try {
+		for (WeiboMap retryWeiboMap : retryWeiboMaps) {
+		  if (oldUserMessagesMap.containsKey(retryWeiboMap.getSinaWeiboId())) {
+			// RETRY
+			syncSinaUserMessage(user, oldUserMessagesMap.get(retryWeiboMap.getSinaWeiboId()), retryWeiboMap);
+		  } else {
+			// ABORT
+			retryWeiboMap.setStatus(WeiboStatus.ABORT);
+			// 同期化履歴レコードを保存する
+			retryWeiboMap = weiboMapDao.save(retryWeiboMap);
+		  }
 		}
+	  } catch (ApiLimitedException e) {
+		e.printStackTrace();
 	  }
 	}
 	return null;
@@ -113,22 +115,27 @@ public class SinaMessageSync {
 
 	// メッセージ単位で同期化処理を行う
 	Status status = null;
-	for (int i = newUserMessages.size() - 1; i >= 0; i--) {
-	  status = newUserMessages.get(i);
-	  
-	  if(this.weiboMapDao.getBySinaWeiboId(status.getId(), user.getId()) == null){
-		syncSinaUserMessage(user, status, new WeiboMap());
-	  }else{
-		log.info("Sina message --> [" + status.getId() + "] 同期化済みでスキップする。");
+	try {
+	  for (int i = newUserMessages.size() - 1; i >= 0; i--) {
+		status = newUserMessages.get(i);
+		if (this.weiboMapDao.getBySinaWeiboId(status.getId(), user.getId()) == null) {
+		  syncSinaUserMessage(user, status, new WeiboMap());
+		} else {
+		  log.info("Sina message --> [" + status.getId() + "] 同期化済みでスキップする。");
+		}
 	  }
+	} catch (ApiLimitedException e) {
+	  e.printStackTrace();
 	}
 	return null;
   }
 
-  public List<WeiboMap> retrySyncUserComment(UserMap user) {
+  public int retrySyncUserComment(UserMap user) {
 
 	// リトライ処理を行う
 	List<CommentMap> retryCommentMaps = this.commentMapDao.getFieldItem(user.getId());
+
+	int count = 0;
 
 	if (retryCommentMaps.size() > 0) {
 
@@ -142,25 +149,31 @@ public class SinaMessageSync {
 	  for (Comment oldUserComment : oldUserComments) {
 		oldUserCommentsMap.put(oldUserComment.getId(), oldUserComment);
 	  }
+	  try {
+		for (CommentMap retryCommentMap : retryCommentMaps) {
+		  if (oldUserCommentsMap.containsKey(retryCommentMap.getSinaCommentId())) {
+			// RETRY
+			boolean result = syncSinaUserComment(user, oldUserCommentsMap.get(retryCommentMap.getSinaCommentId()), retryCommentMap);
+			if (result)
+			  count++;
+		  } else {
+			// ABORT
+			retryCommentMap.setStatus(WeiboStatus.ABORT);
 
-	  for (CommentMap retryCommentMap : retryCommentMaps) {
-		if (oldUserCommentsMap.containsKey(retryCommentMap.getSinaCommentId())) {
-		  // RETRY
-		  syncSinaUserComment(user, oldUserCommentsMap.get(retryCommentMap.getSinaCommentId()), retryCommentMap);
-
-		} else {
-		  // ABORT
-		  retryCommentMap.setStatus(WeiboStatus.ABORT);
-
-		  // 同期化履歴レコードを保存する
-		  retryCommentMap = commentMapDao.save(retryCommentMap);
+			// 同期化履歴レコードを保存する
+			retryCommentMap = commentMapDao.save(retryCommentMap);
+		  }
 		}
+	  } catch (ApiLimitedException e) {
+		e.printStackTrace();
 	  }
 	}
-	return null;
+	return count;
   }
 
-  public List<CommentMap> syncUserComment(UserMap user) {
+  public int syncUserComment(UserMap user) {
+
+	int count = 0;
 
 	// 前回同期化された最後のコメント履歴レコードを取り出す
 	CommentMap lastestCreateCommentMap = commentMapDao.getNewestItem(user.getId());
@@ -172,20 +185,27 @@ public class SinaMessageSync {
 
 	// メッセージ単位で同期化処理を行う
 	Comment comment = null;
-
-	for (int i = newComments.size() - 1; i >= 0; i--) { // FOR-101
-	  comment = newComments.get(i);
-	  if(this.commentMapDao.getBySinaCommentId(comment.getId(), user.getId()) == null){
-		syncSinaUserComment(user, comment, new CommentMap());
-	  }else{
-		log.info("Sina comment --> [" + comment.getId() + "] 同期化済みでスキップする。");
+	try {
+	  for (int i = newComments.size() - 1; i >= 0; i--) { // FOR-101
+		comment = newComments.get(i);
+		if (this.commentMapDao.getBySinaCommentId(comment.getId(), user.getId()) == null) {
+		  boolean result = syncSinaUserComment(user, comment, new CommentMap());
+		  if (result)
+			count++;
+		} else {
+		  log.info("Sina comment --> [" + comment.getId() + "] 同期化済みでスキップする。");
+		}
 	  }
+	} catch (ApiLimitedException e) {
+	  e.printStackTrace();
+	  // DO NOTHING
 	}
-	return null;
+	return count;
   }
 
-  private void syncSinaUserComment(UserMap user, Comment comment, CommentMap commentMap) {
+  private boolean syncSinaUserComment(UserMap user, Comment comment, CommentMap commentMap) throws ApiLimitedException {
 
+	boolean result = false;
 	log.info("Sina comment --> [" + comment.getId() + "]同期化中...");
 
 	commentMap.setSinaCommentId(comment.getId());
@@ -203,12 +223,12 @@ public class SinaMessageSync {
 		if (comment.getText().contains(this.configMap.get("app.piment.unsync.keyword"))) {
 		  commentMap.setStatus(WeiboStatus.SKIPPED);
 		  log.info("Sina comment --> [" + comment.getId() + "]同期化対象外とする");
-		  return;
+		  return false;
 		}
 	  }
 
 	  Long sinaWeiboId = comment.getStatus().getId();
-	  
+
 	  WeiboMap weiboMap = this.weiboMapDao.getBySinaWeiboId(sinaWeiboId, user.getId());
 
 	  if (weiboMap != null && StringUtils.isNotBlank(String.valueOf(weiboMap.getTqqWeiboId()))) {
@@ -249,10 +269,29 @@ public class SinaMessageSync {
 		  commentMap.setTqqCommentId(Long.valueOf(response.getData().getId()));
 		  log.info("Sina comment --> コメント同期化成功！！！");
 		  log.info("Sina comment --> コメントメッセージID：" + comment.getId());
+		  result = true;
 		} else {
 
 		  log.warning("Sina comment --> コメント同期化失敗！！！");
 		  log.warning("Sina comment --> メッセージID：" + comment.getId());
+
+		  String msg001 = "Sina comment --> [" + commentMap.getSinaCommentId() + "]をTQQへの送信が失敗しました。";
+		  log.severe(msg001);
+
+		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
+		  log.severe(errorDetail);
+
+		  // 13 重复发表
+		  // 10 发表太快，被频率限制
+		  if ("10".equals(response.getErrcode())) {
+			System.out.println("DOT NOT SEND EMAIL!");
+			commentMap.setStatus(WeiboStatus.FAILED);
+			throw new ApiLimitedException("发表太快，被频率限制:" + errorDetail);
+		  } else if ("13".equals(response.getErrcode())) {
+			System.out.println("DOT NOT SEND EMAIL!");
+		  } else {
+			MailUtils.sendErrorReport(msg001 + "\n\n処理コメント：" + comment.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
+		  }
 
 		  if (commentMap.getId() != null) {
 			commentMap.setRetryCount(commentMap.getRetryCount() + 1);
@@ -265,24 +304,16 @@ public class SinaMessageSync {
 		  } else {
 			commentMap.setStatus(WeiboStatus.FAILED);
 		  }
-
-		  String msg001 = "Sina comment --> [" + commentMap.getId() + "]をTQQへの送信が失敗しました。";
-		  log.severe(msg001);
-
-		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
-		  log.severe(errorDetail);
-		  
-		  if(response != null && ("10".equals(response.getErrcode()) || "13".equals(response.getErrcode()))){
-			System.out.println("DOT NOT SEND EMAIL!");
-		  }else{
-			MailUtils.sendErrorReport(msg001 + "\n\n処理コメント：" + comment.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
-		  }
 		}
+
 	  } else {
 		commentMap.setStatus(WeiboStatus.SKIPPED);
 		log.info("Sina comment --> [" + comment.getId() + "] 対応するメッセージ履歴がないため、同期化対象外とする");
 	  }
 
+	} catch (ApiLimitedException e) {
+	  // DO NOTHING
+	  throw e;
 	} catch (Exception e) {
 	  String msg001 = "Sina comment --> 同期化失敗しました、コメントメッセージID：" + comment.getId();
 	  log.severe(msg001);
@@ -294,9 +325,10 @@ public class SinaMessageSync {
 	  commentMap = commentMapDao.save(commentMap);
 	  log.info("Sina comment --> 同期化履歴レコードID：" + commentMap.getId());
 	}
+	return result;
   }
 
-  private void syncSinaUserMessage(UserMap userMap, Status status, WeiboMap weiboMap) {
+  private void syncSinaUserMessage(UserMap userMap, Status status, WeiboMap weiboMap) throws ApiLimitedException {
 	try {
 
 	  log.info("Sina Message --> [" + status.getId() + "]同期化中...");
@@ -345,16 +377,16 @@ public class SinaMessageSync {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
 
 			  StringBuilder retweetMsg = new StringBuilder();
-			  
+
 			  // TODO 長さ判定
-			  if(originalMsg.length() < 200){
+			  if (originalMsg.length() < 200) {
 				retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
 			  }
-			  
+
 			  retweetMsg.append(originalMsg);
-			  
+
 			  // TODO 長さ判定
-			  if(originalMsg.length() < 200){
+			  if (originalMsg.length() < 200) {
 				retweetMsg.append(" //Sina源：").append(SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
 			  }
 			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
@@ -403,6 +435,24 @@ public class SinaMessageSync {
 		  log.warning("Sina Message --> 同期化失敗！！！");
 		  log.warning("Sina Message --> メッセージID：" + status.getId());
 
+		  String msg001 = "Sina Message --> [" + status.getId() + "]メッセージをTQQへの送信が失敗しました。";
+		  log.severe(msg001);
+
+		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
+		  log.severe(errorDetail);
+
+		  // 13 重复发表
+		  // 10 发表太快，被频率限制
+		  if ("10".equals(response.getErrcode())) {
+			System.out.println("DOT NOT SEND EMAIL!");
+			weiboMap.setStatus(WeiboStatus.FAILED);
+			throw new ApiLimitedException("发表太快，被频率限制:" + errorDetail);
+		  } else if ("13".equals(response.getErrcode())) {
+			System.out.println("DOT NOT SEND EMAIL!");
+		  } else {
+			MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + status.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
+		  }
+
 		  if (weiboMap.getId() != null) {
 			weiboMap.setRetryCount(weiboMap.getRetryCount() + 1);
 			// 失敗フラグを設定
@@ -414,17 +464,11 @@ public class SinaMessageSync {
 		  } else {
 			weiboMap.setStatus(WeiboStatus.FAILED);
 		  }
-
-		  String msg001 = "Sina Message --> [" + status.getId() + "]メッセージをTQQへの送信が失敗しました。";
-		  log.severe(msg001);
-
-		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
-		  log.severe(errorDetail);
-
-		  MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + status.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
 		}
 	  }
-
+	} catch (ApiLimitedException e) {
+	  // DO NOTHING
+	  throw e;
 	} catch (Exception e) {
 
 	  String msg001 = "Sina Message --> 同期化失敗しました、メッセージID：" + status.getId();
