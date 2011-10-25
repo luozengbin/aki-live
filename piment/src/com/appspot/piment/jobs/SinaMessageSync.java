@@ -359,6 +359,7 @@ public class SinaMessageSync {
 
 		// 同じメッセージをtqqへ発表する
 		Response response = null;
+		Response middleResponse = null;
 		Throwable throwable = null;
 		String originalMsg = null;
 		try {
@@ -377,19 +378,20 @@ public class SinaMessageSync {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
 
 			  StringBuilder retweetMsg = new StringBuilder();
-
+			  
 			  // TODO 長さ判定
 			  if (originalMsg.length() < 200) {
 				retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
 			  }
-
 			  retweetMsg.append(originalMsg);
 
 			  // TODO 長さ判定
-			  if (originalMsg.length() < 200) {
-				retweetMsg.append(" //Sina源：").append(SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId()));
+			  String sinaURL = SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
+			  if (retweetMsg.length() + sinaURL.length() < 200) {
+				retweetMsg.append(" //Sina源：").append(sinaURL);
 			  }
-			  Response middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
+			  
+			  middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
 				log.info("Sina Message --> Retweet Successed!!!");
 				// データストアへ保存する
@@ -408,6 +410,9 @@ public class SinaMessageSync {
 			if (retweetId != null) {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(status.getText().trim());
 			  response = tqqWeiboApi.retweetMessage(retweetId, originalMsg, status.getOriginal_pic(), null);
+			} else {
+			  response = middleResponse;
+			  response.setApplicationMsg("Sina Message --> Retweet [" + retweetedStatus.getId() + "] Failed!!!!");
 			}
 
 		  } else { // 转发微博的处理　-　END

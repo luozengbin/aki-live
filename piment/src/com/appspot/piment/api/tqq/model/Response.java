@@ -2,20 +2,31 @@ package com.appspot.piment.api.tqq.model;
 
 public class Response extends BaseResponse implements java.io.Serializable {
 
-  private static final long serialVersionUID = 3709675295989105677L;
+	private static final long serialVersionUID = 3709675295989105677L;
 
-  private ResponseData data;
+	private ResponseData data;
 
-  public ResponseData getData() {
-	return data;
-  }
+	private String applicationMsg;
 
-  public void setData(ResponseData data) {
-	this.data = data;
-  }
+	public ResponseData getData() {
+		return data;
+	}
 
-  @Override
-  public String toString() {
-	return "Response [data=" + data + ", toString()=" + super.toString() + "]";
-  }
+	public void setData(ResponseData data) {
+		this.data = data;
+	}
+
+	public String getApplicationMsg() {
+		return applicationMsg;
+	}
+
+	public void setApplicationMsg(String applicationMsg) {
+		this.applicationMsg = applicationMsg;
+	}
+
+	@Override
+	public String toString() {
+		return "Response [data=" + data + ", applicationMsg=" + applicationMsg
+				+ "]";
+	}
 }
