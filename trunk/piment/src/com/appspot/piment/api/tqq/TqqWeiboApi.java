@@ -45,6 +45,16 @@ public class TqqWeiboApi extends ApiBase {
 	params.putAll(getFixedParams());
 	return sendMessage(params, pic);
   }
+  
+  public Response sendMessage(String origMsg, String msg, String pic, String clientIp) throws Exception {
+	Map<String, String> params = new LinkedHashMap<String, String>();
+	params.put("clientip", StringUtils.isNotBlank(clientIp) ? clientIp : Constants.LOOPBACK_IP);
+	params.put("content", msg);
+	params.put("orig_content", origMsg);
+	params.put("format", "json");
+	params.putAll(getFixedParams());
+	return sendMessage(params, pic);
+  }
 
   public Response retweetMessage(String retweetId, String msg, String pic, String clientIp) throws Exception {
 	Map<String, String> params = new LinkedHashMap<String, String>();
@@ -85,7 +95,8 @@ public class TqqWeiboApi extends ApiBase {
 	  url = this.sendretweetUrl;
 	} else {
 	  // Videoメッセージ対応
-	  String videoUrl = getVideoUrl(params.get("content"));
+	  String videoUrl = getVideoUrl(params.containsKey("orig_content") ? 
+			  	params.get("orig_content") : params.get("content"));
 	  if (StringUtils.isNotBlank(videoUrl)) {
 		pic = null; // 画像送信しない
 		params.put("url", videoUrl);
@@ -125,6 +136,7 @@ public class TqqWeiboApi extends ApiBase {
 	String[] videoSites = this.configMap.get("app.piment.video.sites").split(",");
 
 	for (String strUrl : urlList) {
+	  log.info("url in message contents: " + strUrl);
 	  for (String videoSite : videoSites) {
 		if (strUrl.indexOf(videoSite) >= 0) {
 		  url = strUrl;
