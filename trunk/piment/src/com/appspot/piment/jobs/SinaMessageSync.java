@@ -382,7 +382,7 @@ public class SinaMessageSync {
 			  retweetMsg.append(originalMsg);
 			  
 			  // TODO 長さ判定
-			  String sinaURL = " //Sina源：" + SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
+			  String sinaURL = "... " + SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
 			  
 			  if(retweetMsg.length() + sinaURL.length() > 140){
 				  retweetMsg = retweetMsg.delete((140 - sinaURL.length()), retweetMsg.length());
