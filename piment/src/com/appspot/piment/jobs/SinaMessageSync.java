@@ -381,16 +381,23 @@ public class SinaMessageSync {
 			  retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
 			  retweetMsg.append(originalMsg);
 			  
-			  // TODO 長さ判定
-			  String sinaURL = "... " + SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
-			  
-			  if(retweetMsg.length() + sinaURL.length() > 140){
+			  // 長調整
+			  if(retweetMsg.length() > 140){
+				  String sinaURL = "... " + SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
 				  retweetMsg = retweetMsg.delete((140 - sinaURL.length()), retweetMsg.length());
+				  retweetMsg.append(sinaURL);
 			  }
-			  retweetMsg.append(sinaURL);
 			  
-			  middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
+			  try {
+				  middleResponse = tqqRobotWeiboApi.sendMessage(originalMsg, retweetMsg.toString(), retweetedStatus.getBmiddle_pic(), null);
+			  } catch (Exception e) {
+				  middleResponse = new Response();
+				  middleResponse.setMsg(e.getMessage());
+				  log.warning("Retweet --> 例外！！！" + e.getMessage());
+			  }
+			  log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~X");
 			  if (middleResponse != null && middleResponse.isOK()) {
+				log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Y");
 				log.info("Sina Message --> Retweet Successed!!!");
 				// データストアへ保存する
 
@@ -405,10 +412,13 @@ public class SinaMessageSync {
 				retweetId = middleResponse.getData().getId();
 			  }
 			}
+			log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Q");
 			if (retweetId != null) {
+			  log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Z");
 			  originalMsg = sinaWeiboApi.getOriginalMsg(status.getText().trim());
-			  response = tqqWeiboApi.retweetMessage(retweetId, originalMsg, status.getOriginal_pic(), null);
+			  response = tqqWeiboApi.retweetMessage(retweetId, originalMsg, status.getBmiddle_pic(), null);
 			} else {
+			  log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~H");
 			  response = middleResponse;
 			  response.setApplicationMsg("Sina Message --> Retweet [" + retweetedStatus.getId() + "] Failed!!!!");
 			}
@@ -417,7 +427,7 @@ public class SinaMessageSync {
 
 			// 普通微博的处理
 			originalMsg = sinaWeiboApi.getOriginalMsg(status.getText().trim());
-			response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getOriginal_pic(), null);
+			response = tqqWeiboApi.sendMessage(status.getText().trim(), status.getBmiddle_pic(), null);
 		  }
 		} catch (Exception e) {
 		  throwable = e;
@@ -440,6 +450,8 @@ public class SinaMessageSync {
 
 		  String msg001 = "Sina Message --> [" + status.getId() + "]メッセージをTQQへの送信が失敗しました。";
 		  log.severe(msg001);
+		  
+		  log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~A");
 
 		  String errorDetail = throwable != null ? JSON.encode(throwable, true) : response.toString();
 		  log.severe(errorDetail);
@@ -453,9 +465,11 @@ public class SinaMessageSync {
 		  } else if ("13".equals(response.getErrcode())) {
 			System.out.println("DOT NOT SEND EMAIL!");
 		  } else {
+			log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~B");
 			MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + status.toString() + "\n\nTQQからのレスポンス：\n" + errorDetail + "\n\n");
 		  }
-
+		  
+		  log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~C");
 		  if (weiboMap.getId() != null) {
 			weiboMap.setRetryCount(weiboMap.getRetryCount() + 1);
 			// 失敗フラグを設定
@@ -465,21 +479,24 @@ public class SinaMessageSync {
 			  weiboMap.setStatus(WeiboStatus.FAILED);
 			}
 		  } else {
+			log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~D");
 			weiboMap.setStatus(WeiboStatus.FAILED);
 		  }
 		}
 	  }
 	} catch (ApiLimitedException e) {
+      log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~E");
 	  // DO NOTHING
 	  throw e;
 	} catch (Exception e) {
-
+		log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~F");
 	  String msg001 = "Sina Message --> 同期化失敗しました、メッセージID：" + status.getId();
 	  log.severe(msg001);
 	  log.severe(JSON.encode(e, true));
 	  MailUtils.sendErrorReport(msg001 + "\n\n処理メッセージ：" + status.toString() + "\n\n例外：\n" + JSON.encode(e, true));
 	  // 例外が起きても次ぎのメッセージの同期化を行う
 	} finally {
+      log.info("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~G");
 	  // 同期化履歴レコードを保存する
 	  weiboMap = weiboMapDao.save(weiboMap);
 	  log.info("Sina Message --> 同期化履歴レコードID：" + weiboMap.getId());
