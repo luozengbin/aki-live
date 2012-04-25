@@ -378,18 +378,16 @@ public class SinaMessageSync {
 			  originalMsg = sinaWeiboApi.getOriginalMsg(retweetedStatus.getText().trim());
 
 			  StringBuilder retweetMsg = new StringBuilder();
+			  retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
+			  retweetMsg.append(originalMsg);
 			  
 			  // TODO 長さ判定
-			  if (originalMsg.length() < 200) {
-				retweetMsg.append("Sina@").append(retweetedStatus.getUser().getName()).append("//");
+			  String sinaURL = " //Sina源：" + SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
+			  
+			  if(retweetMsg.length() + sinaURL.length() > 140){
+				  retweetMsg = retweetMsg.delete((140 - sinaURL.length()), retweetMsg.length());
 			  }
-			  retweetMsg.append(originalMsg);
-
-			  // TODO 長さ判定
-			  String sinaURL = SinaWeiboApi.getStatusPageURL(retweetedStatus.getUser().getId(), retweetedStatus.getId());
-			  if (retweetMsg.length() + sinaURL.length() < 200) {
-				retweetMsg.append(" //Sina源：").append(sinaURL);
-			  }
+			  retweetMsg.append(sinaURL);
 			  
 			  middleResponse = tqqRobotWeiboApi.sendMessage(retweetMsg.toString(), retweetedStatus.getOriginal_pic(), null);
 			  if (middleResponse != null && middleResponse.isOK()) {
