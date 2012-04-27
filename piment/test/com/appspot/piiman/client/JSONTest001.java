@@ -30,7 +30,6 @@ public class JSONTest001 {
 		// TimelineResponse timelineResponse =
 		// JSON.decode("{\"data\":null,\"errcode\":9,\"msg\":\"check sign error\",\"ret\":3}",TimelineResponse.class);
 		// System.out.println(JSON.encode(timelineResponse, true));
-
-
+		
 	}
 }
