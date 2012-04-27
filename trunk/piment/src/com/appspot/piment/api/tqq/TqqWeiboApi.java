@@ -103,7 +103,9 @@ public class TqqWeiboApi extends ApiBase {
 		url = this.sendVideoUrl;
 	  }
 	}
-
+	
+	params.remove("orig_content");
+	
 	boolean sended = false;
 	String response = null;
 	
@@ -133,8 +135,8 @@ public class TqqWeiboApi extends ApiBase {
 
 	String url = null;
 	List<String> urlList = StringUtils.getUrlList(msgContect);
-	String[] videoSites = this.configMap.get("app.piment.video.sites").split(",");
-
+	String[] videoSites = this.configMap.get("app.piment.video.sites").split(",");	
+	
 	for (String strUrl : urlList) {
 	  log.info("url in message contents: " + strUrl);
 	  for (String videoSite : videoSites) {
