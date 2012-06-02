@@ -88,7 +88,9 @@ public class TqqWeiboApi extends ApiBase {
   }
 
   private Response sendMessage(Map<String, String> params, String pic) throws Exception {
-
+    //  微博同步到空间分享标记
+	params.put("syncflag", "1");
+	  
 	String url = this.sendTextUrl;
 
 	if (params.containsKey("reid")) {
